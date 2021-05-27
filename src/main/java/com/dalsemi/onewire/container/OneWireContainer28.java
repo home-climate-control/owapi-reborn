@@ -631,19 +631,17 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      *         adapter
      *
      * @see    #writeDevice
-     * 
-     * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
      */
     @Override
-    public byte[] readDevice() throws OneWireIOException, OneWireException {
+    public byte[] readDevice() throws OneWireException {
 
-        // VT: Yeah, this is real consistent... it's 9 bytes, but why, oh why they buried it that deep???
-        
+        // VT: NOTE: Yeah, this is real consistent... it's 9 bytes, but why, oh why they buried it that deep???
+
         return recallE2();
     }
 
     @Override
-    public void readDevice(byte[] buffer) throws OneWireIOException, OneWireException {
+    public void readDevice(byte[] buffer) throws OneWireException {
 
         recallE2(buffer);
     }
@@ -697,16 +695,17 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      *         adapter
      * @deprecated Use {@link #readScratchpad(byte[])} instead, it doesn't allocate memory.
      */
-    public byte[] readScratchpad() throws OneWireIOException, OneWireException {
+    @Deprecated(forRemoval = false)
+    public byte[] readScratchpad() throws OneWireException {
 
-        byte[] result_block = new byte [9];
-        
-        readScratchpad(result_block);
-        
-        return result_block;
+        byte[] resultBlock = new byte [9];
+
+        readScratchpad(resultBlock);
+
+        return resultBlock;
     }
 
-    public void readScratchpad(byte[] result_block) throws OneWireIOException, OneWireException {
+    public void readScratchpad(byte[] resultBlock) throws OneWireException {
 
         // select the device
         if (!adapter.select(address)) {
@@ -716,24 +715,24 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
 
         // create a block to send that reads the scratchpad
         // 10 bytes
-        byte[] send_block = {
+        byte[] sendBlock = {
                 READ_SCRATCHPAD_COMMAND, (byte) 0xFF, (byte) 0xFF,(byte) 0xFF,
                 (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,(byte) 0xFF,
                 (byte) 0xFF,(byte) 0xFF,
         };
 
         // send the block
-        adapter.dataBlock(send_block, 0, send_block.length);
+        adapter.dataBlock(sendBlock, 0, sendBlock.length);
 
-        // now, send_block contains the 9-byte Scratchpad plus READ_SCRATCHPAD_COMMAND byte
+        // now, sendBlock contains the 9-byte Scratchpad plus READ_SCRATCHPAD_COMMAND byte
         // convert the block to a 9-byte array representing Scratchpad (get rid of first byte)
 
         for (int i = 0; i < 9; i++) {
-            result_block[i] = send_block[i + 1];
+            resultBlock[i] = sendBlock[i + 1];
         }
 
         // see if CRC8 is correct
-        if (CRC8.compute(send_block, 1, 9) == 0) {
+        if (CRC8.compute(sendBlock, 1, 9) == 0) {
             return;
         }
 
@@ -769,7 +768,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
             // device must not have been present
             throw new OneWireIOException(address, "OneWireContainer28-Device not found on 1-Wire Network");
         }
-        
+
         adapter.dataBlock(writeBuffer, 0, writeBuffer.length);
 
         // double check by reading scratchpad
@@ -861,7 +860,8 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      *         adapter
      * @deprecated Use {@link #recallE2(byte[])} instead, it doesn't allocate memory.
      */
-    public byte[] recallE2() throws OneWireIOException, OneWireException {
+    @Deprecated(forRemoval = false)
+    public byte[] recallE2() throws OneWireException {
 
         // select the device
         if (adapter.select(address)) {
@@ -876,9 +876,9 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         // device must not have been present
         throw new OneWireIOException(address, "OneWireContainer28-Device not found on 1-Wire Network");
     }
-    
-    public void recallE2(byte[] buffer) throws OneWireIOException, OneWireException {
-        
+
+    public void recallE2(byte[] buffer) throws OneWireException {
+
         // select the device
         if (!adapter.select(address)) {
             // device must not have been present
@@ -947,6 +947,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      *
      * @see com.dalsemi.onewire.utils.Convert#toFahrenheit(double)
      */
+    @Deprecated(forRemoval = true)
     public float convertToFahrenheit(float celsiusTemperature) {
         return (float) Convert.toFahrenheit(celsiusTemperature);
     }

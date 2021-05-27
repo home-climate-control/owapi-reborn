@@ -185,6 +185,7 @@ public class OneWireContainer3A
     *
     * @return iButton or 1-Wire device name
     */
+   @Override
    public String getName ()
    {
       return "DS2413";
@@ -199,6 +200,7 @@ public class OneWireContainer3A
     *
     * @return  the alternate names for this iButton or 1-Wire device
     */
+   @Override
    public String getAlternateNames ()
    {
       return "Dual Channel Switch";
@@ -210,6 +212,7 @@ public class OneWireContainer3A
     *
     * @return device description
     */
+   @Override
    public String getDescription ()
    {
       return "Dual Channel Addressable Switch";
@@ -222,6 +225,7 @@ public class OneWireContainer3A
     * @return maximum speed
     * @see DSPortAdapter#setSpeed
     */
+   @Override
    public int getMaxSpeed ()
    {
       return DSPortAdapter.SPEED_OVERDRIVE;
@@ -244,6 +248,7 @@ public class OneWireContainer3A
     *
     * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
     */
+   @Override
    public int getNumberChannels (byte[] state)
    {
       return 2;
@@ -261,6 +266,7 @@ public class OneWireContainer3A
     *
     * @see #getLatchState(int,byte[])
     */
+   @Override
    public boolean isHighSideSwitch ()
    {
       return false;
@@ -276,6 +282,7 @@ public class OneWireContainer3A
     * @see #getSensedActivity(int,byte[])
     * @see #clearActivity()
     */
+   @Override
    public boolean hasActivitySensing ()
    {
       return false;
@@ -290,6 +297,7 @@ public class OneWireContainer3A
     *
     * @see #getLevel(int,byte[])
     */
+   @Override
    public boolean hasLevelSensing ()
    {
       return true;
@@ -309,6 +317,7 @@ public class OneWireContainer3A
     *
     * @see #setLatchState(int,boolean,boolean,byte[])
     */
+   @Override
    public boolean hasSmartOn ()
    {
       return false;
@@ -326,6 +335,7 @@ public class OneWireContainer3A
     *
     * @see #setLatchState(int,boolean,boolean,byte[])
     */
+   @Override
    public boolean onlySingleChannelOn ()
    {
       return false;
@@ -350,6 +360,7 @@ public class OneWireContainer3A
     * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
     * @see #hasLevelSensing()
     */
+   @Override
    public boolean getLevel (int channel, byte[] state)
    {
       byte  level = (byte) (0x01 << (channel*2));
@@ -371,6 +382,7 @@ public class OneWireContainer3A
     * @see #isHighSideSwitch()
     * @see #setLatchState(int,boolean,boolean,byte[])
     */
+   @Override
    public boolean getLatchState (int channel, byte[] state)
    {
       byte latch = (byte) (0x01 << ((channel*2)+1));
@@ -394,6 +406,7 @@ public class OneWireContainer3A
     * @see #hasActivitySensing()
     * @see #clearActivity()
     */
+   @Override
    public boolean getSensedActivity (int channel, byte[] state)
       throws OneWireException
    {
@@ -410,9 +423,11 @@ public class OneWireContainer3A
     * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
     * @see #getSensedActivity(int,byte[])
     */
+   @Override
    public void clearActivity ()
       throws OneWireException
    {
+      // VT: NOTE: Do nothing???
    }
 
    //--------
@@ -440,6 +455,7 @@ public class OneWireContainer3A
     * @see #getLatchState(int,byte[])
     * @see com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[])
     */
+   @Override
    public void setLatchState (int channel, boolean latchState,
                               boolean doSmart, byte[] state)
    {
@@ -453,7 +469,7 @@ public class OneWireContainer3A
          temp = (byte) 0x01;
          state[0] = (byte) (((byte) state[0]) | temp);
       }
-      
+
       if(getLatchState(1,state))
       {
          temp = (byte) 0x02;
@@ -498,8 +514,8 @@ public class OneWireContainer3A
     * @throws OneWireException on a communication or setup error with the 1-Wire
     *         adapter
     */
-   public byte[] readDevice ()
-      throws OneWireIOException, OneWireException
+   @Override
+   public byte[] readDevice () throws  OneWireException
    {
       byte[] buff = new byte [2];
 
@@ -532,12 +548,9 @@ public class OneWireContainer3A
     * @throws OneWireException on a communication or setup error with the 1-Wire
     *         adapter
     */
-   public byte[] readRegister ()
-      throws OneWireIOException, OneWireException
+   public byte[] readRegister () throws OneWireException
    {
-      byte[] register = new byte[3];
-
-      return register;
+      return new byte[3];
    }
 
    /**
@@ -555,10 +568,10 @@ public class OneWireContainer3A
     * @throws OneWireException on a communication or setup error with the 1-Wire
     *         adapter
     */
-   public void writeDevice (byte state[])
-      throws OneWireIOException, OneWireException
+   @Override
+   public void writeDevice (byte state[]) throws  OneWireException
    {
-      byte[] buff = new byte [5];
+      var buff = new byte [5];
 
       buff[0] = (byte) 0x5A;      // PIO Access Write Command
       buff[1] = (byte) state[0];  // Channel write information
@@ -594,15 +607,16 @@ public class OneWireContainer3A
     *         adapter
     */
    public void writeRegister (byte[] register)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
+      // VT: NOTE: Do nothing???
    }
 
   /** Need to add the following to overide to an an abstract something not being overidden in ./OneWireSensor.java
   *   Note to MW and VT: I've got no idea what the implications of this dirty hack is
   */
 	 @Override
-	public void readDevice(byte[] outputBuffer) throws OneWireIOException, OneWireException {
+	public void readDevice(byte[] outputBuffer) throws OneWireException {
 	// read the status byte
 
   // These following 3 lines had to be removed from the snip borrowed from line 325-333 of ./OneWireContainer1F.java as they break something
@@ -612,6 +626,5 @@ public class OneWireContainer3A
 	readDevice(outputBuffer);
   	return outputBuffer;
   */
-  }  
-
+  }
 }

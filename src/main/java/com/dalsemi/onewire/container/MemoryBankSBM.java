@@ -44,7 +44,7 @@ import com.dalsemi.onewire.utils.CRC8;
 class MemoryBankSBM implements MemoryBank {
 
     protected final Logger logger = LogManager.getLogger(getClass());
-    
+
    //--------
    //--------Static Final Variables
    //--------
@@ -331,12 +331,9 @@ class MemoryBankSBM implements MemoryBank {
     * @param  readBuf       byte array to place read data into
     * @param  offset        offset into readBuf to place data
     * @param  len           length in bytes to read
-    *
-    * @throws OneWireIOException
-    * @throws OneWireException
     */
    @Override
-   public void read(int startAddr, boolean readContinue, byte[] readBuf, int offset, int len) throws OneWireIOException, OneWireException {
+   public void read(int startAddr, boolean readContinue, byte[] readBuf, int offset, int len) throws OneWireException {
 
        byte[] temp_buf;
 
@@ -398,12 +395,9 @@ class MemoryBankSBM implements MemoryBank {
     * @param  writeBuf      byte array containing data to write
     * @param  offset        offset into writeBuf to get data
     * @param  len           length in bytes to write
-    *
-    * @throws OneWireIOException
-    * @throws OneWireException
     */
    @Override
-   public void write(int startAddr, byte[] writeBuf, int offset, int len) throws OneWireIOException, OneWireException {
+   public void write(int startAddr, byte[] writeBuf, int offset, int len) throws OneWireException {
 
        byte[] temp_buf;
 
@@ -473,7 +467,7 @@ class MemoryBankSBM implements MemoryBank {
     * @throws OneWireException Could not find part
     * @throws IllegalArgumentException Bad parameters passed
     */
-   protected byte[] readRawPage(int page) throws OneWireIOException, OneWireException    {
+   protected byte[] readRawPage(int page) throws OneWireException    {
 
        byte[] buffer = new byte [11];
       byte[] result = new byte [8];
@@ -524,14 +518,12 @@ class MemoryBankSBM implements MemoryBank {
     * @param source  data to be written to page
     * @param offset  offset with page to begin writting
     *
-    * @returns 'true' if the write was successfull
-    *
     * @throws OneWireIOException Error reading data
     * @throws OneWireException Could not find part
     * @throws IllegalArgumentException Bad parameters passed
     */
-   protected void writeRawPage(int page, byte[] source, int offset) throws OneWireIOException, OneWireException {
-       
+   protected void writeRawPage(int page, byte[] source, int offset) throws OneWireException {
+
       byte[] buffer = new byte [12];
       int crc8;
 
@@ -561,7 +553,7 @@ class MemoryBankSBM implements MemoryBank {
 
             // now copy that part of the scratchpad to memory
             if (ib.adapter.select(ib.address)) {
-                
+
                buffer [0] = COPY_SCRATCHPAD_COMMAND;
                buffer [1] = ( byte ) page;
 
@@ -594,11 +586,8 @@ class MemoryBankSBM implements MemoryBank {
    /**
     * Check the device speed if has not been done before or if
     * an error was detected.
-    *
-    * @throws OneWireIOException
-    * @throws OneWireException
     */
-   public synchronized void checkSpeed() throws OneWireIOException, OneWireException {
+   public synchronized void checkSpeed() throws OneWireException {
        // only check the speed
        if (doSetSpeed) {
 

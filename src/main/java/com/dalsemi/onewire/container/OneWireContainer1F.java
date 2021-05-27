@@ -37,7 +37,7 @@ import com.dalsemi.onewire.utils.Bit;
  * 1-Wire&#174 container for 1-Wire(MicroLAN) Coupler, DS2409. This container
  * encapsulates the functionality of the 1-Wire family type <B>1F</B> (hex).
  * </P>
- * 
+ *
  * <H3>Features</H3>
  * <UL>
  * <li>Low impedance coupler to create large common-ground, multi-level MicroLAN
@@ -52,7 +52,7 @@ import com.dalsemi.onewire.utils.Bit;
  * <li>Operating temperature range from -40&#176C to +85&#176C
  * <li>Compact, low cost 6-pin TSOC surface mount package
  * </UL>
- * 
+ *
  * <P>
  * Setting the latch on the DS2409 to 'on' (see
  * {@link #setLatchState(int,boolean,boolean,byte[]) seLatchState}) connects the
@@ -61,24 +61,24 @@ import com.dalsemi.onewire.utils.Bit;
  * DS2406} and {@link com.dalsemi.onewire.container.OneWireContainer05 DS2405}
  * which connect thier I/O lines to ground.
  * <H3>Usage</H3>
- * 
+ *
  * <DL>
  * <DD>See the usage example in
  * {@link com.dalsemi.onewire.container.SwitchContainer SwitchContainer} for
  * basic switch operations.
  * </DL>
- * 
+ *
  * <H3>DataSheet</H3>
  * <DL>
  * <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS2409.pdf">
  * http://pdfserv.maxim-ic.com/arpdf/DS2409.pdf</A>
  * </DL>
- * 
+ *
  * @see com.dalsemi.onewire.container.OneWireSensor
  * @see com.dalsemi.onewire.container.SwitchContainer
  * @see com.dalsemi.onewire.container.OneWireContainer05
  * @see com.dalsemi.onewire.container.OneWireContainer12
- * 
+ *
  * @version 0.00, 13 Sept 2000
  * @author DSS
  * @author Stability enhancements &copy; <a
@@ -156,10 +156,10 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Create an empty container that is not complete until after a call to
      * <code>setupContainer</code>.
      * <p>
-     * 
+     *
      * This is one of the methods to construct a container. The others are
      * through creating a OneWireContainer with parameters.
-     * 
+     *
      * @see #setupContainer(com.dalsemi.onewire.adapter.DSPortAdapter,byte[])
      *      super.setupContainer()
      */
@@ -172,16 +172,16 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Create a container with the provided adapter instance and the address of
      * the iButton or 1-Wire device.
      * <p>
-     * 
+     *
      * This is one of the methods to construct a container. The other is through
      * creating a OneWireContainer with NO parameters.
-     * 
+     *
      * @param sourceAdapter
      *            adapter instance used to communicate with this iButton
      * @param newAddress
      *            {@link com.dalsemi.onewire.utils.Address Address} of this
      *            1-Wire device
-     * 
+     *
      * @see #OneWireContainer1F() OneWireContainer1F
      * @see com.dalsemi.onewire.utils.Address utils.Address
      */
@@ -196,16 +196,16 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Create a container with the provided adapter instance and the address of
      * the iButton or 1-Wire device.
      * <p>
-     * 
+     *
      * This is one of the methods to construct a container. The other is through
      * creating a OneWireContainer with NO parameters.
-     * 
+     *
      * @param sourceAdapter
      *            adapter instance used to communicate with this 1-Wire device
      * @param newAddress
      *            {@link com.dalsemi.onewire.utils.Address Address} of this
      *            1-Wire device
-     * 
+     *
      * @see #OneWireContainer1F() OneWireContainer1F
      * @see com.dalsemi.onewire.utils.Address utils.Address
      */
@@ -219,16 +219,16 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Create a container with the provided adapter instance and the address of
      * the iButton or 1-Wire device.
      * <p>
-     * 
+     *
      * This is one of the methods to construct a container. The other is through
      * creating a OneWireContainer with NO parameters.
-     * 
+     *
      * @param sourceAdapter
      *            adapter instance used to communicate with this 1-Wire device
      * @param newAddress
      *            {@link com.dalsemi.onewire.utils.Address Address} of this
      *            1-Wire device
-     * 
+     *
      * @see #OneWireContainer1F() OneWireContainer1F
      * @see com.dalsemi.onewire.utils.Address utils.Address
      */
@@ -245,7 +245,7 @@ public class OneWireContainer1F extends OneWireContainer implements
     /**
      * Gets the Dallas Semiconductor part number of the iButton or 1-Wire Device
      * as a string. For example 'DS1992'.
-     * 
+     *
      * @return iButton or 1-Wire device name
      */
     @Override
@@ -257,7 +257,7 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Gets the alternate Dallas Semiconductor part numbers or names. A 'family'
      * of 1-Wire Network devices may have more than one part number depending on
      * packaging. There can also be nicknames such as 'Crypto iButton'.
-     * 
+     *
      * @return 1-Wire device alternate names
      */
     @Override
@@ -268,7 +268,7 @@ public class OneWireContainer1F extends OneWireContainer implements
     /**
      * Gets a short description of the function of this iButton or 1-Wire Device
      * type.
-     * 
+     *
      * @return device description
      */
     @Override
@@ -288,12 +288,12 @@ public class OneWireContainer1F extends OneWireContainer implements
      * user manages the bus speed in an application, call this method with
      * <code>doSpeedCheck</code> as <code>false</code>. The default behavior is
      * to call <code>doSpeed()</code>.
-     * 
+     *
      * @param doSpeedCheck
      *            <code>true</code> for <code>doSpeed()</code> to be called
      *            before every 1-Wire bus access, <code>false</code> to skip
      *            this expensive call
-     * 
+     *
      * @see OneWireContainer#doSpeed()
      */
     public synchronized void setSpeedCheck(boolean doSpeedCheck) {
@@ -309,9 +309,9 @@ public class OneWireContainer1F extends OneWireContainer implements
      * byte array. Pass this byte array to the 'get' and 'set' methods. If the
      * device state needs to be changed then call the 'writeDevice' to finalize
      * the changes.
-     * 
+     *
      * @return 1-Wire device sensor state
-     * 
+     *
      * @throws OneWireIOException
      *             on a 1-Wire communication error such as reading an incorrect
      *             CRC from a 1-Wire device. This could be caused by a physical
@@ -319,21 +319,22 @@ public class OneWireContainer1F extends OneWireContainer implements
      *             arriving 1-Wire device issuing a 'presence pulse'.
      * @throws OneWireException
      *             on a communication or setup error with the 1-Wire adapter
-     *             
+     *
      * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
      */
     @Override
-    public byte[] readDevice() throws OneWireIOException, OneWireException {
+    @Deprecated(forRemoval = false)
+    public byte[] readDevice() throws OneWireException {
 
-        byte[] outputBuffer = new byte[4];
-        
+        var outputBuffer = new byte[4];
+
         readDevice(outputBuffer);
 
         return outputBuffer;
     }
 
     @Override
-    public void readDevice(byte[] outputBuffer) throws OneWireIOException, OneWireException {
+    public void readDevice(byte[] outputBuffer) throws OneWireException {
 
         if (doSpeedEnable) {
             doSpeed();
@@ -351,10 +352,10 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Writes the 1-Wire device sensor state that have been changed by 'set'
      * methods. Only the state registers that changed are updated. This is done
      * by referencing a field information appended to the state data.
-     * 
+     *
      * @param state
      *            1-Wire device sensor state
-     * 
+     *
      * @throws OneWireIOException
      *             on a 1-Wire communication error such as reading an incorrect
      *             CRC from a 1-Wire device. This could be caused by a physical
@@ -364,11 +365,11 @@ public class OneWireContainer1F extends OneWireContainer implements
      *             on a communication or setup error with the 1-Wire adapter
      */
     @Override
-    public void writeDevice(byte[] state) throws OneWireIOException,
-            OneWireException {
+    public void writeDevice(byte[] state) throws OneWireException {
 
-        int extra = 0;
-        byte command, first_byte;
+        var extra = 0;
+        byte command;
+        byte first_byte;
         byte[] tmp_buf = null;
 
         if (doSpeedEnable) {
@@ -400,7 +401,7 @@ public class OneWireContainer1F extends OneWireContainer implements
                 first_byte |= (byte) 0xC0;
 
             tmp_buf = deviceOperation(READ_WRITE_STATUS_COMMAND, first_byte, 2);
-            state[0] = (byte) tmp_buf[2];
+            state[0] = tmp_buf[2];
         }
 
         // check for AUX state change
@@ -478,16 +479,16 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Force a power-on reset for parasitically powered 1-Wire devices connected
      * to the main or auziliary output of the DS2409.
      * </P>
-     * 
+     *
      * <P>
      * IMPORTANT: the duration of the discharge time should be 100ms minimum.
      * </P>
      * <BR>
-     * 
+     *
      * @param time
      *            number of milliseconds the lines are to be discharged for
      *            (minimum 100)
-     * 
+     *
      * @throws OneWireIOException
      *             on a 1-Wire communication error such as reading an incorrect
      *             CRC from a 1-Wire device. This could be caused by a physical
@@ -496,8 +497,7 @@ public class OneWireContainer1F extends OneWireContainer implements
      * @throws OneWireException
      *             on a communication or setup error with the 1-Wire adapter
      */
-    public void dischargeLines(int time) throws OneWireIOException,
-            OneWireException {
+    public void dischargeLines(int time) throws OneWireException {
 
         // Error checking
         if (time < 100) {
@@ -534,10 +534,10 @@ public class OneWireContainer1F extends OneWireContainer implements
      * connect to the 1-Wire data. If this method returns <code>false</code>
      * then when the switch is 'on' or <code>true</code>, the switch is
      * connected to ground.
-     * 
+     *
      * @return <code>true</code> if the switch is a 'high side' switch,
      *         <code>false</code> if the switch is a 'low side' switch
-     * 
+     *
      * @see #getLatchState(int,byte[])
      */
     @Override
@@ -549,9 +549,9 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Checks to see if the channels of this switch support activity sensing. If
      * this method returns <code>true</code> then the method
      * <code>getSensedActivity(int,byte[])</code> can be used.
-     * 
+     *
      * @return <code>true</code> if channels support activity sensing
-     * 
+     *
      * @see #getSensedActivity(int,byte[])
      * @see #clearActivity()
      */
@@ -564,9 +564,9 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Checks to see if the channels of this switch support level sensing. If
      * this method returns <code>true</code> then the method
      * <code>getLevel(int,byte[])</code> can be used.
-     * 
+     *
      * @return <code>true</code> if channels support level sensing
-     * 
+     *
      * @see #getLevel(int,byte[])
      */
     @Override
@@ -582,9 +582,9 @@ public class OneWireContainer1F extends OneWireContainer implements
      * <code>true</code> then the method
      * <code>setLatchState(int,boolean,boolean,byte[])</code> can be used with
      * the <code>doSmart</code> parameter <code>true</code>.
-     * 
+     *
      * @return <code>true</code> if channels support 'smart on'
-     * 
+     *
      * @see #setLatchState(int,boolean,boolean,byte[])
      */
     @Override
@@ -599,9 +599,9 @@ public class OneWireContainer1F extends OneWireContainer implements
      * will not only affect the state of the given channel but may affect the
      * state of the other channels as well to insure that only one channel is on
      * at a time.
-     * 
+     *
      * @return <code>true</code> if only one channel can be on at a time.
-     * 
+     *
      * @see #setLatchState(int,boolean,boolean,byte[])
      */
     @Override
@@ -620,11 +620,11 @@ public class OneWireContainer1F extends OneWireContainer implements
      * devices of the same family will not necessarily have the same number of
      * channels. The DS2406 comes in two packages--one that has a single
      * channel, and one that has two channels.
-     * 
+     *
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @return the number of channels for this device
      */
     @Override
@@ -637,17 +637,17 @@ public class OneWireContainer1F extends OneWireContainer implements
      * verify that this switch has level sensing with the
      * <code>hasLevelSensing()</code>. Level sensing means that the device can
      * sense the logic level on its PIO pin.
-     * 
+     *
      * @param channel
      *            channel to execute this operation, in the range [0 to (
      *            <code>getNumberChannels(byte[])</code> - 1)]
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @return <code>true</code> if level sensed is 'high' and
      *         <code>false</code> if level sensed is 'low'
-     * 
+     *
      * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
      * @see #hasLevelSensing()
      */
@@ -658,19 +658,19 @@ public class OneWireContainer1F extends OneWireContainer implements
 
     /**
      * Checks the latch state of the indicated channel.
-     * 
+     *
      * @param channel
      *            channel to execute this operation, in the range [0 to (
      *            <code>getNumberChannels(byte[])</code> - 1)]
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @return <code>true</code> if channel latch is 'on' or conducting and
      *         <code>false</code> if channel latch is 'off' and not conducting.
      *         Note that the actual output when the latch is 'on' is returned
      *         from the <code>isHighSideSwitch()</code> method.
-     * 
+     *
      * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
      * @see #isHighSideSwitch()
      * @see #setLatchState(int,boolean,boolean,byte[])
@@ -686,20 +686,20 @@ public class OneWireContainer1F extends OneWireContainer implements
      * reported, call <code>clearActivity()</code>. To avoid an exception,
      * verify that this device supports activity sensing by calling the method
      * <code>hasActivitySensing()</code>.
-     * 
+     *
      * @param channel
      *            channel to execute this operation, in the range [0 to (
      *            <code>getNumberChannels(byte[])</code> - 1)]
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @return <code>true</code> if activity was detected and <code>false</code>
      *         if no activity was detected
-     * 
+     *
      * @throws OneWireException
      *             if this device does not have activity sensing
-     * 
+     *
      * @see #hasActivitySensing()
      * @see #clearActivity()
      */
@@ -715,11 +715,11 @@ public class OneWireContainer1F extends OneWireContainer implements
 
     /**
      * Checks if the control I/O pin mode is automatic (see DS2409 data sheet).
-     * 
+     *
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @return <code>true</code> if control mode is automatic
      */
     public boolean isModeAuto(byte[] state) {
@@ -729,11 +729,11 @@ public class OneWireContainer1F extends OneWireContainer implements
     /**
      * Checks the channel association of the control pin. This value only makes
      * sense if the control mode is automatic (see <CODE>isModeAuto</CODE>).
-     * 
+     *
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @return <code>int</code> the channel number that is associated with the
      *         control pin
      */
@@ -745,11 +745,11 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Checks the control data value. This value only makes sense if the control
      * mode is manual (see <CODE>isModeAuto</CODE>). 0 = output transistor off,
      * 1 = output transistor on
-     * 
+     *
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @return <code>int</code> the control output transistor state
      */
     public int getControlData(byte[] state) {
@@ -761,7 +761,7 @@ public class OneWireContainer1F extends OneWireContainer implements
      * smart on. Note that this flag is only valid if the DS2409 flag was
      * cleared with an ALL_LINES_OFF command and the last writeDevice performed
      * a 'smart-on' on one of the channels.
-     * 
+     *
      * @return <code>true</code> if device detected on branch
      */
     public boolean getLastSmartOnDeviceDetect() {
@@ -777,7 +777,7 @@ public class OneWireContainer1F extends OneWireContainer implements
      * <code>writeDevice(byte[])</code> must be called to finalize changes to
      * the device. Note that multiple 'set' methods can be called before one
      * call to <code>writeDevice(byte[])</code>.
-     * 
+     *
      * @param channel
      *            channel to execute this operation, in the range [0 to (
      *            <code>getNumberChannels(byte[])</code> - 1)]
@@ -795,7 +795,7 @@ public class OneWireContainer1F extends OneWireContainer implements
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @see #hasSmartOn()
      * @see #getLatchState(int,byte[])
      * @see com.dalsemi.onewire.container.OneWireSensor#writeDevice(byte[])
@@ -819,10 +819,10 @@ public class OneWireContainer1F extends OneWireContainer implements
      * Clears the activity latches the next time possible. For example, on a
      * DS2406/07, this happens the next time the status is read with
      * <code>readDevice()</code>.
-     * 
+     *
      * @throws OneWireException
      *             if this device does not support activity sensing
-     * 
+     *
      * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
      * @see #getSensedActivity(int,byte[])
      */
@@ -840,7 +840,7 @@ public class OneWireContainer1F extends OneWireContainer implements
      * must be called to finalize changes to the device. Note that multiple
      * 'set' methods can be called before one call to
      * <code>writeDevice(byte[])</code>.
-     * 
+     *
      * @param makeAuto
      *            <CODE>true</CODE> to set to auto mode, false for manual mode
      * @param state
@@ -861,13 +861,13 @@ public class OneWireContainer1F extends OneWireContainer implements
      * <code>writeDevice(byte[])</code> must be called to finalize changes to
      * the device. Note that multiple 'set' methods can be called before one
      * call to <code>writeDevice(byte[])</code>.
-     * 
+     *
      * @param channel
      *            channel to associate with control pin
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @throws OneWireException
      *             when trying to set channel association in manual mode
      */
@@ -893,13 +893,13 @@ public class OneWireContainer1F extends OneWireContainer implements
      * <code>writeDevice(byte[])</code> must be called to finalize changes to
      * the device. Note that multiple 'set' methods can be called before one
      * call to <code>writeDevice(byte[])</code>.
-     * 
+     *
      * @param data
      *            <CODE>true</CODE> for on and <CODE>false</CODE> for off
      * @param state
      *            current state of the device returned from
      *            <code>readDevice()</code>
-     * 
+     *
      * @throws OneWireException
      *             when trying to set control data in automatic mode
      */
@@ -925,16 +925,16 @@ public class OneWireContainer1F extends OneWireContainer implements
 
     /**
      * Do a DS2409 specidific operation.
-     * 
+     *
      * @param command
      *            code to send
      * @param sendByte
      *            data byte to send
      * @param extra
      *            number of extra bytes to send
-     * 
+     *
      * @return block of the complete resulting transaction
-     * 
+     *
      * @throws OneWireIOException
      *             on a 1-Wire communication error such as reading an incorrect
      *             CRC from a 1-Wire device. This could be caused by a physical
@@ -988,7 +988,7 @@ public class OneWireContainer1F extends OneWireContainer implements
                 }
 
                 return raw_buf;
-                
+
             } else {
 
                 throw new OneWireIOException(address, "OneWireContainer1F failure - Device not found");

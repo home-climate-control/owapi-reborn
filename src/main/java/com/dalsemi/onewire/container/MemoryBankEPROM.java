@@ -32,8 +32,6 @@ package com.dalsemi.onewire.container;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.*;
 import com.dalsemi.onewire.utils.*;
-import com.dalsemi.onewire.container.OneWireContainer;
-
 
 /**
  * Memory bank class for the EPROM section of iButtons and 1-Wire devices.
@@ -118,7 +116,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
     protected boolean doSetSpeed;
 
     //--------
-    //-------- Protected Variables for MemoryBank implementation 
+    //-------- Protected Variables for MemoryBank implementation
     //--------
 
     /**
@@ -180,7 +178,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
     protected boolean writeVerification;
 
     //--------
-    //-------- Protected Variables for PagedMemoryBank implementation 
+    //-------- Protected Variables for PagedMemoryBank implementation
     //--------
 
     /**
@@ -220,7 +218,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
     protected String extraInfoDescription;
 
     //--------
-    //-------- Protected Variables for OTPMemoryBank implementation 
+    //-------- Protected Variables for OTPMemoryBank implementation
     //--------
 
     /**
@@ -510,12 +508,13 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @deprecated  As of 1-Wire API 0.01, replaced by {@link #hasExtraInfo()}
      */
     @Override
+    @Deprecated(forRemoval = true)
     public boolean haveExtraInfo() {
         return hasExtraInfo();
     }
 
     /**
-     * Checks to see if this memory bank's pages deliver extra 
+     * Checks to see if this memory bank's pages deliver extra
      * information outside of the normal data space,  when read.  Examples
      * of this may be a redirection byte, counter, tamper protection
      * bytes, or SHA-1 result.  If this method returns true then the
@@ -524,7 +523,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * {@link #readPageCRC(int,boolean,byte[],int,byte[]) readPageCRC}, and
      * {@link #readPagePacket(int,boolean,byte[],int,byte[]) readPagePacket}.
      *
-     * @return  <CODE> true </CODE> if reading the this memory bank's 
+     * @return  <CODE> true </CODE> if reading the this memory bank's
      *                 pages provides extra information
      *
      * @see #readPage(int,boolean,byte[],int,byte[]) readPage(extra)
@@ -639,13 +638,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  readBuf       byte array to place read data into
      * @param  offset        offset into readBuf to place data
      * @param  len           length in bytes to read
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public void read(int startAddr, boolean readContinue, byte[] readBuf,
-            int offset, int len) throws OneWireIOException, OneWireException {
+            int offset, int len) throws OneWireException {
         int i;
 
         // check if read exceeds memory
@@ -711,14 +707,14 @@ class MemoryBankEPROM implements OTPMemoryBank {
                 ib.adapter.dataBlock(raw_buf, 0, num_bytes);
             }
 
-            // pre-fill readBuf with 0xFF 
+            // pre-fill readBuf with 0xFF
             int pgs   = len / pageLength;
             int extra = len % pageLength;
 
             for (i = 0; i < pgs; i++) {
                 System.arraycopy(ffBlock, 0, readBuf, offset + i * pageLength, pageLength);
             }
-            
+
             System.arraycopy(ffBlock, 0, readBuf, offset + pgs * pageLength, extra);
 
             // send second block to read data, return result
@@ -743,12 +739,9 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  writeBuf      byte array containing data to write
      * @param  offset        offset into writeBuf to get data
      * @param  len           length in bytes to write
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
-    public void write(int startAddr, byte[] writeBuf, int offset, int len) throws OneWireIOException, OneWireException {
+    public void write(int startAddr, byte[] writeBuf, int offset, int len) throws OneWireException {
 
         int  i;
         byte result;
@@ -823,13 +816,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      *                       'beginExclusive/endExclusive' block.
      * @param  readBuf       byte array to place read data into
      * @param  offset        offset into readBuf to place data
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
-    public void readPage(int page, boolean readContinue, byte[] readBuf, int offset) throws OneWireIOException, OneWireException {
-        
+    public void readPage(int page, boolean readContinue, byte[] readBuf, int offset) throws OneWireException {
+
         if (pageAutoCRC) {
             readPageCRC(page, readContinue, readBuf, offset, null, extraInfoLength);
         } else {
@@ -859,14 +849,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  readBuf       byte array to place read data into
      * @param  offset        offset into readBuf to place data
      * @param  extraInfo     byte array to put extra info read into
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public void readPage(int page, boolean readContinue, byte[] readBuf,
-            int offset, byte[] extraInfo) throws OneWireIOException,
-            OneWireException {
+            int offset, byte[] extraInfo) throws OneWireException {
 
         // check if current bank is not scratchpad bank, or not page 0
         if (!this.extraInfo) {
@@ -895,14 +881,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  extraInfo     byte array to put extra info read into
      *
      * @return  number of data bytes written to readBuf at the offset.
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public int readPagePacket(int page, boolean readContinue, byte[] readBuf,
-            int offset, byte[] extraInfo) throws OneWireIOException,
-            OneWireException {
+            int offset, byte[] extraInfo) throws OneWireException {
 
         byte[] raw_buf = new byte [pageLength];
 
@@ -954,13 +936,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  offset        offset into readBuf to place data
      *
      * @return  number of data bytes written to readBuf at the offset.
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public int readPagePacket(int page, boolean readContinue, byte[] readBuf,
-            int offset) throws OneWireIOException, OneWireException {
+            int offset) throws OneWireException {
 
         byte[] raw_buf = new byte [pageLength];
 
@@ -997,13 +976,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  writeBuf      data byte array to write
      * @param  offset        offset into writeBuf where data to write is
      * @param  len           number of bytes to write
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public void writePagePacket(int page, byte[] writeBuf, int offset, int len)
-            throws OneWireIOException, OneWireException {
+            throws OneWireException {
 
         // make sure length does not exceed max
         if (len > maxPacketDataLength) {
@@ -1047,13 +1023,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  readBuf       byte array to put data read. Must have at least
      *                       'getMaxPacketDataLength()' elements.
      * @param  offset        offset into readBuf to place data
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public void readPageCRC(int page, boolean readContinue, byte[] readBuf,
-            int offset) throws OneWireIOException, OneWireException {
+            int offset) throws OneWireException {
         readPageCRC(page, readContinue, readBuf, offset, null, extraInfoLength);
     }
 
@@ -1074,14 +1047,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      *                       'getMaxPacketDataLength()' elements.
      * @param  offset        offset into readBuf to place data
      * @param  extraInfo     byte array to put extra info read into
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public void readPageCRC(int page, boolean readContinue, byte[] readBuf,
-            int offset, byte[] extraInfo) throws OneWireIOException,
-            OneWireException {
+            int offset, byte[] extraInfo) throws OneWireException {
         readPageCRC(page, readContinue, readBuf, offset, extraInfo, extraInfoLength);
     }
 
@@ -1094,12 +1063,9 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * by all devices.  See the method 'canLockPage()'.
      *
      * @param  page   number of page to lock
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
-    public void lockPage(int page) throws OneWireIOException, OneWireException {
+    public void lockPage(int page) throws OneWireException {
 
         // create byte to write to mlLock to lock page
         int    nbyt    = (page >>> 3);
@@ -1130,14 +1096,11 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  page  number of page to see if locked
      *
      * @return  'true' if page locked.
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
-    public boolean isPageLocked(int page) throws OneWireIOException, OneWireException {
+    public boolean isPageLocked(int page) throws OneWireException {
 
-        // read page that locked bit is on 
+        // read page that locked bit is on
         int pg_len  = mbLock.getPageLength();
         int read_pg = (page + lockOffset) / (pg_len * 8);
 
@@ -1165,7 +1128,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @throws OneWireException
      */
     @Override
-    public void redirectPage(int page, int newPage) throws OneWireIOException, OneWireException {
+    public void redirectPage(int page, int newPage) throws OneWireException {
 
         // create byte to redirect page
         byte[] wr_byte = new byte [1];
@@ -1187,16 +1150,13 @@ class MemoryBankEPROM implements OTPMemoryBank {
      *
      * @return  return the new page number or 0 if not redirected
      *
-     * @throws OneWireIOException
-     * @throws OneWireException
-     *
      * @deprecated  As of 1-Wire API 0.01, replaced by {@link #getRedirectedPage(int)}
      */
     @Override
-    public int isPageRedirected(int page) throws OneWireIOException,
-            OneWireException {
+    @Deprecated(forRemoval = false)
+    public int isPageRedirected(int page) throws OneWireException {
 
-        // read page that redirect byte is on 
+        // read page that redirect byte is on
         int pg_len  = mbRedirect.getPageLength();
         int read_pg = (page + redirectOffset) / pg_len;
 
@@ -1211,27 +1171,27 @@ class MemoryBankEPROM implements OTPMemoryBank {
 
     /**
      * Gets the page redirection of the specified page.
-     * Not supported by all devices. 
+     * Not supported by all devices.
      *
      * @param  page  page to check for redirection
      *
      * @return  the new page number or 0 if not redirected
      *
-     * @throws OneWireIOException on a 1-Wire communication error such as 
+     * @throws OneWireIOException on a 1-Wire communication error such as
      *         no device present or a CRC read from the device is incorrect.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to 
+     *         caused by a physical interruption in the 1-Wire Network due to
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire 
-     *         adapter.  
+     * @throws OneWireException on a communication or setup error with the 1-Wire
+     *         adapter.
      *
      * @see #canRedirectPage() canRedirectPage
      * @see #redirectPage(int,int) redirectPage
      * @since 1-Wire API 0.01
      */
     @Override
-    public int getRedirectedPage(int page) throws OneWireIOException, OneWireException {
+    public int getRedirectedPage(int page) throws OneWireException {
 
-        // read page that redirect byte is on 
+        // read page that redirect byte is on
         int pg_len  = mbRedirect.getPageLength();
         int read_pg = (page + redirectOffset) / pg_len;
 
@@ -1250,12 +1210,9 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * 'canLockRedirectPage()'.
      *
      * @param  page      number of page to redirect
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
-    public void lockRedirectPage(int page) throws OneWireIOException, OneWireException {
+    public void lockRedirectPage(int page) throws OneWireException {
 
         // create byte to write to mlLock to lock page
         int    nbyt    = (page >>> 3);
@@ -1287,14 +1244,11 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  page      number of page check for locked redirection
      *
      * @return  return 'true' if redirection is locked for this page
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
-    public boolean isRedirectPageLocked(int page) throws OneWireIOException, OneWireException {
+    public boolean isRedirectPageLocked(int page) throws OneWireException {
 
-        // read page that lock redirect bit is on 
+        // read page that lock redirect bit is on
         int pg_len  = mbLockRedirect.getPageLength();
         int read_pg = (page + lockRedirectOffset) / (pg_len * 8);
 
@@ -1331,13 +1285,10 @@ class MemoryBankEPROM implements OTPMemoryBank {
      * @param  offset        offset into readBuf to place data
      * @param  extraInfo     byte array to put extra info read into
      * @param  extraLength   length of extra information
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     protected void readPageCRC(int page, boolean readContinue, byte[] readBuf,
             int offset, byte[] extraInfo, int extraLength)
-            throws OneWireIOException, OneWireException {
+            throws OneWireException {
 
         int    len = 0, lastcrc = 0;
         byte[] raw_buf = new byte [pageLength + numCRCBytes];
@@ -1384,7 +1335,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
             raw_buf [1] = ( byte ) (addr & 0xFF);
             raw_buf [2] = ( byte ) (((addr & 0xFFFF) >>> 8) & 0xFF);
 
-            // do the first block 
+            // do the first block
             ib.adapter.dataBlock(raw_buf, 0, len);
 
         } else if (extraInfoLength > 0) {
@@ -1394,7 +1345,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
 
             System.arraycopy(ffBlock, 0, raw_buf, 0, len);
 
-            // do the first block 
+            // do the first block
             ib.adapter.dataBlock(raw_buf, 0, len);
         }
 
@@ -1430,7 +1381,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
                         extraInfo, 0, extraLength);
         }
 
-        // pre-fill with 0xFF 
+        // pre-fill with 0xFF
         System.arraycopy(ffBlock, 0, raw_buf, 0, raw_buf.length);
 
         // send block to read data + crc
@@ -1468,12 +1419,9 @@ class MemoryBankEPROM implements OTPMemoryBank {
      *
      * @return  the echo byte after programming.  This should be the desired
      *          byte to program if the location was previously unprogrammed.
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     protected byte programByte(int addr, byte data, boolean writeContinue)
-            throws OneWireIOException, OneWireException {
+            throws OneWireException {
         int lastcrc = 0, len;
 
         if (!writeContinue) {
@@ -1485,7 +1433,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
                 throw new OneWireIOException("device not present");
             }
 
-            // pre-fill with 0xFF 
+            // pre-fill with 0xFF
             byte[] raw_buf = new byte [6];
 
             System.arraycopy(ffBlock, 0, raw_buf, 0, raw_buf.length);
@@ -1547,7 +1495,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
             }
         }
 
-        // send the pulse 
+        // send the pulse
         ib.adapter.startProgramPulse(DSPortAdapter.CONDITION_NOW);
 
         // return the result
@@ -1561,11 +1509,8 @@ class MemoryBankEPROM implements OTPMemoryBank {
     /**
      * Check the device speed if has not been done before or if
      * an error was detected.
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
-    public synchronized void checkSpeed() throws OneWireIOException, OneWireException {
+    public synchronized void checkSpeed() throws OneWireException {
 
         // only check the speed
         if (doSetSpeed) {

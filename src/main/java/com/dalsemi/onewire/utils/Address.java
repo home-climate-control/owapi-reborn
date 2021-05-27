@@ -183,11 +183,12 @@ public class Address
     *
     * @return address represented in a byte array, family
     *                 code (LS byte) first.
-    *                 
+    *
     * @deprecated Use {@link #toByteArray(String, byte[])} wherever possible, it doesn't use heap allocation.
     */
+   @Deprecated(forRemoval = false)
    public static byte[] toByteArray (String address) {
-      
+
        byte address_byte [] = new byte [8];
 
       toByteArray(address, address_byte);
@@ -196,7 +197,7 @@ public class Address
    }
 
    public static void toByteArray(String address, byte[] address_byte) {
-   
+
       for (int i = 0; i < 8; i++) {
          address_byte [7 - i] =
             ( byte ) ((Character.digit((address.charAt(i * 2)), 16) << 4)
@@ -207,9 +208,10 @@ public class Address
    /**
     * Convert an iButton or 1-Wire device address as a long
     * (little endian) into an array of bytes.
-    *                 
+    *
     * @deprecated Use {@link #toByteArray(long, byte[])} wherever possible, it doesn't use heap allocation.
     */
+   @Deprecated(forRemoval = false)
    public static byte[] toByteArray (long address) {
 
       /* This looks funny, but it should actually take
@@ -217,7 +219,7 @@ public class Address
          of 8+16+24+32+40+48+56 shifts.
       */
       byte address_byte [] = new byte [8];
-      
+
       toByteArray(address, address_byte);
 
       return address_byte;

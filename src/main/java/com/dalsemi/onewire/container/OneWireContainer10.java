@@ -285,7 +285,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      */
     @Override
     public double[] getTemperatureResolutions () {
-        
+
         return new double[] { RESOLUTION_NORMAL, RESOLUTION_MAXIMUM };
     }
 
@@ -352,8 +352,8 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      */
     @SuppressWarnings("static-access")
     @Override
-    public void doTemperatureConvert (byte[] state) throws OneWireIOException, OneWireException {
-        
+    public void doTemperatureConvert (byte[] state) throws OneWireException {
+
         doSpeed();
 
         // select the device
@@ -467,7 +467,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      */
     @Override
     public double getTemperatureAlarm(int alarmType, byte[] state) {
-        
+
         return ( double ) state [alarmType == ALARM_LOW ? 3 : 2];
     }
 
@@ -487,7 +487,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      */
     @Override
     public double getTemperatureResolution(byte[] state) {
-        
+
         if (state [4] == 0) {
             return RESOLUTION_NORMAL;
         }
@@ -584,13 +584,14 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      *         adapter
      *
      * @see    #writeDevice
-     * 
+     *
      * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
      */
     @Override
-    public byte[] readDevice() throws OneWireIOException, OneWireException {
+    @Deprecated(forRemoval = false)
+    public byte[] readDevice() throws OneWireException {
 
-        byte[] data = new byte [8];
+        var data = new byte [8];
 
         readDevice(data);
 
@@ -598,7 +599,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
     }
 
     @Override
-    public void readDevice(byte[] outputBuffer) throws OneWireIOException, OneWireException {
+    public void readDevice(byte[] outputBuffer) throws OneWireException {
 
         doSpeed();
 
@@ -630,7 +631,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
             } else {
                 throw new OneWireIOException(address, "OneWireContainer10-Error reading CRC8 from device.");
             }
-            
+
         } else {
             throw new OneWireIOException(address, "OneWireContainer10-Device not found on 1-Wire Network");
         }
@@ -658,11 +659,11 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      * @see    #readDevice
      */
     @Override
-    public void writeDevice (byte[] state) throws OneWireIOException, OneWireException {
-        
+    public void writeDevice (byte[] state) throws OneWireException {
+
         doSpeed();
 
-        byte[] temp = new byte [2];
+        var temp = new byte [2];
 
         temp [0] = state [2];
         temp [1] = state [3];
@@ -685,8 +686,9 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      *
      * @see com.dalsemi.onewire.utils.Convert#toFahrenheit(double)
      */
-    static public double convertToFahrenheit (double celsiusTemperature) {
-        
+    @Deprecated(forRemoval = true)
+    public static double convertToFahrenheit (double celsiusTemperature) {
+
         return Convert.toFahrenheit(celsiusTemperature);
     }
 
@@ -701,8 +703,9 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      *
      * @see com.dalsemi.onewire.utils.Convert#toCelsius(double)
      */
-    static public double convertToCelsius (double fahrenheitTemperature) {
-        
+    @Deprecated(forRemoval = true)
+    public static double convertToCelsius (double fahrenheitTemperature) {
+
         return Convert.toCelsius(fahrenheitTemperature);
     }
 
@@ -723,13 +726,13 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    private void readScratch (byte[] data) throws OneWireIOException, OneWireException {
+    private void readScratch (byte[] data) throws OneWireException {
 
         // select the device
         if (adapter.select(address)) {
 
             // construct a block to read the scratchpad
-            byte[] buffer = new byte [10];
+            var buffer = new byte [10];
 
             // read scratchpad command
             buffer [0] = ( byte ) READ_SCRATCHPAD_COMMAND;
@@ -769,11 +772,11 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      *         adapter
      * @throws IllegalArgumentException when data length is not equal to <code>2</code>
      */
-    private void writeScratchpad (byte[] data) throws OneWireIOException, OneWireException, IllegalArgumentException {
+    private void writeScratchpad (byte[] data) throws OneWireException, IllegalArgumentException {
 
         // Variables.
-        byte[] write_block = new byte [3];
-        byte[] buffer      = new byte [8];
+        var write_block = new byte [3];
+        var buffer      = new byte [8];
 
         // First do some error checking.
         if (data.length != 2)
@@ -801,8 +804,6 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
         if ((buffer [2] != data [0]) || (buffer [3] != data [1])) {
             throw new OneWireIOException(address, "OneWireContainer10 - data read back incorrect");
         }
-
-        return;
     }
 
     /**
@@ -817,7 +818,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
      *         adapter
      */
     @SuppressWarnings("static-access")
-    private void copyScratchpad () throws OneWireIOException, OneWireException {
+    private void copyScratchpad () throws OneWireException {
 
         // select the device
         if (adapter.select(address)) {
@@ -838,7 +839,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
 
             // Turn power back to normal.
             adapter.setPowerNormal();
-            
+
         } else {
             throw new OneWireIOException(address, "OneWireContainer10 - device not found");
         }

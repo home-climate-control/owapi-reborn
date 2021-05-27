@@ -316,7 +316,7 @@ public abstract class DSPortAdapter {
      * will have to stay because creating new device containers along with the whole
      * Louisiana purchase on EVERY browse is... I leave the word choice to you.
      */
-    private Map<String, OneWireContainer> address2container = new TreeMap<String, OneWireContainer>();
+    private Map<String, OneWireContainer> address2container = new TreeMap<>();
 
     /**
      * Registers a user provided {@code OneWireContainer} class. Using this
@@ -381,7 +381,7 @@ public abstract class DSPortAdapter {
      * communicate with port.
      * @throws OneWireException If port does not exist
      */
-    public abstract boolean selectPort(String portName) throws OneWireIOException, OneWireException;
+    public abstract boolean selectPort(String portName) throws OneWireException;
 
     /**
      * Frees ownership of the selected port, if it is currently owned, back to
@@ -409,10 +409,8 @@ public abstract class DSPortAdapter {
      *
      * @return {@code true} if the adapter is confirmed to be connected to the
      * selected port, {@code false} if the adapter is not connected.
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
-    public abstract boolean adapterDetected() throws OneWireIOException, OneWireException;
+    public abstract boolean adapterDetected() throws OneWireException;
 
     /**
      * Retrieves the version of the adapter.
@@ -426,7 +424,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a communication or setup error with the
      * 1-Wire adapter
      */
-    public String getAdapterVersion() throws OneWireIOException, OneWireException {
+    public String getAdapterVersion() throws OneWireException {
 
         return "<na>";
     }
@@ -445,7 +443,7 @@ public abstract class DSPortAdapter {
      * 1-Wire adapter
      * @see Address
      */
-    public String getAdapterAddress() throws OneWireIOException, OneWireException {
+    public String getAdapterAddress() throws OneWireException {
 
         return "<na>";
     }
@@ -468,7 +466,7 @@ public abstract class DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean canOverdrive() throws OneWireIOException, OneWireException {
+    public boolean canOverdrive() throws OneWireException {
 
         return false;
     }
@@ -482,7 +480,7 @@ public abstract class DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean canHyperdrive() throws OneWireIOException, OneWireException {
+    public boolean canHyperdrive() throws OneWireException {
 
         return false;
     }
@@ -496,7 +494,7 @@ public abstract class DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean canFlex() throws OneWireIOException, OneWireException {
+    public boolean canFlex() throws OneWireException {
 
         return false;
     }
@@ -510,7 +508,7 @@ public abstract class DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean canProgram() throws OneWireIOException, OneWireException {
+    public boolean canProgram() throws OneWireException {
 
         return false;
     }
@@ -525,7 +523,7 @@ public abstract class DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean canDeliverPower() throws OneWireIOException, OneWireException {
+    public boolean canDeliverPower() throws OneWireException {
 
         return false;
     }
@@ -542,7 +540,7 @@ public abstract class DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean canDeliverSmartPower() throws OneWireIOException, OneWireException {
+    public boolean canDeliverSmartPower() throws OneWireException {
 
         return false;
     }
@@ -556,7 +554,7 @@ public abstract class DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean canBreak() throws OneWireIOException, OneWireException {
+    public boolean canBreak() throws OneWireException {
 
         return false;
     }
@@ -577,9 +575,9 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public Enumeration<OneWireContainer> getAllDeviceContainers() throws OneWireIOException, OneWireException {
+    public Enumeration<OneWireContainer> getAllDeviceContainers() throws OneWireException {
 
-        Vector<OneWireContainer> ibutton_vector = new Vector<OneWireContainer>();
+        Vector<OneWireContainer> ibutton_vector = new Vector<>();
         OneWireContainer temp_ibutton;
 
         temp_ibutton = getFirstDeviceContainer();
@@ -611,9 +609,9 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public OneWireContainer getFirstDeviceContainer() throws OneWireIOException, OneWireException {
+    public OneWireContainer getFirstDeviceContainer() throws OneWireException {
 
-        if (findFirstDevice() == true) {
+        if (findFirstDevice()) {
             return getDeviceContainer();
         }
 
@@ -633,9 +631,9 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public OneWireContainer getNextDeviceContainer() throws OneWireIOException, OneWireException {
+    public OneWireContainer getNextDeviceContainer() throws OneWireException {
 
-        if (findNextDevice() == true) {
+        if (findNextDevice()) {
             return getDeviceContainer();
         }
 
@@ -651,7 +649,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract boolean findFirstDevice() throws OneWireIOException, OneWireException;
+    public abstract boolean findFirstDevice() throws OneWireException;
 
     /**
      * Returns {@code true} if the next iButton or 1-Wire device is found. The
@@ -662,7 +660,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract boolean findNextDevice() throws OneWireIOException, OneWireException;
+    public abstract boolean findNextDevice() throws OneWireException;
 
     /**
      * Copies the 'current' 1-Wire device address being used by the adapter into
@@ -723,7 +721,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      * @see Address
      */
-    public boolean isPresent(byte[] address) throws OneWireIOException, OneWireException {
+    public boolean isPresent(byte[] address) throws OneWireException {
 
         reset();
         putByte(0xF0); // Search ROM command
@@ -742,7 +740,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      * @see Address
      */
-    public final boolean isPresent(long address) throws OneWireIOException, OneWireException {
+    public final boolean isPresent(long address) throws OneWireException {
 
         // 8 bytes
         byte[] buffer = {
@@ -765,7 +763,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      * @see Address
      */
-    public final boolean isPresent(String address) throws OneWireIOException, OneWireException {
+    public final boolean isPresent(String address) throws OneWireException {
 
         // 8 bytes
         byte[] buffer = {
@@ -789,7 +787,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      * @see Address
      */
-    public boolean isAlarming(byte[] address) throws OneWireIOException, OneWireException {
+    public boolean isAlarming(byte[] address) throws OneWireException {
 
         reset();
         putByte(0xEC); // Conditional search commands
@@ -809,7 +807,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      * @see Address
      */
-    public final boolean isAlarming(long address) throws OneWireIOException, OneWireException {
+    public final boolean isAlarming(long address) throws OneWireException {
 
         // 8 bytes
         byte[] buffer = {
@@ -833,7 +831,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      * @see Address
      */
-    public final boolean isAlarming(String address) throws OneWireIOException, OneWireException {
+    public final boolean isAlarming(String address) throws OneWireException {
 
         // 8 bytes
         byte[] buffer = {
@@ -860,7 +858,7 @@ public abstract class DSPortAdapter {
      * @see com.dalsemi.onewire.adapter.DSPortAdapter#isPresent(byte[])
      * @see Address
      */
-    public boolean select(byte[] address) throws OneWireIOException, OneWireException {
+    public boolean select(byte[] address) throws OneWireException {
 
         // send 1-Wire Reset
         int rslt = reset();
@@ -894,7 +892,7 @@ public abstract class DSPortAdapter {
      * @see com.dalsemi.onewire.adapter.DSPortAdapter#isPresent(byte[])
      * @see Address
      */
-    public final boolean select(long address) throws OneWireIOException, OneWireException {
+    public final boolean select(long address) throws OneWireException {
 
         // 8 bytes
         byte[] buffer = {
@@ -921,7 +919,7 @@ public abstract class DSPortAdapter {
      * @see com.dalsemi.onewire.adapter.DSPortAdapter#isPresent(byte[])
      * @see Address
      */
-    public final boolean select(String address) throws OneWireIOException, OneWireException {
+    public final boolean select(String address) throws OneWireException {
 
         // 8 bytes
         byte[] buffer = {
@@ -950,7 +948,7 @@ public abstract class DSPortAdapter {
      * @see com.dalsemi.onewire.adapter.DSPortAdapter#isPresent(byte[])
      * @see Address
      */
-    public final void assertSelect(byte[] address) throws OneWireIOException, OneWireException {
+    public final void assertSelect(byte[] address) throws OneWireException {
 
         if (!select(address)) {
             throw new OneWireIOException(address, "Device not present");
@@ -974,7 +972,7 @@ public abstract class DSPortAdapter {
      * @see com.dalsemi.onewire.adapter.DSPortAdapter#isPresent(byte[])
      * @see Address
      */
-    public void assertSelect(long address) throws OneWireIOException, OneWireException {
+    public void assertSelect(long address) throws OneWireException {
 
         // 8 bytes
         byte[] buffer = {
@@ -1006,7 +1004,7 @@ public abstract class DSPortAdapter {
      * @see com.dalsemi.onewire.adapter.DSPortAdapter#isPresent(byte[])
      * @see Address
      */
-    public void assertSelect(String address) throws OneWireIOException, OneWireException {
+    public void assertSelect(String address) throws OneWireException {
 
         // 8 bytes
         byte[] buffer = {
@@ -1181,7 +1179,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract void putBit(boolean bitValue) throws OneWireIOException, OneWireException;
+    public abstract void putBit(boolean bitValue) throws OneWireException;
 
     /**
      * Gets a bit from the 1-Wire Network.
@@ -1190,7 +1188,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract boolean getBit() throws OneWireIOException, OneWireException;
+    public abstract boolean getBit() throws OneWireException;
 
     /**
      * Sends a byte to the 1-Wire Network.
@@ -1199,7 +1197,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract void putByte(int byteValue) throws OneWireIOException, OneWireException;
+    public abstract void putByte(int byteValue) throws OneWireException;
 
     /**
      * Gets a byte from the 1-Wire Network.
@@ -1208,7 +1206,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract int getByte() throws OneWireIOException, OneWireException;
+    public abstract int getByte() throws OneWireException;
 
     /**
      * Gets a block of data from the 1-Wire Network.
@@ -1218,7 +1216,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract byte[] getBlock(int len) throws OneWireIOException, OneWireException;
+    public abstract byte[] getBlock(int len) throws OneWireException;
 
     /**
      * Gets a block of data from the 1-Wire Network and write it into the
@@ -1229,7 +1227,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract void getBlock(byte[] arr, int len) throws OneWireIOException, OneWireException;
+    public abstract void getBlock(byte[] arr, int len) throws OneWireException;
 
     /**
      * Gets a block of data from the 1-Wire Network and write it into the
@@ -1241,7 +1239,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract void getBlock(byte[] arr, int off, int len) throws OneWireIOException, OneWireException;
+    public abstract void getBlock(byte[] arr, int off, int len) throws OneWireException;
 
     /**
      * Sends a block of data and returns the data received in the same array.
@@ -1256,7 +1254,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract void dataBlock(byte dataBlock[], int off, int len) throws OneWireIOException, OneWireException;
+    public abstract void dataBlock(byte dataBlock[], int off, int len) throws OneWireException;
 
     /**
      * Sends a Reset to the 1-Wire Network.
@@ -1276,7 +1274,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract int reset() throws OneWireIOException, OneWireException;
+    public abstract int reset() throws OneWireException;
 
     // --------
     // -------- 1-Wire Network power methods
@@ -1305,7 +1303,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public void setPowerDuration(int timeFactor) throws OneWireIOException, OneWireException {
+    public void setPowerDuration(int timeFactor) throws OneWireException {
 
         throw new OneWireException("Power delivery not supported by this adapter type");
     }
@@ -1332,7 +1330,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean startPowerDelivery(int changeCondition) throws OneWireIOException, OneWireException {
+    public boolean startPowerDelivery(int changeCondition) throws OneWireException {
 
         throw new OneWireException("Power delivery not supported by this adapter type");
     }
@@ -1355,7 +1353,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public void setProgramPulseDuration(int timeFactor) throws OneWireIOException, OneWireException {
+    public void setProgramPulseDuration(int timeFactor) throws OneWireException {
 
         throw new OneWireException("Program pulse delivery not supported by this adapter type");
     }
@@ -1383,7 +1381,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    public boolean startProgramPulse(int changeCondition) throws OneWireIOException, OneWireException {
+    public boolean startProgramPulse(int changeCondition) throws OneWireException {
 
         throw new OneWireException("Program pulse delivery not supported by this adapter type");
     }
@@ -1397,7 +1395,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    public void startBreak() throws OneWireIOException, OneWireException {
+    public void startBreak() throws OneWireException {
 
         throw new OneWireException("Break delivery not supported by this adapter type");
     }
@@ -1413,7 +1411,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    public void setPowerNormal() throws OneWireIOException, OneWireException {
+    public void setPowerNormal() throws OneWireException {
 
         return;
     }
@@ -1439,7 +1437,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    public void setSpeed(int speed) throws OneWireIOException, OneWireException {
+    public void setSpeed(int speed) throws OneWireException {
 
         if (speed != SPEED_REGULAR)
             throw new OneWireException("Non-regular 1-Wire speed not supported by this adapter type");
@@ -1662,10 +1660,8 @@ public abstract class DSPortAdapter {
      * @param address device address to do strongAccess on.
      * @return true if device participated and was present in the strongAccess
      * search.
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
-    private synchronized boolean strongAccess(byte[] address) throws OneWireIOException, OneWireException {
+    private synchronized boolean strongAccess(byte[] address) throws OneWireException {
 
         // 24 bytes
         // All bits must be set

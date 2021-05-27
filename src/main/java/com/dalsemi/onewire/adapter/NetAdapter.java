@@ -294,7 +294,7 @@ public class NetAdapter
     * of time that has run.
     */
    public void pingHost()
-      throws OneWireException, OneWireIOException
+      throws OneWireException
    {
       try
       {
@@ -322,12 +322,10 @@ public class NetAdapter
     *
     * @return  <code>true</code> if the adapter is confirmed to be connected to
     * the selected port, <code>false</code> if the adapter is not connected.
-    *
-    * @throws OneWireIOException
-    * @throws OneWireException
     */
+   @Override
    public boolean adapterDetected ()
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       synchronized(conn)
       {
@@ -343,6 +341,7 @@ public class NetAdapter
     *
     * @return  <code>String</code> representation of the port adapter.
     */
+   @Override
    public String getAdapterName ()
    {
       return "NetAdapter";
@@ -354,6 +353,7 @@ public class NetAdapter
     *
     * @return  <code>String</code> description of the port type required.
     */
+   @Override
    public String getPortTypeDescription ()
    {
       return "Network 'Hostname:Port'";
@@ -364,6 +364,7 @@ public class NetAdapter
     *
     * @return  version string
     */
+   @Override
    public String getClassVersion ()
    {
       return ""+versionUID;
@@ -383,9 +384,10 @@ public class NetAdapter
     * @return  <code>Enumeration</code> of type <code>String</code> that contains the port
     * names
     */
+   @Override
    public Enumeration getPortNames ()
    {
-      Vector v = new Vector();
+      var v = new Vector<String>();
 
       // figure out if multicast is enabled
       if(multicastEnabled == null)
@@ -405,7 +407,7 @@ public class NetAdapter
 
       // if multicasting is enabled, we'll look for servers dynamically
       // and add them to the list
-      if(multicastEnabled.booleanValue())
+      if(multicastEnabled)
       {
          // figure out what the datagram listen port is
          if(datagramPort==-1)
@@ -460,14 +462,14 @@ public class NetAdapter
             byte[] versionBytes = Convert.toByteArray(versionUID);
 
             // send a packet with the versionUID
-            DatagramPacket outPacket
+            var outPacket
                = new DatagramPacket(versionBytes, 4, group, datagramPort);
             socket.send(outPacket);
 
             // set a timeout of 1/2 second for the receive
             socket.setSoTimeout(500);
 
-            byte[] receiveBuffer = new byte[32];
+            var receiveBuffer = new byte[32];
             for(;;)
             {
                //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
@@ -543,6 +545,7 @@ public class NetAdapter
     * @throws OneWireIOException If port does not exist, or unable to communicate with port.
     * @throws OneWireException If port does not exist
     */
+   @Override
    public boolean selectPort (String portName)
       throws OneWireIOException, OneWireException
    {
@@ -685,6 +688,7 @@ public class NetAdapter
     *
     * @throws OneWireException If port does not exist
     */
+   @Override
    public void freePort ()
       throws OneWireException
    {
@@ -711,6 +715,7 @@ public class NetAdapter
     *
     * @throws OneWireException if valid port not yet selected
     */
+   @Override
    public String getPortName ()
       throws OneWireException
    {
@@ -738,8 +743,8 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire
     *         adapter
     */
-   public boolean canOverdrive ()
-      throws OneWireIOException, OneWireException
+   @Override
+   public boolean canOverdrive () throws OneWireException
    {
       try
       {
@@ -772,8 +777,8 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire
     *         adapter
     */
-   public boolean canHyperdrive ()
-      throws OneWireIOException, OneWireException
+   @Override
+   public boolean canHyperdrive () throws OneWireException
    {
       try
       {
@@ -806,8 +811,8 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire
     *         adapter
     */
-   public boolean canFlex ()
-      throws OneWireIOException, OneWireException
+   @Override
+   public boolean canFlex () throws OneWireException
    {
       try
       {
@@ -840,8 +845,8 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire
     *         adapter
     */
-   public boolean canProgram ()
-      throws OneWireIOException, OneWireException
+   @Override
+   public boolean canProgram () throws OneWireException
    {
       try
       {
@@ -875,8 +880,8 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire
     *         adapter
     */
-   public boolean canDeliverPower ()
-      throws OneWireIOException, OneWireException
+   @Override
+   public boolean canDeliverPower () throws OneWireException
    {
       try
       {
@@ -912,8 +917,8 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire
     *         adapter
     */
-   public boolean canDeliverSmartPower ()
-      throws OneWireIOException, OneWireException
+   @Override
+   public boolean canDeliverSmartPower () throws OneWireException
    {
       try
       {
@@ -946,8 +951,8 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire
     *         adapter
     */
-   public boolean canBreak ()
-      throws OneWireIOException, OneWireException
+   @Override
+   public boolean canBreak () throws OneWireException
    {
       try
       {
@@ -984,8 +989,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public boolean findFirstDevice ()
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1019,8 +1025,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public boolean findNextDevice ()
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1055,6 +1062,7 @@ public class NetAdapter
     * @param  address An array to be filled with the current iButton address.
     * @see    Address
     */
+   @Override
    public void getAddress (byte[] address)
    {
       try
@@ -1086,6 +1094,7 @@ public class NetAdapter
     *
     * @see #setNoResetSearch
     */
+   @Override
    public void setSearchOnlyAlarmingDevices ()
    {
       try
@@ -1112,6 +1121,7 @@ public class NetAdapter
     * The normal reset before each search can be restored with the
     * 'setSearchAllDevices()' method.
     */
+   @Override
    public void setNoResetSearch ()
    {
       try
@@ -1139,6 +1149,7 @@ public class NetAdapter
     *
     * @see #setNoResetSearch
     */
+   @Override
    public void setSearchAllDevices ()
    {
       try
@@ -1168,6 +1179,7 @@ public class NetAdapter
     * @see    #excludeFamily
     * @see    #excludeFamily(byte[])
     */
+   @Override
    public void targetAllFamilies ()
    {
       try
@@ -1196,6 +1208,7 @@ public class NetAdapter
     * @see    Address
     * @see    #targetAllFamilies
     */
+   @Override
    public void targetFamily (int family)
    {
       try
@@ -1225,6 +1238,7 @@ public class NetAdapter
     * @see    Address
     * @see    #targetAllFamilies
     */
+   @Override
    public void targetFamily (byte family [])
    {
       try
@@ -1256,6 +1270,7 @@ public class NetAdapter
     * @see    Address
     * @see    #targetAllFamilies
     */
+   @Override
    public void excludeFamily (int family)
    {
       try
@@ -1286,6 +1301,7 @@ public class NetAdapter
     * @see    Address
     * @see    #targetAllFamilies
     */
+   @Override
    public void excludeFamily (byte family [])
    {
       try
@@ -1329,9 +1345,8 @@ public class NetAdapter
    *
    * @throws OneWireException on a setup error with the 1-Wire adapter
    */
+  @Override
   public void beginExclusive ()throws OneWireException {
-
-    boolean bGotServerBlock = false;
 
     theLock.lock();
 
@@ -1362,6 +1377,7 @@ public class NetAdapter
     * This command dynamically marks the end of a critical section and
     * should be used when exclusive control is no longer needed.
     */
+   @Override
    public void endExclusive () {
 
      theLock.unlock();
@@ -1407,8 +1423,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public int reset()
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1439,8 +1456,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public void putBit (boolean bitValue)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1470,6 +1488,7 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public boolean getBit ()
       throws OneWireIOException, OneWireException
    {
@@ -1533,8 +1552,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public int getByte ()
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1567,10 +1587,11 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public byte[] getBlock (int len)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
-      byte[] buffer = new byte[len];
+      var buffer = new byte[len];
       getBlock(buffer,0,len);
       return buffer;
    }
@@ -1585,8 +1606,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public void getBlock (byte[] arr, int len)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       getBlock(arr, 0, len);
    }
@@ -1602,8 +1624,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public void getBlock (byte[] arr, int off, int len)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1641,8 +1664,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public void dataBlock (byte[] dataBlock, int off, int len)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       if(DEBUG)
       {
@@ -1705,8 +1729,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public void setPowerDuration (int timeFactor)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1753,8 +1778,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public boolean startPowerDelivery (int changeCondition)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1799,8 +1825,9 @@ public class NetAdapter
     * @throws OneWireIOException on a 1-Wire communication error
     * @throws OneWireException on a setup error with the 1-Wire adapter
     */
+   @Override
    public void setProgramPulseDuration (int timeFactor)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1848,8 +1875,9 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire adapter
     *         or the adapter does not support this operation
     */
+   @Override
    public boolean startProgramPulse (int changeCondition)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1883,8 +1911,9 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire adapter
     *         or the adapter does not support this operation
     */
+   @Override
    public void startBreak ()
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1915,8 +1944,9 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire adapter
     *         or the adapter does not support this operation
     */
+   @Override
    public void setPowerNormal ()
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1960,8 +1990,9 @@ public class NetAdapter
     * @throws OneWireException on a setup error with the 1-Wire adapter
     *         or the adapter does not support this operation
     */
+   @Override
    public void setSpeed (int speed)
-      throws OneWireIOException, OneWireException
+      throws OneWireException
    {
       try
       {
@@ -1998,6 +2029,7 @@ public class NetAdapter
     * <li>    >3 future speeds
     * </ul>
     */
+   @Override
    public int getSpeed ()
    {
       try

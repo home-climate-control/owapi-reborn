@@ -462,7 +462,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      */
     @Override
     public void setLatchState(int channel, boolean latchState, boolean doSmart, byte[] state) {
-        
+
         byte latch = (byte) (0x01 << channel);
 
         if (latchState) {
@@ -502,21 +502,22 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
-     *         
+     *
      * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
      */
     @Override
-    public byte[] readDevice() throws OneWireIOException, OneWireException {
+    @Deprecated(forRemoval = false)
+    public byte[] readDevice() throws OneWireException {
 
         byte[] state = new byte [3];
-        
+
         readDevice(state);
 
         return state;
     }
 
     @Override
-    public void readDevice(byte[] state) throws OneWireIOException, OneWireException {
+    public void readDevice(byte[] state) throws OneWireException {
 
         System.arraycopy(FF,0,state,0,3);
         map.read(0,false,state,0,3);
@@ -537,7 +538,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    public byte[] readRegister() throws OneWireIOException, OneWireException {
+    public byte[] readRegister() throws OneWireException {
 
         byte[] register = new byte[3];
 
@@ -562,7 +563,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      *         adapter
      */
     @Override
-    public void writeDevice(byte[] state) throws OneWireIOException, OneWireException {
+    public void writeDevice(byte[] state) throws OneWireException {
         map.write(1,state,1,1);
     }
 
@@ -579,7 +580,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    public void writeRegister(byte[] register) throws OneWireIOException, OneWireException {
+    public void writeRegister(byte[] register) throws OneWireException {
         search.write(0,register,0,3);
     }
 
@@ -595,8 +596,8 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    public void setResetMode(byte[] register, boolean set) throws OneWireIOException, OneWireException {
-        
+    public void setResetMode(byte[] register, boolean set) throws OneWireException {
+
         if (set && ((register[2] & 0x04) == 0x04)) {
             register[2] = (byte) (register[2] & (byte) 0xFB);
         } else if ((!set) && ((register[2] & (byte) 0x04) == (byte) 0x00)) {
@@ -618,8 +619,8 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    public boolean getVCC(byte[] register) throws OneWireIOException, OneWireException {
-        
+    public boolean getVCC(byte[] register) throws OneWireException {
+
         if((register[2] & (byte) 0x80) == (byte) 0x80) {
             return true;
         }

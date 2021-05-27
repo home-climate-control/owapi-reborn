@@ -313,6 +313,7 @@ public class OneWireContainer05 extends OneWireContainer implements SwitchContai
      *
      * @see #setLatchState(int,boolean,boolean,byte[])
      */
+    @Override
     public boolean onlySingleChannelOn() {
         return true;
     }
@@ -430,7 +431,7 @@ public class OneWireContainer05 extends OneWireContainer implements SwitchContai
      */
     @Override
     public void setLatchState(int channel, boolean latchState, boolean doSmart, byte[] state) {
-        
+
         if (latchState) {
             state [0] = ( byte ) (state [0] | 0x01);
         } else {
@@ -455,10 +456,11 @@ public class OneWireContainer05 extends OneWireContainer implements SwitchContai
      * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
      */
     @Override
-    public byte[] readDevice() throws OneWireIOException, OneWireException {
+    @Deprecated(forRemoval = false)
+    public byte[] readDevice() throws OneWireException {
 
         //this ain't a hard part--it's only gonna take 1 byte
-        byte[] state = new byte [1];
+        var state = new byte [1];
 
         readDevice(state);
 
@@ -466,7 +468,7 @@ public class OneWireContainer05 extends OneWireContainer implements SwitchContai
     }
 
     @Override
-    public void readDevice(byte[] state) throws OneWireIOException, OneWireException {
+    public void readDevice(byte[] state) throws OneWireException {
 
         //first let's make sure we can talk to the part
         //speed is not critical with the 2405 so i'll just call doSpeed()
@@ -512,7 +514,7 @@ public class OneWireContainer05 extends OneWireContainer implements SwitchContai
      *         adapter
      */
     @Override
-    public void writeDevice(byte[] state) throws OneWireIOException, OneWireException {
+    public void writeDevice(byte[] state) throws OneWireException {
 
         doSpeed();
 

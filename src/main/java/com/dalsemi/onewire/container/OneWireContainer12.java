@@ -434,10 +434,10 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
     @Override
     public Enumeration<MemoryBank> getMemoryBanks() {
 
-        Vector<MemoryBank> bank_vector = new Vector<MemoryBank>(2);
+        Vector<MemoryBank> bank_vector = new Vector<>(2);
 
         // EPROM main bank
-        MemoryBankEPROM mn = new MemoryBankEPROM(this);
+        var mn = new MemoryBankEPROM(this);
 
         mn.numberPages = 4;
         mn.size        = 128;
@@ -614,7 +614,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      */
     @Override
     public boolean getLevel(int channel, byte[] state) {
-     
+
         if (channel == 0) {
             return ((state [0] & 0x04) == 0x04);
         } else {
@@ -677,10 +677,10 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      * status is read with <code>readDevice()</code>.</p>
      *
      * <p>The activity latches will only be cleared once.  With the
-     * DS2406/07, this means that only the first call to 
-     * <code>readDevice()</code> will clear the activity latches.  
+     * DS2406/07, this means that only the first call to
+     * <code>readDevice()</code> will clear the activity latches.
      * Subsequent calls to <code>readDevice()</code> will leave the
-     * activity latch states intact, unless this method has been 
+     * activity latch states intact, unless this method has been
      * invoked since the last call to <code>readDevice()</code>.</p>
      *
      * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
@@ -746,21 +746,22 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
-     *         
+     *
      * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
      */
     @Override
-    public synchronized byte[] readDevice() throws OneWireIOException, OneWireException {
+    @Deprecated(forRemoval = false)
+    public synchronized byte[] readDevice() throws OneWireException {
 
-        byte[] state = new byte [2];
-        
+        var state = new byte [2];
+
         readDevice(state);
 
         return state;
     }
 
     @Override
-    public synchronized void readDevice(byte[] state) throws OneWireIOException, OneWireException {
+    public synchronized void readDevice(byte[] state) throws OneWireException {
 
         //the first byte is the raw status
         //the second byte is for writing
@@ -797,7 +798,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
 
             // calculate the CRC16 on the result and check if correct
             if (CRC16.compute(buffer, 0, 7, 0) == 0xB001) {
-                
+
                 state [0] = buffer [3];
 
                 //let's read the status byte 7 and get the data there
@@ -836,8 +837,8 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      *         adapter
      */
     @Override
-    public void writeDevice(byte[] state) throws OneWireIOException, OneWireException {
-        
+    public void writeDevice(byte[] state) throws OneWireException {
+
         if (doSpeedEnable) {
             doSpeed();
         }
@@ -856,7 +857,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
                 buffer [2] = 0x00;
 
                 // write state
-                buffer [3] = ( byte ) state [1];
+                buffer [3] = state [1];
 
                 // read CRC16
                 buffer [4] = ( byte ) 0xFF;
@@ -956,7 +957,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      * @see #DONT_CHANGE
      */
     public void setSearchConditions(byte channel, byte source, byte polarity, byte[] state) {
-        
+
         //state[1] bitmap
         // SUP PIOB PIOA CSS4 CSS3 CSS2 CSS1  CSS0
         //               [channel] [source ][polarity]
@@ -992,7 +993,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      * read and write bytes from and to this channel.  Setting
      * <code>toggleRW</code> to <code>false</code> means
      * that only one operation will occur, whichever operation
-     * is selected by <code>readInitially</code>. <br> <i> <b> NOTE: </b> 
+     * is selected by <code>readInitially</code>. <br> <i> <b> NOTE: </b>
      * When toggleRW is <code>true</code> the 'read' bytes are
      * automatically provided and only the results of the read
      * bytes are returned. </i>
@@ -1048,7 +1049,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      *
      * @return If any bytes were read, this returns a byte array of data
      * read from the channel access.  If no bytes were read, it
-     * will return the input buffer that was to be written.  
+     * will return the input buffer that was to be written.
      *
      * @throws OneWireIOException on a 1-Wire communication error such as
      *         reading an incorrect CRC from a 1-Wire device.  This could be
@@ -1067,8 +1068,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      */
     public byte[] channelAccess(byte[] inbuffer, boolean toggleRW,
             boolean readInitially, int CRCMode, int channelMode,
-            boolean clearActivity, boolean interleave) throws OneWireException,
-            OneWireIOException {
+            boolean clearActivity, boolean interleave) throws OneWireException {
 
         CRCMode     = CRCMode & 0x03;       //MASK THIS TO ACCEPTABLE VALUE
         channelMode = channelMode & 0x0c;   //MASK THIS TO ACCEPTABLE VALUE
@@ -1116,7 +1116,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
                 break;
             }
 
-            byte[] outputbuffer = new byte [inlength + 3 + 1];   //3 control bytes + 1 information byte
+            var outputbuffer = new byte [inlength + 3 + 1];   //3 control bytes + 1 information byte
 
             outputbuffer [0] = CHANNEL_ACCESS_COMMAND;
             crc16            = CRC16.compute(CHANNEL_ACCESS_COMMAND & 0x0FF);
@@ -1169,7 +1169,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
 
              ...Brain
              */
-            int j      = 4;   //outputbuffer 0-2 is command bytes, outputbuffer[3] is return info
+            var j      = 4;   //outputbuffer 0-2 is command bytes, outputbuffer[3] is return info
             int option = outputbuffer [1] & 0x63;   //get the bits out we want for toggle, initial, and CRC
 
             option = ((option >> 3) | option) & 0x0f;   //now lets make it a number 0-15
@@ -1251,9 +1251,9 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
             crc16 = CRC16.compute(outputbuffer [3], crc16);
             j     = 0;   //j will be how many bytes we are into the buffer - CRC bytes read
 
-            int     k            = 0;   //index into the return buffer
-            boolean fresh        = false;   //whether or not we need to reinitialize the CRC calculation
-            byte[]  returnbuffer = new byte [inbuffer.length];
+            var k = 0;   //index into the return buffer
+            var fresh = false;   //whether or not we need to reinitialize the CRC calculation
+            var returnbuffer = new byte [inbuffer.length];
 
             for (i = 4; i < outputbuffer.length; i++) {
                 if (CRCMode != CRC_DISABLE) {

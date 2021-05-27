@@ -166,6 +166,7 @@ public class OneWireContainer22 extends OneWireContainer28 {
      *
      * @return this <code>OneWireContainer22</code> name
      */
+    @Override
     public String getName() {
         return "DS1822";
     }
@@ -178,6 +179,7 @@ public class OneWireContainer22 extends OneWireContainer28 {
      *
      * @return this <code>OneWireContainer22</code> alternate names
      */
+    @Override
     public String getAlternateNames() {
         return "";
     }
@@ -188,6 +190,7 @@ public class OneWireContainer22 extends OneWireContainer28 {
      *
      * @return <code>OneWireContainer22</code> functional description
      */
+    @Override
     public String getDescription() {
         return "Digital thermometer measures temperatures from "
         + "-55C to 125C in 0.75 seconds (max).  +/- 2C "

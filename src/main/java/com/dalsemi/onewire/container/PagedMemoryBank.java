@@ -36,24 +36,24 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  * <P> Paged Memory bank interface for iButtons (or 1-Wire devices) with page
  * based memory.  This interface extents the base functionality of
  * the super-interface {@link com.dalsemi.onewire.container.MemoryBank MemoryBank}
- * by providing paged based services. </P> 
+ * by providing paged based services. </P>
  *
  * <P> This interface has methods to read and write a packet structure
  * called the UDP (Universal Data Packet).  This structure has a length byte,
  * data, and an inverted CRC16.  See Dallas Semiconductor Application Note 114
- * for details: 
- * <A HREF="http://dbserv.maxim-ic.com/appnotes.cfm?appnote_number=114"> 
+ * for details:
+ * <A HREF="http://dbserv.maxim-ic.com/appnotes.cfm?appnote_number=114">
  * http://dbserv.maxim-ic.com/appnotes.cfm?appnote_number=114</A>
- * </P> 
- * 
+ * </P>
+ *
  * <P>The MemoryBank methods can be organized into the following categories: </P>
  * <UL>
  *   <LI> <B> Information </B>
  *     <UL>
- *       <LI> {@link #getNumberPages() getNumberPages} 
- *       <LI> {@link #getPageLength() getPageLength} 
- *       <LI> {@link #getMaxPacketDataLength() getMaxPacketDataLength} 
- *       <LI> {@link #hasPageAutoCRC() hasPageAutoCRC} 
+ *       <LI> {@link #getNumberPages() getNumberPages}
+ *       <LI> {@link #getPageLength() getPageLength}
+ *       <LI> {@link #getMaxPacketDataLength() getMaxPacketDataLength}
+ *       <LI> {@link #hasPageAutoCRC() hasPageAutoCRC}
  *       <LI> {@link #hasExtraInfo() hasExtraInfo}
  *       <LI> {@link #getExtraInfoLength() getExtraInfoLength}
  *       <LI> {@link #getExtraInfoDescription() getExtraInfoDescription}
@@ -70,11 +70,11 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  *     </UL>
  *  </UL>
  *
- * <H3> Usage </H3> 
- *  
- * <DL> 
- * <DD> <H4> Example 1</H4> 
- * Display some features of PagedMemoryBank instance 'pmb': 
+ * <H3> Usage </H3>
+ *
+ * <DL>
+ * <DD> <H4> Example 1</H4>
+ * Display some features of PagedMemoryBank instance 'pmb':
  * <PRE> <CODE>
  *  System.out.print("PagedMemoryBank has: " + pmb.getNumberPages() + " pages of length ");
  *  System.out.print(pbank.getPageLength() + " bytes ");
@@ -86,38 +86,38 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  *    System.out.print("PagedMemoryBank has device generated CRC");
  * </CODE> </PRE>
  *
- * <DD> <H4> Example 2</H4> 
- * Write a packet into the first page of a PagedMemoryBank instance 'pmb': 
+ * <DD> <H4> Example 2</H4>
+ * Write a packet into the first page of a PagedMemoryBank instance 'pmb':
  * <PRE> <CODE>
  *  byte[] write_buf = new byte[pmb.getMaxPacketDataLength()];
  *  for (int i = 0; i < write_buf.length; i++)
  *      write_buf[i] = (byte)0;
- * 
+ *
  *  mb.writePagePacket(0, write_buf, 0, write_buf.length);
  * </CODE> </PRE>
  *
- * <DD> <H4> Example 3</H4> 
- * Read all of the pages of a PagedMemoryBank instance 'pmb' with device CRC verification: 
+ * <DD> <H4> Example 3</H4>
+ * Read all of the pages of a PagedMemoryBank instance 'pmb' with device CRC verification:
  * <PRE> <CODE>
  *  byte[] read_buf = new byte[pmb.getPageLength()];
  *
  *  if (pmb.hasAutoCRC())
  *  {
- *     // loop to read each page with CRC 
+ *     // loop to read each page with CRC
  *     for (int pg = 0; pg < pmb.getNumberPages(); pg++)
  *     {
  *        // use 'readContinue' arguement to only access device on first page
  *        pmb.readPageCRC(pg, (pg == 0), read_buf, 0);
  *
- *        // do something with data in read_buf ... 
+ *        // do something with data in read_buf ...
  *     }
  *  }
  *  else
  *     System.out.println("PagedMemoryBank does not support device generated CRC");
- * 
+ *
  * </CODE> </PRE>
  * </DL>
- * 
+ *
  * @see com.dalsemi.onewire.container.MemoryBank
  * @see com.dalsemi.onewire.container.OTPMemoryBank
  * @see com.dalsemi.onewire.container.OneWireContainer04
@@ -165,15 +165,15 @@ public interface PagedMemoryBank extends MemoryBank {
 
     /**
      * Gets Maximum data page length in bytes for a packet
-     * read or written in this memory bank.  See the 
+     * read or written in this memory bank.  See the
      * {@link #readPagePacket(int,boolean,byte[],int) readPagePacket}
-     * and 
+     * and
      * {@link #writePagePacket(int,byte[],int,int) writePagePacket}
      * methods.  This method is only usefull
      * if this memory bank is general purpose memory.
      *
      * @return  max packet page length in bytes in this memory bank
-     * 
+     *
      * @see #readPagePacket(int,boolean,byte[],int) readPagePacket
      * @see #readPagePacket(int,boolean,byte[],int,byte[]) readPagePacket(extra)
      * @see #writePagePacket(int,byte[],int,int) writePagePacket
@@ -183,11 +183,11 @@ public interface PagedMemoryBank extends MemoryBank {
     /**
      * Checks to see if this memory bank's pages can be read with
      * the contents being verified by a device generated CRC.
-     * This is used to see if the 
+     * This is used to see if the
      * {@link #readPageCRC(int,boolean,byte[],int) readPageCRC}
      * method can be used.
      *
-     * @return  <CODE> true </CODE> if this memory bank can be 
+     * @return  <CODE> true </CODE> if this memory bank can be
      *          read with self generated CRC
      *
      * @see #readPageCRC(int,boolean,byte[],int) readPageCRC
@@ -196,7 +196,7 @@ public interface PagedMemoryBank extends MemoryBank {
     boolean hasPageAutoCRC();
 
     /**
-     * Checks to see if this memory bank's pages deliver extra 
+     * Checks to see if this memory bank's pages deliver extra
      * information outside of the normal data space,  when read.  Examples
      * of this may be a redirection byte, counter, tamper protection
      * bytes, or SHA-1 result.  If this method returns true then the
@@ -205,7 +205,7 @@ public interface PagedMemoryBank extends MemoryBank {
      * {@link #readPageCRC(int,boolean,byte[],int,byte[]) readPageCRC}, and
      * {@link #readPagePacket(int,boolean,byte[],int,byte[]) readPagePacket}.
      *
-     * @return  <CODE> true </CODE> if reading the this memory bank's 
+     * @return  <CODE> true </CODE> if reading the this memory bank's
      *                 pages provides extra information
      *
      * @see #readPage(int,boolean,byte[],int,byte[]) readPage(extra)
@@ -214,10 +214,11 @@ public interface PagedMemoryBank extends MemoryBank {
      *
      * @deprecated  As of 1-Wire API 0.01, replaced by {@link #hasExtraInfo()}
      */
+    @Deprecated(forRemoval = true)
     boolean haveExtraInfo();
 
     /**
-     * Checks to see if this memory bank's pages deliver extra 
+     * Checks to see if this memory bank's pages deliver extra
      * information outside of the normal data space,  when read.  Examples
      * of this may be a redirection byte, counter, tamper protection
      * bytes, or SHA-1 result.  If this method returns true then the
@@ -226,7 +227,7 @@ public interface PagedMemoryBank extends MemoryBank {
      * {@link #readPageCRC(int,boolean,byte[],int,byte[]) readPageCRC}, and
      * {@link #readPagePacket(int,boolean,byte[],int,byte[]) readPagePacket}.
      *
-     * @return  <CODE> true </CODE> if reading the this memory bank's 
+     * @return  <CODE> true </CODE> if reading the this memory bank's
      *                 pages provides extra information
      *
      * @see #readPage(int,boolean,byte[],int,byte[]) readPage(extra)
@@ -238,7 +239,7 @@ public interface PagedMemoryBank extends MemoryBank {
 
     /**
      * Gets the length in bytes of extra information that
-     * is read when reading a page in this memory bank.  
+     * is read when reading a page in this memory bank.
      *
      * @return  number of bytes in Extra Information read when reading
      *          pages from this memory bank
@@ -250,7 +251,7 @@ public interface PagedMemoryBank extends MemoryBank {
     /**
      * Gets a string description of what is contained in
      * the Extra Information returned when reading pages in this
-     * memory bank.  
+     * memory bank.
      *
      * @return extra information description.
      *
@@ -269,10 +270,10 @@ public interface PagedMemoryBank extends MemoryBank {
      * that the data contain some kind of checking (CRC) like in the
      * {@link #readPagePacket(int,boolean,byte[],int) readPagePacket}
      * method or have the 1-Wire device provide the
-     * CRC as in 
+     * CRC as in
      * {@link #readPageCRC(int,boolean,byte[],int) readPageCRC}.
      * However device CRC generation is not
-     * supported on all memory types, see 
+     * supported on all memory types, see
      * {@link #hasPageAutoCRC() hasPageAutoCRC}.
      * If neither is an option then this method could be called more
      * then once to at least verify that the same data is read consistently.
@@ -287,19 +288,19 @@ public interface PagedMemoryBank extends MemoryBank {
      *           block.
      *
      * @param  page          page number to read packet from
-     * @param  readContinue  <CODE> true </CODE> then device read 
-     *                       is continued without re-selecting  
-     * @param  readBuf       location for data read 
+     * @param  readContinue  <CODE> true </CODE> then device read
+     *                       is continued without re-selecting
+     * @param  readBuf       location for data read
      * @param  offset        offset into readBuf to place data
      *
-     * @throws OneWireIOException on a 1-Wire communication error such as 
+     * @throws OneWireIOException on a 1-Wire communication error such as
      *         no 1-Wire device present.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to 
+     *         caused by a physical interruption in the 1-Wire Network due to
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire 
+     * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    void readPage(int page, boolean readContinue, byte[] readBuf, int offset) throws OneWireIOException, OneWireException;
+    void readPage(int page, boolean readContinue, byte[] readBuf, int offset) throws OneWireException;
 
     /**
      * Reads a page in this memory bank with extra information with no
@@ -308,10 +309,10 @@ public interface PagedMemoryBank extends MemoryBank {
      * that the data contain some kind of checking (CRC) like in the
      * {@link #readPagePacket(int,boolean,byte[],int,byte[]) readPagePacket}
      * method or have the 1-Wire device provide the
-     * CRC as in 
+     * CRC as in
      * {@link #readPageCRC(int,boolean,byte[],int,byte[]) readPageCRC}.
      * However device CRC generation is not
-     * supported on all memory types, see 
+     * supported on all memory types, see
      * {@link #hasPageAutoCRC() hasPageAutoCRC}.
      * If neither is an option then this method could be called more
      * then once to at least verify that the same data is read consistently.The
@@ -326,23 +327,23 @@ public interface PagedMemoryBank extends MemoryBank {
      *           block.
      *
      * @param  page          page number to read packet from
-     * @param  readContinue  <CODE> true </CODE> then device read 
+     * @param  readContinue  <CODE> true </CODE> then device read
      *                       is continued without re-selecting
-     * @param  readBuf       location for data read 
+     * @param  readBuf       location for data read
      * @param  offset        offset into readBuf to place data
      * @param  extraInfo     location for extra info read
      *
-     * @throws OneWireIOException on a 1-Wire communication error such as 
+     * @throws OneWireIOException on a 1-Wire communication error such as
      *         no 1-Wire device present.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to 
+     *         caused by a physical interruption in the 1-Wire Network due to
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire 
+     * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      *
      * @see #hasExtraInfo() hasExtraInfo
-     * @see #getExtraInfoLength() getExtraInfoLength 
+     * @see #getExtraInfoLength() getExtraInfoLength
      */
-    void readPage(int page, boolean readContinue, byte[] readBuf, int offset, byte[] extraInfo) throws OneWireIOException, OneWireException;
+    void readPage(int page, boolean readContinue, byte[] readBuf, int offset, byte[] extraInfo) throws OneWireException;
 
     /**
      * Reads a Universal Data Packet.
@@ -363,7 +364,7 @@ public interface PagedMemoryBank extends MemoryBank {
      * to true for the next four calls.
      *
      * <P> See Dallas Semiconductor Application Note 114
-     * for details: <A HREF="http://dbserv.maxim-ic.com/appnotes.cfm?appnote_number=114"> 
+     * for details: <A HREF="http://dbserv.maxim-ic.com/appnotes.cfm?appnote_number=114">
      * http://dbserv.maxim-ic.com/appnotes.cfm?appnote_number=114</A>
      *
      * <P> Note: Using readContinue = true  can only be used if the new
@@ -372,7 +373,7 @@ public interface PagedMemoryBank extends MemoryBank {
      *           block.
      *
      * @param  page          page number to read packet from
-     * @param  readContinue  <CODE> true </CODE> true then device read 
+     * @param  readContinue  <CODE> true </CODE> true then device read
      *                       is continued without re-selecting
      * @param  readBuf       location for data read
      * @param  offset        offset into readBuf to place data
@@ -380,22 +381,22 @@ public interface PagedMemoryBank extends MemoryBank {
      * @return  number of data bytes read from the device and saved to
      *          readBuf at the provided offset
      *
-     * @throws OneWireIOException on a 1-Wire communication error such as 
+     * @throws OneWireIOException on a 1-Wire communication error such as
      *         an invalid CRC16 or length found in the packet.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to 
+     *         caused by a physical interruption in the 1-Wire Network due to
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     *         It could also be caused due to the device page not containing a 
+     *         It could also be caused due to the device page not containing a
      *         valid packet.
-     * @throws OneWireException on a communication or setup error with the 1-Wire 
+     * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
-     * 
-     * @see #getMaxPacketDataLength() getMaxPacketDataLength 
+     *
+     * @see #getMaxPacketDataLength() getMaxPacketDataLength
      */
-    int readPagePacket(int page, boolean readContinue, byte[] readBuf, int offset) throws OneWireIOException, OneWireException;
+    int readPagePacket(int page, boolean readContinue, byte[] readBuf, int offset) throws OneWireException;
 
     /**
      * Reads a Universal Data Packet and extra information.  See the
-     * method 
+     * method
      * {@link #readPagePacket(int,boolean,byte[],int) readPagePacket}
      * for a description of the packet structure.  The
      * readContinue parameter is used to eliminate the overhead in re-accessing
@@ -409,7 +410,7 @@ public interface PagedMemoryBank extends MemoryBank {
      *           block.
      *
      * @param  page          page number to read packet from
-     * @param  readContinue  <CODE> true </CODE> then device read 
+     * @param  readContinue  <CODE> true </CODE> then device read
      *                       is continued without re-selecting
      * @param  readBuf       location for data read
      * @param  offset        offset into readBuf to place data
@@ -418,23 +419,23 @@ public interface PagedMemoryBank extends MemoryBank {
      * @return  number of data bytes read from the device and written to
      *          readBuf at the offset.
      *
-     * @throws OneWireIOException on a 1-Wire communication error such as 
+     * @throws OneWireIOException on a 1-Wire communication error such as
      *         an invalid CRC16 or length found in the packet.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to 
+     *         caused by a physical interruption in the 1-Wire Network due to
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     *         It could also be caused due to the device page not containing a 
+     *         It could also be caused due to the device page not containing a
      *         valid packet.
-     * @throws OneWireException on a communication or setup error with the 1-Wire 
+     * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      *
      * @see #hasExtraInfo() hasExtraInfo
      * @see #getExtraInfoLength() getExtraInfoLength
      * @see #getMaxPacketDataLength() getMaxPacketDataLength
      */
-    int readPagePacket(int page, boolean readContinue, byte[] readBuf, int offset, byte[] extraInfo) throws OneWireIOException, OneWireException;
+    int readPagePacket(int page, boolean readContinue, byte[] readBuf, int offset, byte[] extraInfo) throws OneWireException;
 
     /**
-     * Writes a Universal Data Packet.  See the method 
+     * Writes a Universal Data Packet.  See the method
      * {@link #readPagePacket(int,boolean,byte[],int) readPagePacket}
      * for a description of the packet structure.
      *
@@ -442,20 +443,20 @@ public interface PagedMemoryBank extends MemoryBank {
      * @param  writeBuf      data to write
      * @param  offset        offset into writeBuf where data to write is
      * @param  len           number of bytes to write with a max of
-     *                       {@link #getMaxPacketDataLength() getMaxPacketDataLength} 
+     *                       {@link #getMaxPacketDataLength() getMaxPacketDataLength}
      *                       elements
      *
-     * @throws OneWireIOException on a 1-Wire communication error such as 
+     * @throws OneWireIOException on a 1-Wire communication error such as
      *         read verification error on write.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to 
+     *         caused by a physical interruption in the 1-Wire Network due to
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
      *         It could also be caused due to the device page being write protected.
-     * @throws OneWireException on a communication or setup error with the 1-Wire 
+     * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      *
-     * @see #getMaxPacketDataLength() getMaxPacketDataLength 
+     * @see #getMaxPacketDataLength() getMaxPacketDataLength
      */
-    void writePagePacket(int page, byte[] writeBuf, int offset, int len) throws OneWireIOException, OneWireException;
+    void writePagePacket(int page, byte[] writeBuf, int offset, int len) throws OneWireException;
 
     /**
      * Reads a complete memory page with CRC verification provided by the
@@ -471,22 +472,22 @@ public interface PagedMemoryBank extends MemoryBank {
      *           block.
      *
      * @param  page          page number to read
-     * @param  readContinue  <CODE> true </CODE> true then device read 
+     * @param  readContinue  <CODE> true </CODE> true then device read
      *                       is continued without re-selecting
      * @param  readBuf       location for data read
      * @param  offset        offset into readBuf to place data
      *
-     * @throws OneWireIOException on a 1-Wire communication error such as 
+     * @throws OneWireIOException on a 1-Wire communication error such as
      *         an invalid CRC read from device.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to 
+     *         caused by a physical interruption in the 1-Wire Network due to
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire 
+     * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      *
      * @see #hasPageAutoCRC() hasPageAutoCRC
      * @see #getPageLength() getPageLength
      */
-    void readPageCRC(int page, boolean readContinue, byte[] readBuf, int offset) throws OneWireIOException, OneWireException;
+    void readPageCRC(int page, boolean readContinue, byte[] readBuf, int offset) throws OneWireException;
 
     /**
      * Reads a complete memory page with CRC verification provided by the
@@ -495,7 +496,7 @@ public interface PagedMemoryBank extends MemoryBank {
      * a part already being read from. For example, if pages 0 - 4 are to
      * be read, readContinue would be set to false for page 0 and would be set
      * to true for the next four calls.
-     * 
+     *
      *
      * <P> Note: Using readContinue = true  can only be used if the new
      *           read continues where the last one left off
@@ -503,17 +504,17 @@ public interface PagedMemoryBank extends MemoryBank {
      *           block.
      *
      * @param  page          page number to read
-     * @param  readContinue  <CODE> true </CODE> true then device read 
+     * @param  readContinue  <CODE> true </CODE> true then device read
      *                       is issued without continued without re-selecting
      * @param  readBuf       location for data read
      * @param  offset        offset into readBuf to place data
      * @param  extraInfo     location for extra info read
      *
-     * @throws OneWireIOException on a 1-Wire communication error such as 
+     * @throws OneWireIOException on a 1-Wire communication error such as
      *         an invalid CRC read from device.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to 
+     *         caused by a physical interruption in the 1-Wire Network due to
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire 
+     * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      *
      * @see #hasExtraInfo() hasExtraInfo
@@ -521,5 +522,5 @@ public interface PagedMemoryBank extends MemoryBank {
      * @see #hasPageAutoCRC() hasPageAutoCRC
      * @see #getPageLength() getPageLength
      */
-    void readPageCRC(int page, boolean readContinue, byte[] readBuf, int offset, byte[] extraInfo) throws OneWireIOException, OneWireException;
+    void readPageCRC(int page, boolean readContinue, byte[] readBuf, int offset, byte[] extraInfo) throws OneWireException;
 }
