@@ -3,7 +3,13 @@ owapi-reborn
 
 [![Gradle](https://github.com/home-climate-control/owapi-reborn/actions/workflows/gradle.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/gradle.yml)
 [![CodeQL](https://github.com/home-climate-control/owapi-reborn/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/codeql-analysis.yml)
-[![SonarCloud](https://github.com/home-climate-control/owapi-reborn/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/sonarcloud.yml)
+[![SonarCloud](https://github.com/home-climate-control/owapi-reborn/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/sonarcloud.yml)  
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=home-climate-control_owapi-reborn&metric=alert_status)](https://sonarcloud.io/dashboard?id=home-climate-control_owapi-reborn)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=home-climate-control_owapi-reborn&metric=bugs)](https://sonarcloud.io/dashboard?id=home-climate-control_owapi-reborn)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=home-climate-control_owapi-reborn&metric=code_smells)](https://sonarcloud.io/dashboard?id=home-climate-control_owapi-reborn)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=home-climate-control_owapi-reborn&metric=coverage)](https://sonarcloud.io/dashboard?id=home-climate-control_owapi-reborn)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=home-climate-control_owapi-reborn&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=home-climate-control_owapi-reborn)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=home-climate-control_owapi-reborn&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=home-climate-control_owapi-reborn)
 
 ### Dallas Semiconductor 1-Wire API, on its own again
 
@@ -15,11 +21,11 @@ Since then, it has been heavily reworked with stability and memory efficiency be
 ([Home Climate Control](https://github.com/home-climate-control/dz)) is undergoing yet another transformation, it's time for this library
 to be separated so that it can continue life on its own - surprisingly, there's still demand for 1-Wire operations from Java.
 
-### Status
+### Build
 
-Just split out. Cutting out hanging pieces, setting up CI. Come back tomorrow.
+`./gradlew build`. Done.
 
 ### About those code quality badges...
 
-(coming soon) It is what it is. `owapi` code was never a focus for independent improvement, the quality level was "good enough" (and it is, for its primary use case).
+It is what it is. `owapi` code was never a focus for independent improvement, the quality level was "good enough" (and it is, for its primary use case).
 Now that the project is independent again, hopefully, that will change.
