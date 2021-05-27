@@ -1,6 +1,10 @@
 owapi-reborn
 ==
 
+[![Gradle](https://github.com/home-climate-control/owapi-reborn/actions/workflows/gradle.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/gradle.yml)
+[![CodeQL](https://github.com/home-climate-control/owapi-reborn/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/codeql-analysis.yml)
+[![SonarCloud](https://github.com/home-climate-control/owapi-reborn/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/sonarcloud.yml)
+
 ### Dallas Semiconductor 1-Wire API, on its own again
 
 This code is based on the original Dallas Semicondictor `owapi` library version - when it was released (about 20 years ago).
