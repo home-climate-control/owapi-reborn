@@ -5,3 +5,8 @@
 /build
 /target
 /bin/
+/.gradle/
+/.idea/
+*.iml
+*~
+.*~
