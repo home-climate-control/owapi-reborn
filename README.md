@@ -11,6 +11,10 @@ Since then, it has been heavily reworked with stability and memory efficiency be
 ([Home Climate Control](https://github.com/home-climate-control/dz)) is undergoing yet another transformation, it's time for this library
 to be separated so that it can continue life on its own - surprisingly, there's still demand for 1-Wire operations from Java.
 
+### Status
+
+Just split out. Cutting out hanging pieces, setting up CI. Come back tomorrow.
+
 ### About those code quality badges...
 
 (coming soon) It is what it is. `owapi` code was never a focus for independent improvement, the quality level was "good enough" (and it is, for its primary use case).
