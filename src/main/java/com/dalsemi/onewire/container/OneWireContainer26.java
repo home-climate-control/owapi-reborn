@@ -818,7 +818,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
     /**
      * This method extracts the Clock Value in milliseconds from the
-     * state data retrieved from the <CODE>readDevice()</CODE> method.
+     * state data retrieved from the {@link #readDevice()} method.
      *
      * @param state device state.
      *
@@ -830,7 +830,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
     /**
      * This method extracts the Clock Value in milliseconds from the
-     * state data retrieved from the <CODE>readDevice()</CODE> method.
+     * state data retrieved from the {@link #readDevice()} method.
      *
      * @param state device state
      *
@@ -971,7 +971,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @param channel channel in the range
      *                 <CODE> [0 to (getNumberChannels() - 1)]</CODE>
      * @param state  current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      *
      * @throws OneWireIOException Error writing data
      * @throws OneWireException Could not find part
@@ -1038,7 +1038,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @param doConvert  channels
      *                    to perform conversion on
      * @param state  current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      *
      * @throws OneWireIOException Error writing data
      * @throws OneWireException Could not find part
@@ -1051,12 +1051,12 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to read the voltage values.  Must
      * be used after a <CODE>doADConvert()</CODE> method call.  Also must
-     * include the last valid state from the <CODE>readDevice()</CODE> method
+     * include the last valid state from the {@link #readDevice()} method
      * and this A/D must support multi-channel read <CODE>canMultiChannelRead()</CODE>
      * if there are more then 1 channel.
      *
      * @param state current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      *
      * @return voltage values for all channels
      *
@@ -1071,7 +1071,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to read a channels voltage value.  Must
      * be used after a <CODE>doADConvert()</CODE> method call.  Also must
-     * include the last valid state from the <CODE>readDevice()</CODE> method.
+     * include the last valid state from the {@link #readDevice()} method.
      * Note, if more then one channel is to be read then it is more
      * efficient to use the <CODE>getVoltage()</CODE> method that returns all
      * channel values.
@@ -1079,7 +1079,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @param channel channel in the range
      *                  <CODE>[0 to (getNumberChannels() - 1)]</CODE>
      * @param state current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      *
      * @return   voltage value for the specified
      *                  channel
@@ -1110,14 +1110,14 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to extract the alarm voltage value of the
      * specified channel from the provided state buffer.  The
-     * state buffer is retrieved from the <CODE>readDevice()</CODE> method.
+     * state buffer is retrieved from the {@link #readDevice()} method.
      *
      * @param channel channel in the range
      *                  <CODE>[0 to (getNumberChannels() - 1)]</CODE>
      * @param alarmType desired alarm, <CODE>ALARM_HIGH (1)
      *               or ALARM_LOW (0)</CODE>
      * @param state current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      *
      * @return alarm_value in volts
      *
@@ -1131,14 +1131,14 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to extract the alarm enable value of the
      * specified channel from the provided state buffer.  The state
-     * buffer is retrieved from the <CODE>readDevice()</CODE> method.
+     * buffer is retrieved from the {@link #readDevice()} method.
      *
      * @param channel channel in the range
      *                  <CODE>[0 to (getNumberChannels() - 1)]</CODE>
      * @param alarmType desired alarm, <CODE>ALARM_HIGH (1)
      *               or ALARM_LOW (0)</CODE>
      * @param state current state of the state
-     *               returned from <CODE>readDevice()</CODE>
+     *               returned from {@link #readDevice()}
      *
      * @return true if specified alarm is enabled
      *
@@ -1152,14 +1152,14 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to check the alarm event value of the
      * specified channel from the provided state buffer.  The
-     * state buffer is retrieved from the <CODE>readDevice()</CODE> method.
+     * state buffer is retrieved from the {@link #readDevice()} method.
      *
      * @param channel channel in the range
      *                  <CODE>[0 to (getNumberChannels() - 1)]</CODE>
      * @param alarmType desired alarm, <CODE>ALARM_HIGH (1)
      *               or ALARM_LOW (0)</CODE>
      * @param state current state of the state
-                    returned from <CODE>readDevice()</CODE>
+                    returned from {@link #readDevice()}
      *
      * @return true if specified alarm occurred
      *
@@ -1174,12 +1174,12 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * This method is used to extract the conversion resolution of the
      * specified channel from the provided state buffer expressed in
      * volts.  The state is retrieved from the
-     * <CODE>readDevice()</CODE> method.
+     * {@link #readDevice()} method.
      *
      * @param channel channel in the range
      *                  <CODE>[0 to (getNumberChannels() - 1)]</CODE>
      * @param state current state of the state
-     *               returned from <CODE>readDevice()</CODE>
+     *               returned from {@link #readDevice()}
      *
      * @return resolution of channel in volts
      */
@@ -1193,12 +1193,12 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to extract the input voltage range of the
      * specified channel from the provided state buffer.  The state
-     * buffer is retrieved from the <CODE>readDevice()</CODE> method.
+     * buffer is retrieved from the {@link #readDevice()} method.
      *
      * @param channel channel in the range
      *                  <CODE>[0 to (getNumberChannels() - 1)]</CODE>
      * @param state current state of the state
-     *                  returned from <CODE>readDevice()</CODE>
+     *                  returned from {@link #readDevice()}
      *
      * @return input voltage range
      */
@@ -1219,7 +1219,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to set the alarm voltage value of the
      * specified channel in the provided state buffer.  The
-     * state buffer is retrieved from the <CODE>readDevice()</CODE> method.
+     * state buffer is retrieved from the {@link #readDevice()} method.
      * The method <CODE>writeDevice()</CODE> must be called to finalize these
      * changes to the device.  Note that multiple 'set' methods can
      * be called before one call to <CODE>writeDevice()</CODE>.
@@ -1230,7 +1230,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *               or ALARM_LOW (0)</CODE>
      * @param alarm  alarm value (will be reduced to 8 bit resolution)
      * @param state  current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      *
      * @throws OneWireException Device does not support A/D alarms
      */
@@ -1242,7 +1242,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to set the alarm enable value of the
      * specified channel in the provided state buffer.  The
-     * state buffer is retrieved from the <CODE>readDevice()</CODE> method.
+     * state buffer is retrieved from the {@link #readDevice()} method.
      * The method <CODE>writeDevice()</CODE> must be called to finalize these
      * changes to the device.  Note that multiple 'set' methods can
      * be called before one call to <CODE>writeDevice()</CODE>.
@@ -1253,7 +1253,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *               or ALARM_LOW (0)</CODE>
      * @param alarmEnable alarm enable value
      * @param state current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      *
      * @throws OneWireException Device does not support A/D alarms
      */
@@ -1265,7 +1265,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to set the conversion resolution value for the
      * specified channel in the provided state buffer.  The
-     * state buffer is retrieved from the <CODE>readDevice()</CODE> method.
+     * state buffer is retrieved from the {@link #readDevice()} method.
      * The method <CODE>writeDevice()</CODE> must be called to finalize these
      * changes to the device.  Note that multiple 'set' methods can
      * be called before one call to <CODE>writeDevice()</CODE>.
@@ -1274,7 +1274,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *                  <CODE>[0 to (getNumberChannels() - 1)]</CODE>
      * @param resolution resolution to use in volts
      * @param state current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      */
     @Override
     public void setADResolution(int channel, double resolution, byte[] state) {
@@ -1286,7 +1286,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method is used to set the input range for the
      * specified channel in the provided state buffer.  The
-     * state buffer is retrieved from the <CODE>readDevice()</CODE> method.
+     * state buffer is retrieved from the {@link #readDevice()} method.
      * The method <CODE>writeDevice()</CODE> must be called to finalize these
      * changes to the device.  Note that multiple 'set' methods can
      * be called before one call to <CODE>writeDevice()</CODE>.
@@ -1296,7 +1296,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @param range maximum volt range, use
      *                <CODE>getRanges()</CODE> method to get available ranges
      * @param state current state of the
-     *               device returned from <CODE>readDevice()</CODE>
+     *               device returned from {@link #readDevice()}
      */
     @Override
     public void setADRange(int channel, double range, byte[] state) {
@@ -1490,7 +1490,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
     /**
      * This method extracts the Temperature Value in degrees C from the
-     * state data retrieved from the <CODE>readDevice()</CODE> method.
+     * state data retrieved from the {@link #readDevice()} method.
      *
      * @param state device state
      *
@@ -1503,7 +1503,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
     /**
      * This method extracts the specified Alarm value in degrees C from the
-     * state data retrieved from the <CODE>readDevice()</CODE> method.
+     * state data retrieved from the {@link #readDevice()} method.
      *
      * @param alarmType alarm trip type <CODE>ALARM_HIGH (1)
      *               or ALARM_LOW (0)</CODE>
@@ -1520,7 +1520,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
     /**
      * This method extracts the current resolution in degrees C from the
-     * state data retrieved from the <CODE>readDevice()</CODE> method.
+     * state data retrieved from the {@link #readDevice()} method.
      *
      * @param state device state
      *
@@ -1612,7 +1612,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
     /**
      * This method extracts the Clock Value in milliseconds from the
-     * state data retrieved from the <CODE>readDevice()</CODE> method.
+     * state data retrieved from the {@link #readDevice()} method.
      *
      * @param state  device state.
      *
@@ -1625,7 +1625,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
     /**
      * This method extracts the Clock Alarm Value from the provided
-     * state data retrieved from the <CODE>readDevice()</CODE>
+     * state data retrieved from the {@link #readDevice()}
      * method.
      *
      * @param state device state
@@ -1642,7 +1642,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method checks if the Clock Alarm flag has been set
      * from the state data retrieved from the
-     * <CODE>readDevice()</CODE> method.
+     * {@link #readDevice()} method.
      *
      * @param state device state
      *
@@ -1656,7 +1656,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * This method checks if the Clock Alarm is enabled
      * from the provided state data retrieved from the
-     * <CODE>readDevice()</CODE> method.
+     * {@link #readDevice()} method.
      *
      * @param state device state
      *
@@ -1671,7 +1671,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * This method checks if the device's oscilator is enabled.  The clock
      * will not increment if the clock is not enabled.
      * This value is read from the provided state data retrieved from the
-     * <CODE>readDevice()</CODE> method.
+     * {@link #readDevice()} method.
      *
      * @param state device state
      *
@@ -1918,7 +1918,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
     /**
      * Gets the current Humidity resolution in percent from the
-     * <code>state</code> data retrieved from the <code>readDevice()</code>
+     * <code>state</code> data retrieved from the {@link #readDevice()}
      * method.
      *
      * @param  state byte array with device state information
@@ -1937,7 +1937,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     /**
      * Gets the specified Humidity alarm value in percent from the
      * <code>state</code> data retrieved from the
-     * <code>readDevice()</code> method.
+     * {@link #readDevice()} method.
      *
      * @param  alarmType valid value: <code>ALARM_HIGH</code> or
      *                   <code>ALARM_LOW</code>
