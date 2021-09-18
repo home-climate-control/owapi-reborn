@@ -16,6 +16,7 @@ version = '1.10.0'
 repositories {
 
     jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -24,9 +25,9 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
     implementation 'org.rxtx:rxtx:2.1.7'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 
-    errorprone 'com.google.errorprone:error_prone_core:2.6.0'
+    errorprone 'com.google.errorprone:error_prone_core:2.9.0'
 }
 
 sonarqube {
