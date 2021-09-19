@@ -39,7 +39,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
-import com.dalsemi.onewire.adapter.TMEXAdapter;
 
 
 /**
@@ -139,29 +138,6 @@ public class OneWireAccessProvider {
             return (adaptersFound.elements());
         }
 
-        // only try native TMEX if on x86 Windows platform
-        if ((System.getProperty("os.arch").indexOf("86") != -1)
-                && (System.getProperty("os.name").indexOf("Windows") != -1)) {
-
-            // loop through the TMEX adapters
-            for (int port_type = 0; port_type <= 15; port_type++) {
-
-                // try to load the adapter classes
-                try {
-                    DSPortAdapter adapterInstance = new com.dalsemi.onewire.adapter.TMEXAdapter(port_type);
-
-                    // only add it if it has some ports
-                    if (adapterInstance.getPortNames().hasMoreElements()) {
-                        adaptersFound.addElement(adapterInstance);
-                        TMEX_loaded = true;
-                    }
-                } catch (Throwable t) {
-                    // DRAIN
-                    logger.fatal("DalSemi ignored this exception", t);
-                }
-            }
-        }
-
         // get the pure java adapter
         try {
             Class<?> adapterClass = Class.forName("com.dalsemi.onewire.adapter.USerialAdapter");
@@ -200,27 +176,14 @@ public class OneWireAccessProvider {
             logger.error("Or install RXTX Serial Communications API from http://www.rxtx.org ");
         }
 
-        // get the network adapter
-        try {
-            Class<?> adapterClass = Class.forName("com.dalsemi.onewire.adapter.NetAdapter");
-            DSPortAdapter adapterInstance = (DSPortAdapter) adapterClass.newInstance();
-
-            adaptersFound.addElement(adapterInstance);
-        } catch (NoClassDefFoundError ex) {
-            logger.error("Warning: Could not load NetAdapter: ", ex);
-        } catch (Exception ex) {
-            // DRAIN
-            logger.fatal("DalSemi ignored this exception", ex);
-        }
-
         // get adapters from property file with keys
         // 'onewire.register.adapter0-15'
-        
+
         // VT: FIXME: Need to see if this is a bug: the nesting of the loop and try/catc seems funky,
         // the loop will be broken on the first unsuccessful attempt
-        
+
         String className = null;
-        
+
         try {
             // loop through the possible registered adapters
             for (int reg_num = 0; reg_num <= 15; reg_num++) {
@@ -249,7 +212,7 @@ public class OneWireAccessProvider {
         // check for no adapters
         if (adaptersFound.isEmpty())
             logger.error("No 1-Wire adapter classes found");
-        
+
         return (adaptersFound.elements());
     }
 
@@ -437,26 +400,6 @@ public class OneWireAccessProvider {
                 // try the second path
                 path = System.getProperty("java.home") + File.separator + "lib" + File.separator;
             }
-        }
-
-        // if defaults still not found then check TMEX default
-        if (ret_str == null) {
-            try {
-                if (propName.equals("onewire.adapter.default"))
-                    ret_str = TMEXAdapter.getDefaultAdapterName();
-                else if (propName.equals("onewire.port.default"))
-                    ret_str = TMEXAdapter.getDefaultPortName();
-
-                // if did not get real string then null out
-                if (ret_str != null) {
-                    if (ret_str.length() <= 0)
-                        ret_str = null;
-                }
-            } catch (Throwable t) {
-                // DRAIN
-                logger.fatal("DalSemi ignored this exception", t);
-            }
-
         }
 
         // if STILL not found then just pick DS9097U on 'smartDefaultPort'
