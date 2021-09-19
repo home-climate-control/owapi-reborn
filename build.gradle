@@ -15,17 +15,20 @@ version = '2.0.0-SNAPSHOT'
 
 repositories {
 
-    jcenter()
     mavenCentral()
 }
 
 dependencies {
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.1'
     implementation 'org.rxtx:rxtx:2.1.7'
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.2'
 
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testImplementation 'org.assertj:assertj-core:3.20.2'
 
     errorprone 'com.google.errorprone:error_prone_core:2.9.0'
 }
