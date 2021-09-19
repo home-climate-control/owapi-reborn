@@ -142,9 +142,9 @@ import java.util.Vector;
  * </UL>
  * <LI> 1-Wire Speed and Power Selection
  * <UL>
- * <LI> {@link #setPowerDuration(int) setPowerDuration}
+ * <LI> {@link #setPowerDuration(PowerDeliveryDuration)}
  * <LI> {@link #startPowerDelivery(PowerChangeCondition)}
- * <LI> {@link #setProgramPulseDuration(int) setProgramPulseDuration}
+ * <LI> {@link #setProgramPulseDuration(PowerDeliveryDuration)}
  * <LI> {@link #startProgramPulse(PowerChangeCondition)}
  * <LI> {@link #startBreak() startBreak}
  * <LI> {@link #setPowerNormal() setPowerNormal}
@@ -293,10 +293,6 @@ public abstract class DSPortAdapter {
      */
     private byte[] exclude;
 
-    // --------
-    // -------- Methods
-    // --------
-
     /**
      * Retrieves the name of the port adapter as a string. The 'Adapter' is a
      * device that connects to a 'port' that allows one to communicate with an
@@ -321,10 +317,6 @@ public abstract class DSPortAdapter {
      */
     public abstract String getClassVersion();
 
-    // --------
-    // -------- Port Selection
-    // --------
-
     /**
      * Retrieves a list of the platform appropriate port names for this adapter.
      * A port must be selected with the method 'selectPort' before any other
@@ -345,7 +337,7 @@ public abstract class DSPortAdapter {
      * will have to stay because creating new device containers along with the whole
      * Louisiana purchase on EVERY browse is... I leave the word choice to you.
      */
-    private Map<String, OneWireContainer> address2container = new TreeMap<>();
+    private final Map<String, OneWireContainer> address2container = new TreeMap<>();
 
     /**
      * Registers a user provided {@code OneWireContainer} class. Using this
@@ -367,12 +359,10 @@ public abstract class DSPortAdapter {
      */
     public synchronized void registerOneWireContainerClass(int family, Class<?> OneWireContainerClass) throws OneWireException {
 
-        Integer familyInt = new Integer(family);
-
         if (OneWireContainerClass == null) {
 
             // If a null is passed, remove the old container class.
-            registeredOneWireContainerClasses.remove(familyInt);
+            registeredOneWireContainerClasses.remove(family);
             return;
         }
 
@@ -384,7 +374,7 @@ public abstract class DSPortAdapter {
 
                 // Put the new container class in the hashtable, replacing any
                 // old one.
-                registeredOneWireContainerClasses.put(familyInt, OneWireContainerClass);
+                registeredOneWireContainerClasses.put(family, OneWireContainerClass);
 
             } else {
                 throw new ClassCastException(OneWireContainerClass.getName() + "does not extend " + CLASS_NAME_ONEWIRECONTAINER);
@@ -429,10 +419,6 @@ public abstract class DSPortAdapter {
      */
     public abstract String getPortName() throws OneWireException;
 
-    // --------
-    // -------- Adapter detection
-    // --------
-
     /**
      * Detects adapter presence on the selected port.
      *
@@ -454,7 +440,6 @@ public abstract class DSPortAdapter {
      * 1-Wire adapter
      */
     public String getAdapterVersion() throws OneWireException {
-
         return "<na>";
     }
 
@@ -473,72 +458,50 @@ public abstract class DSPortAdapter {
      * @see Address
      */
     public String getAdapterAddress() throws OneWireException {
-
         return "<na>";
     }
-
-    // --------
-    // -------- Adapter features
-    // --------
-
-    /*
-     * The following interogative methods are provided so that client code can
-     * react selectively to underlying states without generating an exception.
-     */
 
     /**
      * Returns whether adapter can physically support overdrive mode.
      *
-     * @return {@code true} if this port adapter can do OverDrive, {@code false}
-     * otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do OverDrive, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canOverdrive() throws OneWireException {
-
         return false;
     }
 
     /**
      * Returns whether the adapter can physically support hyperdrive mode.
      *
-     * @return {@code true} if this port adapter can do HyperDrive,
-     * {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do HyperDrive, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canHyperdrive() throws OneWireException {
-
         return false;
     }
 
     /**
      * Returns whether the adapter can physically support flex speed mode.
      *
-     * @return {@code true} if this port adapter can do flex speed,
-     * {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do flex speed, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canFlex() throws OneWireException {
-
         return false;
     }
 
     /**
      * Returns whether adapter can physically support 12 volt power mode.
      *
-     * @return {@code true} if this port adapter can do Program voltage,
-     * {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do Program voltage, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canProgram() throws OneWireException {
-
         return false;
     }
 
@@ -546,14 +509,11 @@ public abstract class DSPortAdapter {
      * Returns whether the adapter can physically support strong 5 volt power
      * mode.
      *
-     * @return {@code true} if this port adapter can do strong 5 volt mode,
-     * {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do strong 5 volt mode, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canDeliverPower() throws OneWireException {
-
         return false;
     }
 
@@ -563,34 +523,24 @@ public abstract class DSPortAdapter {
      * it is no longer needed. The current drop it detected and power delivery
      * is stopped.
      *
-     * @return {@code true} if this port adapter can do "smart" strong 5 volt
-     * mode, {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do "smart" strong 5 volt mode, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canDeliverSmartPower() throws OneWireException {
-
         return false;
     }
 
     /**
      * Returns whether adapter can physically support 0 volt 'break' mode.
      *
-     * @return {@code true} if this port adapter can do break, {@code false}
-     * otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do break, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canBreak() throws OneWireException {
-
         return false;
     }
-
-    // --------
-    // -------- Finding iButtons and 1-Wire devices
-    // --------
 
     /**
      * Returns an enumeration of {@code OneWireContainer} objects corresponding
