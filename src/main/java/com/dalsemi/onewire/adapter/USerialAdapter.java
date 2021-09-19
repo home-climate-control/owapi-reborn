@@ -1829,58 +1829,45 @@ public class USerialAdapter extends DSPortAdapter {
     private void sleep(long msTime) {
 
         // provided debug on standard out
-        logger.debug("sleep(" + msTime + ")");
+        logger.debug("sleep({})", msTime);
 
         try {
             Thread.sleep(msTime);
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             logger.debug("sleep interrupted");
         }
     }
 
-    // --------
-    // -------- Static
-    // --------
-
-    /**
-     * Static method called before instance is created. Attempt to create a hash
-     * of SerialService's and get the max baud rate.
-     */
     static {
-
-        /*
-         * // create a SerialServices instance for each port available and put
-         * in hash Enumeration com_enum =
-         * CommPortIdentifier.getPortIdentifiers(); CommPortIdentifier port_id;
-         * SerialService serial_instance; // loop throught all of the serial
-         * port elements while (com_enum.hasMoreElements()) { // get the next
-         * com port port_id = ( CommPortIdentifier ) com_enum.nextElement(); //
-         * only collect the names of the serial ports if (port_id.getPortType() ==
-         * CommPortIdentifier.PORT_SERIAL) { serial_instance = new
-         * SerialService(port_id.getName());
-         * serailServiceHash.put(port_id.getName(), serial_instance); if
-         * (DEBUG) System.out.println("DEBUG: Serial port: " +
-         * port_id.getName()); } }
-         */
 
         // check properties to see if max baud set manualy
         maxBaud = 115200;
 
-        String max_baud_str = OneWireAccessProvider.getProperty("onewire.serial.maxbaud");
+        String maxBaudStr = OneWireAccessProvider.getProperty("onewire.serial.maxbaud");
 
-        if (max_baud_str != null) {
+        if (maxBaudStr != null) {
             try {
-                maxBaud = Integer.parseInt(max_baud_str);
+                maxBaud = Integer.parseInt(maxBaudStr);
             } catch (NumberFormatException ex) {
                 maxBaud = 0;
             }
         }
 
-        // provided debug on standard out
-        LogManager.getLogger(USerialAdapter.class).debug("getMaxBaud from properties: " + maxBaud);
+        LogManager.getLogger(USerialAdapter.class).debug("onewire.serial.maxbaud={}", maxBaud);
 
-        // if not valid then use fastest
-        if ((maxBaud != 115200) && (maxBaud != 57600) && (maxBaud != 19200) && (maxBaud != 9600))
-            maxBaud = 115200;
+        switch (maxBaud) {
+            case 9600:
+            case 19200:
+            case 57600:
+            case 115200:
+
+                // Looking good
+                break;
+
+            default:
+                LogManager.getLogger(USerialAdapter.class).warn("unsupported baud rate {}, reverting to 115200", maxBaud);
+                maxBaud = 115200;
+        }
     }
 }

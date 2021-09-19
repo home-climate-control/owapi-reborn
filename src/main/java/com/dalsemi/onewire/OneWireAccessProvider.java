@@ -99,17 +99,7 @@ import java.util.Properties;
  */
 public class OneWireAccessProvider {
 
-    protected final static Logger logger = LogManager.getLogger(OneWireAccessProvider.class);
-
-    /**
-     * Override adapter variables.
-     */
-    private static boolean useOverrideAdapter = false;
-
-    /**
-     * The override adapter.
-     */
-    private static DSPortAdapter overrideAdapter = null;
+    protected static final Logger logger = LogManager.getLogger(OneWireAccessProvider.class);
 
     /**
      * Don't allow anyone to instantiate.
@@ -126,13 +116,9 @@ public class OneWireAccessProvider {
      * @return <code>Enumeration</code> of <code>DSPortAdapters</code> in
      * the system
      */
-    public synchronized static List<DSPortAdapter> getAdapters() {
+    public static synchronized List<DSPortAdapter> getAdapters() {
 
         var adaptersFound = new ArrayList<DSPortAdapter>();
-
-        if (useOverrideAdapter) {
-            return List.of(overrideAdapter);
-        }
 
         // get the pure java adapter
         try {
@@ -197,20 +183,14 @@ public class OneWireAccessProvider {
      * @throws OneWireIOException when communication with the adapter fails.
      * @throws OneWireException when the port or adapter not present.
      */
-    public synchronized static DSPortAdapter getAdapter(String adapterName, String portName) throws OneWireIOException,
-    OneWireException {
-
-        if (useOverrideAdapter)
-            return overrideAdapter;
+    public static synchronized DSPortAdapter getAdapter(String adapterName, String portName) throws OneWireException {
 
         DSPortAdapter found = null;
 
 
         // enumerature through available adapters to find the correct one
-        for (var e = getAdapters().iterator(); e.hasNext();) {
+        for (DSPortAdapter adapter : getAdapters()) {
             // cast the enum as a DSPortAdapter
-            DSPortAdapter adapter = e.next();
-
             // see if this is the type of adapter we want
             if ((found != null) || (!adapter.getAdapterName().equals(adapterName))) {
                 // not this adapter, then just cleanup
@@ -256,39 +236,6 @@ public class OneWireAccessProvider {
     }
 
     /**
-     * Finds, opens, and verifies the default adapter and port. Looks for the
-     * default adapter/port in the following locations:
-     * <p>
-     * <ul>
-     * <li> Use adapter/port in System.properties for onewire.adapter.default,
-     * and onewire.port.default properties tags.</li>
-     * <li> Use adapter/port from onewire.properties file in current directory
-     * or < java.home >/lib/ (Desktop) or /etc/ (TINI)</li>
-     * <li> Use smart default
-     * <ul>
-     * <li> Desktop
-     * <ul>
-     * <li> First, TMEX default (Win32 only)
-     * <li> Second, if TMEX not present, then DS9097U/(first serial port)
-     * </ul>
-     * <li> TINI, TINIExternalAdapter on port serial1
-     * </ul>
-     * </ul>
-     *
-     * @return <code>DSPortAdapter</code> if default adapter present
-     * @throws OneWireIOException when communcation with the adapter fails
-     * @throws OneWireException when the port or adapter not present
-     */
-    public synchronized static DSPortAdapter getDefaultAdapter() throws OneWireIOException, OneWireException {
-
-        if (useOverrideAdapter) {
-            return overrideAdapter;
-        }
-
-        return getAdapter(getProperty("onewire.adapter.default"), getProperty("onewire.port.default"));
-    }
-
-    /**
      * Gets the specified onewire property. Looks for the property in the
      * following locations:
      * <p>
@@ -306,19 +253,7 @@ public class OneWireAccessProvider {
      * and <code>onewire.port.default</code> may return a 'smart' default even
      * if property not present)
      */
-    public synchronized static String getProperty(String propName) {
-
-        try {
-            if (useOverrideAdapter) {
-                if (propName.equals("onewire.adapter.default"))
-                    return overrideAdapter.getAdapterName();
-                if (propName.equals("onewire.port.default"))
-                    return overrideAdapter.getPortName();
-            }
-        } catch (Exception ex) {
-            // just drain it and let the normal method run...
-            logger.fatal("DalSemi ignored this exception", ex);
-        }
+    public static synchronized String getProperty(String propName) {
 
         Properties onewire_properties = new Properties();
         FileInputStream prop_file = null;
@@ -395,34 +330,5 @@ public class OneWireAccessProvider {
         }
 
         return ret_str;
-    }
-
-    /**
-     * Sets an overriding adapter. This adapter will be returned from getAdapter
-     * and getDefaultAdapter despite what was requested.
-     *
-     * @param adapter adapter to be the override
-     * @see #getAdapter
-     * @see #getDefaultAdapter
-     * @see #clearUseOverridingAdapter
-     */
-    public synchronized static void setUseOverridingAdapter(DSPortAdapter adapter) {
-
-        useOverrideAdapter = true;
-        overrideAdapter = adapter;
-    }
-
-    /**
-     * Clears the overriding adapter. The operation of getAdapter and
-     * getDefaultAdapter will be returned to normal.
-     *
-     * @see #getAdapter
-     * @see #getDefaultAdapter
-     * @see #setUseOverridingAdapter
-     */
-    public synchronized static void clearUseOverridingAdapter() {
-
-        useOverrideAdapter = false;
-        overrideAdapter = null;
     }
 }
