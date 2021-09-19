@@ -99,7 +99,7 @@ class OneWireState
     *          setBusNormal() method is called.
     * </ul>
     */
-   public int levelTimeFactor;
+   public DSPortAdapter.PowerDeliveryDuration levelTimeFactor;
 
    /**
     * Value of the last discrepancy during the last search for an iButton.
@@ -162,7 +162,7 @@ class OneWireState
       levelChangeOnNextBit  = false;
       levelChangeOnNextByte = false;
       primedLevelValue      = DSPortAdapter.Level.NORMAL;
-      levelTimeFactor       = DSPortAdapter.DELIVERY_INFINITE;
+      levelTimeFactor       = DSPortAdapter.PowerDeliveryDuration.INFINITE;
 
       // adapter abilities
       canProgram = false;

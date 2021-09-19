@@ -29,9 +29,12 @@
 package com.dalsemi.onewire.container;
 
 // imports
+
 import com.dalsemi.onewire.OneWireException;
-import com.dalsemi.onewire.adapter.*;
-import com.dalsemi.onewire.utils.*;
+import com.dalsemi.onewire.adapter.DSPortAdapter;
+import com.dalsemi.onewire.adapter.OneWireIOException;
+import com.dalsemi.onewire.utils.CRC16;
+import com.dalsemi.onewire.utils.CRC8;
 
 /**
  * Memory bank class for the EPROM section of iButtons and 1-Wire devices.
@@ -768,7 +771,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
         }
 
         // set the program pulse duration
-        ib.adapter.setProgramPulseDuration(DSPortAdapter.DELIVERY_EPROM);
+        ib.adapter.setProgramPulseDuration(DSPortAdapter.PowerDeliveryDuration.EPROM);
 
         // attempt to put device at max desired speed
         checkSpeed();

@@ -255,39 +255,33 @@ public abstract class DSPortAdapter {
         }
     }
 
-    /** Duration used in delivering power to the 1-Wire, 1/2 second */
-    public static final int DELIVERY_HALF_SECOND = 0;
+    public enum PowerDeliveryDuration {
 
-    /** Duration used in delivering power to the 1-Wire, 1 second */
-    public static final int DELIVERY_ONE_SECOND = 1;
+        HALF_SECOND(0),
+        ONE_SECOND(1),
+        TWO_SECONDS(2),
+        FOUR_SECONDS(3),
+        SMART_COMPLETE(4),
+        INFINITE(5),
+        CURRENT_DETECT(6),
 
-    /** Duration used in delivering power to the 1-Wire, 2 seconds */
-    public static final int DELIVERY_TWO_SECONDS = 2;
+        /**
+         * 480 μs.
+         */
+        EPROM(7);
 
-    /** Duration used in delivering power to the 1-Wire, 4 second */
-    public static final int DELIVERY_FOUR_SECONDS = 3;
+        public final int code;
 
-    /** Duration used in delivering power to the 1-Wire, smart complete */
-    public static final int DELIVERY_SMART_DONE = 4;
-
-    /** Duration used in delivering power to the 1-Wire, infinite */
-    public static final int DELIVERY_INFINITE = 5;
-
-    /** Duration used in delivering power to the 1-Wire, current detect */
-    public static final int DELIVERY_CURRENT_DETECT = 6;
-
-    /** Duration used in delivering power to the 1-Wire, 480 us */
-    public static final int DELIVERY_EPROM = 7;
-
-    // --------
-    // -------- Variables
-    // --------
+        PowerDeliveryDuration(int code) {
+            this.code = code;
+        }
+    }
 
     /**
      * Hashtable to contain the user replaced OneWireContainers. The key is the
      * family, the value is the container class.
      */
-    private final Map<Integer, Class<?>> registeredOneWireContainerClasses = new TreeMap<Integer, Class<?>>();
+    private final Map<Integer, Class<?>> registeredOneWireContainerClasses = new TreeMap<>();
 
     /**
      * Byte array of families to include in search
@@ -1338,7 +1332,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public void setPowerDuration(int timeFactor) throws OneWireException {
+    public void setPowerDuration(PowerDeliveryDuration timeFactor) throws OneWireException {
         // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Power delivery not supported by this adapter type");
     }
@@ -1388,7 +1382,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public void setProgramPulseDuration(int timeFactor) throws OneWireException {
+    public void setProgramPulseDuration(PowerDeliveryDuration timeFactor) throws OneWireException {
         // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Program pulse delivery not supported by this adapter type");
     }

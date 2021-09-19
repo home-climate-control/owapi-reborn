@@ -743,7 +743,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             ib.adapter.dataBlock(send_block, 0, 3);
 
             // provide strong pull-up for copy
-            ib.adapter.setPowerDuration(DSPortAdapter.DELIVERY_INFINITE);
+            ib.adapter.setPowerDuration(DSPortAdapter.PowerDeliveryDuration.INFINITE);
             ib.adapter.startPowerDelivery(DSPortAdapter.PowerChangeCondition.AFTER_NEXT_BYTE);
             ib.adapter.putByte(send_block[3]);
 

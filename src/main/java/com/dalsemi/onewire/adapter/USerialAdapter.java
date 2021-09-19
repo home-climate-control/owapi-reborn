@@ -27,18 +27,17 @@
 
 package com.dalsemi.onewire.adapter;
 
-import java.io.IOException;
-import java.util.Enumeration;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.ThreadContext;
-
 import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.container.OneWireContainer;
+import com.dalsemi.onewire.utils.Address;
 import com.dalsemi.onewire.utils.Bit;
 import com.dalsemi.onewire.utils.CRC8;
-import com.dalsemi.onewire.utils.Address;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.IOException;
+import java.util.Enumeration;
 
 /**
  * The USerialAdapter class implememts the DSPortAdapter interface for a DS2480
@@ -267,6 +266,7 @@ public class USerialAdapter extends DSPortAdapter {
      *
      * @return <code>String</code> representation of the port adapter.
      */
+    @Override
     public String getAdapterName() {
 
         return "DS9097U";
@@ -278,6 +278,7 @@ public class USerialAdapter extends DSPortAdapter {
      *
      * @return <code>String</code> description of the port type required.
      */
+    @Override
     public String getPortTypeDescription() {
 
         return "serial communication port";
@@ -288,6 +289,7 @@ public class USerialAdapter extends DSPortAdapter {
      *
      * @return version string
      */
+    @Override
     public String getClassVersion() {
 
         return classVersion;
@@ -307,7 +309,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @return enumeration of type <code>String</code> that contains the port
      * names
      */
-    @SuppressWarnings("static-access")
+    @Override
     public Enumeration<String> getPortNames() {
 
         return serial.getSerialPortIdentifiers();
@@ -379,6 +381,7 @@ public class USerialAdapter extends DSPortAdapter {
      *
      * @throws OneWireException If port does not exist
      */
+    @Override
     public void freePort() throws OneWireException {
 
         try {
@@ -408,6 +411,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException
      * @throws OneWireException
      */
+    @Override
     public boolean adapterDetected() throws OneWireIOException, OneWireException {
 
         boolean rt;
@@ -443,6 +447,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a communication or setup error with the
      * 1-Wire adapter
      */
+    @Override
     public String getAdapterVersion() throws OneWireIOException, OneWireException {
 
         String version_string = "DS2480 based adapter";
@@ -485,6 +490,7 @@ public class USerialAdapter extends DSPortAdapter {
      * 1-Wire adapter
      * @see Address
      */
+    @Override
     public String getAdapterAddress() throws OneWireIOException, OneWireException {
 
         // get a reference to the current oneWire State
@@ -613,6 +619,7 @@ public class USerialAdapter extends DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean canOverdrive() throws OneWireIOException, OneWireException {
 
         return true;
@@ -627,6 +634,7 @@ public class USerialAdapter extends DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean canHyperdrive() throws OneWireIOException, OneWireException {
 
         return false;
@@ -641,6 +649,7 @@ public class USerialAdapter extends DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean canFlex() throws OneWireIOException, OneWireException {
 
         return true;
@@ -655,6 +664,7 @@ public class USerialAdapter extends DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean canProgram() throws OneWireIOException, OneWireException {
 
         try {
@@ -690,6 +700,7 @@ public class USerialAdapter extends DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean canDeliverPower() throws OneWireIOException, OneWireException {
 
         return true;
@@ -707,6 +718,7 @@ public class USerialAdapter extends DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean canDeliverSmartPower() throws OneWireIOException, OneWireException {
 
         // regardless of adapter, the class does not support it
@@ -722,6 +734,7 @@ public class USerialAdapter extends DSPortAdapter {
      * adapter
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean canBreak() throws OneWireIOException, OneWireException {
 
         return true;
@@ -740,6 +753,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean findFirstDevice() throws OneWireIOException, OneWireException {
 
         // reset the current search
@@ -761,6 +775,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean findNextDevice() throws OneWireIOException, OneWireException {
 
         boolean search_result;
@@ -872,6 +887,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @param address An array to be filled with the current iButton address.
      * @see Address
      */
+    @Override
     public void getAddress(byte[] address) {
 
         System.arraycopy(owState.ID, 0, address, 0, 8);
@@ -901,6 +917,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      * @see Address
      */
+    @Override
     public boolean isPresent(byte[] address) throws OneWireIOException, OneWireException {
 
         try {
@@ -966,6 +983,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      * @see Address
      */
+    @Override
     public boolean isAlarming(byte[] address) throws OneWireIOException, OneWireException {
 
         try {
@@ -1032,6 +1050,7 @@ public class USerialAdapter extends DSPortAdapter {
      *
      * @see #setNoResetSearch
      */
+    @Override
     public void setSearchOnlyAlarmingDevices() {
 
         owState.searchOnlyAlarmingButtons = true;
@@ -1043,6 +1062,7 @@ public class USerialAdapter extends DSPortAdapter {
      * normal reset before each search can be restored with the
      * 'setSearchAllDevices()' method.
      */
+    @Override
     public void setNoResetSearch() {
 
         owState.skipResetOnSearch = true;
@@ -1056,6 +1076,7 @@ public class USerialAdapter extends DSPortAdapter {
      *
      * @see #setNoResetSearch
      */
+    @Override
     public void setSearchAllDevices() {
 
         owState.searchOnlyAlarmingButtons = false;
@@ -1073,6 +1094,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @see #excludeFamily
      * @see #excludeFamily(byte[])
      */
+    @Override
     public void targetAllFamilies() {
 
         // clear the include and exclude family search lists
@@ -1089,6 +1111,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @see Address
      * @see #targetAllFamilies
      */
+    @Override
     public void targetFamily(int familyID) {
 
         // replace include family array with 1 element array
@@ -1105,6 +1128,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @see Address
      * @see #targetAllFamilies
      */
+    @Override
     public void targetFamily(byte familyID[]) {
 
         // replace include family array with new array
@@ -1122,6 +1146,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @see Address
      * @see #targetAllFamilies
      */
+    @Override
     public void excludeFamily(int familyID) {
 
         // replace exclude family array with 1 element array
@@ -1138,6 +1163,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @see Address
      * @see #targetAllFamilies
      */
+    @Override
     public void excludeFamily(byte familyID[]) {
 
         // replace exclude family array with new array
@@ -1162,6 +1188,7 @@ public class USerialAdapter extends DSPortAdapter {
      *
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public void beginExclusive() throws OneWireException {
 
         serial.beginExclusive();
@@ -1172,6 +1199,7 @@ public class USerialAdapter extends DSPortAdapter {
      * dynamically marks the end of a critical section and should be used when
      * exclusive control is no longer needed.
      */
+    @Override
     public void endExclusive() {
 
         serial.endExclusive();
@@ -1213,6 +1241,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public void putBit(boolean bitValue) throws OneWireIOException, OneWireException {
 
         try {
@@ -1269,6 +1298,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean getBit() throws OneWireIOException, OneWireException {
 
         try {
@@ -1327,6 +1357,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public void putByte(int byteValue) throws OneWireIOException, OneWireException {
 
         byte[] temp_block = new byte[1];
@@ -1347,6 +1378,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public int getByte() throws OneWireIOException, OneWireException {
 
         byte[] temp_block = new byte[1];
@@ -1369,6 +1401,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public byte[] getBlock(int len) throws OneWireIOException, OneWireException {
 
         byte[] temp_block = new byte[len];
@@ -1391,6 +1424,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public void getBlock(byte[] arr, int len) throws OneWireIOException, OneWireException {
 
         getBlock(arr, 0, len);
@@ -1406,6 +1440,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public void getBlock(byte[] arr, int off, int len) throws OneWireIOException, OneWireException {
 
         // set block to read 0xFF
@@ -1428,7 +1463,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    @SuppressWarnings("static-access")
+    @Override
     public void dataBlock(byte dataBlock[], int off, int len) throws OneWireIOException, OneWireException {
 
         int data_offset;
@@ -1506,6 +1541,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public ResetResult reset() throws OneWireIOException, OneWireException {
 
         try {
@@ -1574,12 +1610,14 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public void setPowerDuration(int timeFactor) throws OneWireIOException, OneWireException {
+    @Override
+    public void setPowerDuration(PowerDeliveryDuration timeFactor) throws OneWireIOException, OneWireException {
 
-        if (timeFactor != DELIVERY_INFINITE)
+        if (timeFactor != PowerDeliveryDuration.INFINITE)
+            // VT: FIXME: Replace with UnsupportedOperationException?
             throw new OneWireException("USerialAdapter-setPowerDuration, does not support this duration, infinite only");
         else
-            owState.levelTimeFactor = DELIVERY_INFINITE;
+            owState.levelTimeFactor = PowerDeliveryDuration.INFINITE;
     }
 
     /**
@@ -1605,6 +1643,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
+    @Override
     public boolean startPowerDelivery(PowerChangeCondition changeCondition) throws OneWireIOException, OneWireException {
 
         try {
@@ -1682,10 +1721,13 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public void setProgramPulseDuration(int timeFactor) throws OneWireIOException, OneWireException {
+    @Override
+    public void setProgramPulseDuration(PowerDeliveryDuration timeFactor) throws OneWireIOException, OneWireException {
 
-        if (timeFactor != DELIVERY_EPROM)
+        if (timeFactor != PowerDeliveryDuration.EPROM) {
+            // VT: FIXME: Replace with UnsupportedOperationException?
             throw new OneWireException("Only support EPROM length program pulse duration");
+        }
     }
 
     /**
@@ -1711,6 +1753,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
+    @Override
     public boolean startProgramPulse(PowerChangeCondition changeCondition) throws OneWireIOException, OneWireException {
 
         // check if adapter supports program
@@ -1758,6 +1801,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
+    @Override
     public void startBreak() throws OneWireIOException, OneWireException {
 
         try {
@@ -1792,6 +1836,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
+    @Override
     public void setPowerNormal() throws OneWireIOException, OneWireException {
 
         try {
@@ -1937,6 +1982,7 @@ public class USerialAdapter extends DSPortAdapter {
      * <li> >3 future speeds
      * </ul>
      */
+    @Override
     public Speed getSpeed() {
 
         return owState.oneWireSpeed;
@@ -1953,7 +1999,6 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    @SuppressWarnings("static-access")
     private boolean search(OneWireState mState) throws OneWireIOException, OneWireException {
 
         int reset_offset = 0;
@@ -2065,7 +2110,6 @@ public class USerialAdapter extends DSPortAdapter {
     /**
      * set the correct baud rate to stream this operation
      */
-    @SuppressWarnings("static-access")
     private void setStreamingSpeed(int operation) throws OneWireIOException {
 
         ThreadContext.push("setStreamingSpeed(" + operation + ")");
@@ -2228,7 +2272,6 @@ public class USerialAdapter extends DSPortAdapter {
      * Do a master reset on the DS2480. This reduces the baud rate to 9600 and
      * performs a break. A single timing byte is then sent.
      */
-    @SuppressWarnings("static-access")
     private synchronized void uMasterReset() {
 
         ThreadContext.push("uMasterReset");
@@ -2270,7 +2313,6 @@ public class USerialAdapter extends DSPortAdapter {
      * Do a power reset on the DS2480. This reduces the baud rate to 9600 and
      * powers down the DS2480. A single timing byte is then sent.
      */
-    @SuppressWarnings("static-access")
     private synchronized void uPowerReset() {
 
         ThreadContext.push("uPowerReset");
