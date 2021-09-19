@@ -1385,30 +1385,14 @@ public abstract class DSPortAdapter {
      * adapter does not support this operation
      */
     public void setPowerNormal() throws OneWireException {
-
-        return;
+        // Do nothing
     }
-
-    // --------
-    // -------- 1-Wire Network speed methods
-    // --------
 
     /**
      * Sets the new speed of data transfer on the 1-Wire Network.
-     * <p>
      *
-     * @param speed
-     * <ul>
-     * <li> 0 (SPEED_REGULAR) set to normal communciation speed
-     * <li> 1 (SPEED_FLEX) set to flexible communciation speed used for long
-     * lines
-     * <li> 2 (SPEED_OVERDRIVE) set to normal communciation speed to overdrive
-     * <li> 3 (SPEED_HYPERDRIVE) set to normal communciation speed to hyperdrive
-     * <li> >3 future speeds
-     * </ul>
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter or the
-     * adapter does not support this operation
+     * @throws OneWireIOException on a 1-Wire communication error.
+     * @throws OneWireException on a setup error with the 1-Wire adapter or the adapter does not support this operation.
      */
     public void setSpeed(Speed speed) throws OneWireException {
 
@@ -1418,27 +1402,9 @@ public abstract class DSPortAdapter {
         }
     }
 
-    /**
-     * Returns the current data transfer speed on the 1-Wire Network.
-     * <p>
-     *
-     * @return {@code int} representing the current 1-Wire speed
-     * <ul>
-     * <li> 0 (SPEED_REGULAR) set to normal communication speed
-     * <li> 1 (SPEED_FLEX) set to flexible communication speed used for long
-     * lines
-     * <li> 2 (SPEED_OVERDRIVE) set to normal communication speed to overdrive
-     * <li> 3 (SPEED_HYPERDRIVE) set to normal communication speed to hyperdrive
-     * <li> >3 future speeds
-     * </ul>
-     */
     public Speed getSpeed() {
         return Speed.REGULAR;
     }
-
-    // --------
-    // -------- Misc
-    // --------
 
     /**
      * Constructs a {@code OneWireContainer} object with a user supplied 1-Wire
@@ -1466,41 +1432,38 @@ public abstract class DSPortAdapter {
                 }
             }
 
-            int family_code = address[0] & 0x7F;
-            String family_string = ((family_code) < 16) ? ("0" + Integer.toHexString(family_code)).toUpperCase() : (Integer
-                    .toHexString(family_code)).toUpperCase();
-            Class<?> ibutton_class = null;
-            OneWireContainer new_ibutton;
+            int familyCode = address[0] & 0x7F;
+            String familyString = ((familyCode) < 16) ? ("0" + Integer.toHexString(familyCode)).toUpperCase() : (Integer
+                    .toHexString(familyCode)).toUpperCase();
+            Class<?> deviceClass = null;
+            OneWireContainer newDevice;
 
             // If any user registered button exist, check the hashtable.
             if (!registeredOneWireContainerClasses.isEmpty()) {
-                Integer familyInt = new Integer(family_code);
-
                 // Try and get a user provided container class first.
-                ibutton_class = registeredOneWireContainerClasses.get(familyInt);
+                deviceClass = registeredOneWireContainerClasses.get(familyCode);
             }
 
             // If we don't get one, do the normal lookup method.
-            if (ibutton_class == null) {
+            if (deviceClass == null) {
 
                 // try to load the ibutton container class
                 try {
 
-                    String className = CLASS_NAME_ONEWIRECONTAINER + family_string;
-                    logger.debug("Trying to instantiate " + className);
-                    ibutton_class = Class.forName(className);
+                    String className = CLASS_NAME_ONEWIRECONTAINER + familyString;
+                    logger.debug("Trying to instantiate {}", className);
+                    deviceClass = Class.forName(className);
                 } catch (Exception e) {
                     logger.warn("Failed, moving on", e);
-                    ibutton_class = null;
                 }
 
                 // if did not get specific container try the general one
-                if (ibutton_class == null) {
+                if (deviceClass == null) {
 
                     // try to load the ibutton container class
                     try {
                         logger.debug("Falling back to " + CLASS_NAME_ONEWIRECONTAINER);
-                        ibutton_class = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
+                        deviceClass = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
                     } catch (Exception ex) {
                         logger.error("Unable to load OneWireContainer", ex);
 
@@ -1514,22 +1477,22 @@ public abstract class DSPortAdapter {
             try {
 
                 // create the iButton container with a reference to this adapter
-                logger.debug("Instantiating " + ibutton_class.getName());
-                new_ibutton = (OneWireContainer) ibutton_class.newInstance();
+                logger.debug("Instantiating {}", deviceClass.getName());
+                newDevice = (OneWireContainer) deviceClass.newInstance();
 
-                new_ibutton.setupContainer(this, address);
+                newDevice.setupContainer(this, address);
             } catch (Exception ex) {
-                logger.error("Unable to instantiate OneWireContainer " + ibutton_class + ": ", ex);
+                logger.error("Unable to instantiate OneWireContainer {}",deviceClass , ex);
 
                 // VT: FIXME: Maybe throw an exception, eh?
                 return null;
             }
 
             // Remember this container
-            address2container.put(stringAddress, new_ibutton);
+            address2container.put(stringAddress, newDevice);
 
             // return this new container
-            return new_ibutton;
+            return newDevice;
 
         } finally {
             ThreadContext.pop();
@@ -1584,7 +1547,7 @@ public abstract class DSPortAdapter {
      *
      * @return the {@code OneWireContainer} object
      */
-    public synchronized final OneWireContainer getDeviceContainer() {
+    public final synchronized OneWireContainer getDeviceContainer() {
 
         // Mask off the upper bit.
         // 8 bytes
@@ -1606,16 +1569,16 @@ public abstract class DSPortAdapter {
         byte familyCode = address[0];
 
         if (exclude != null) {
-            for (int i = 0; i < exclude.length; i++) {
-                if (familyCode == exclude[i]) {
+            for (byte b : exclude) {
+                if (familyCode == b) {
                     return false;
                 }
             }
         }
 
         if (include != null) {
-            for (int i = 0; i < include.length; i++) {
-                if (familyCode == include[i]) {
+            for (byte b : include) {
+                if (familyCode == b) {
                     return true;
                 }
             }
@@ -1639,7 +1602,7 @@ public abstract class DSPortAdapter {
 
         // 24 bytes
         // All bits must be set
-        byte[] send_packet = {
+        byte[] sendPacket = {
                 (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
                 (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
                 (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
@@ -1648,23 +1611,23 @@ public abstract class DSPortAdapter {
 
         // now set or clear appropriate bits for search
         for (i = 0; i < 64; i++) {
-            arrayWriteBit(arrayReadBit(i, address), (i + 1) * 3 - 1, send_packet);
+            arrayWriteBit(arrayReadBit(i, address), (i + 1) * 3 - 1, sendPacket);
         }
 
         // send to 1-Wire Net
-        dataBlock(send_packet, 0, 24);
+        dataBlock(sendPacket, 0, 24);
 
         // check the results of last 8 triplets (should be no conflicts)
-        int cnt = 56, goodbits = 0, tst, s;
+        int cnt = 56;
+        int goodbits = 0;
 
         for (i = 168; i < 192; i += 3) {
-            tst = (arrayReadBit(i, send_packet) << 1) | arrayReadBit(i + 1, send_packet);
-            s = arrayReadBit(cnt++, address);
+            var tst = (arrayReadBit(i, sendPacket) << 1) | arrayReadBit(i + 1, sendPacket);
+            var s = arrayReadBit(cnt++, address);
 
             if (tst == 0x03) // no device on line
             {
                 goodbits = 0; // number of good bits set to zero
-
                 break; // quit
             }
 
@@ -1673,7 +1636,7 @@ public abstract class DSPortAdapter {
                 goodbits++; // count as a good bit
         }
 
-        // check too see if there were enough good bits to be successful
+        // check to see if there were enough good bits to be successful
         return (goodbits >= 8);
     }
 
@@ -1711,19 +1674,6 @@ public abstract class DSPortAdapter {
         return ((buf[nbyt] >>> nbit) & 0x01);
     }
 
-    // --------
-    // -------- java.lang.Object methods
-    // --------
-
-    /**
-     * Returns a hashcode for this object
-     *
-     * @return a hascode for this object
-     */
-    /*
-     * public int hashCode() { return this.toString().hashCode(); }
-     */
-
     /**
      * Returns true if the given object is the same or equivalent to this
      * DSPortAdapter.
@@ -1735,10 +1685,8 @@ public abstract class DSPortAdapter {
     @Override
     public boolean equals(Object o) {
 
-        if (o != null && o instanceof DSPortAdapter) {
-            if (o == this || o.toString().equals(this.toString())) {
-                return true;
-            }
+        if (o instanceof DSPortAdapter) {
+            return o == this || o.toString().equals(this.toString());
         }
 
         return false;
