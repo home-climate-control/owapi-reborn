@@ -190,17 +190,37 @@ public abstract class DSPortAdapter {
 
     public static final String CLASS_NAME_ONEWIRECONTAINER = "com.dalsemi.onewire.container.OneWireContainer";
 
-    /** 1-Wire Network level, normal (weak 5Volt pullup) */
-    public static final char LEVEL_NORMAL = 0;
+    /**
+     * Power level.
+     */
+    public enum Level {
 
-    /** 1-Wire Network level, (strong 5Volt pullup, used for power delivery) */
-    public static final char LEVEL_POWER_DELIVERY = 1;
+        /**
+         * Weak 5V pullup.
+         */
+        NORMAL(0),
 
-    /** 1-Wire Network level, (strong pulldown to 0Volts, reset 1-Wire) */
-    public static final char LEVEL_BREAK = 2;
+        /**
+         * Strong 5V pullup, used for power delivery.
+         */
+        POWER_DELIVERY(1),
 
-    /** 1-Wire Network level, (strong 12Volt pullup, used to program eprom ) */
-    public static final char LEVEL_PROGRAM = 3;
+        /**
+         * Strong 0V pulldown, reset 1-Wire bus.
+         */
+        BREAK(2),
+
+        /**
+         * Strong 12V pullup, used to program EPROM.
+         */
+        PROGRAM(3);
+
+        public final int code;
+
+        Level(int code) {
+            this.code = code;
+        }
+    }
 
     /** 1-Wire Network reset result = no presence */
     public static final int RESET_NOPRESENCE = 0x00;

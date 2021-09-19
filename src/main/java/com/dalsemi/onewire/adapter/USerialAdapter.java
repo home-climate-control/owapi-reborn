@@ -912,7 +912,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // if in overdrive, then use the block method in super
@@ -977,7 +977,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // if in overdrive, then use the block method in super
@@ -1224,7 +1224,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -1242,7 +1242,7 @@ public class USerialAdapter extends DSPortAdapter {
                     owState.levelChangeOnNextBit = false;
 
                     // set new level state
-                    owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                    owState.oneWireLevel = Level.POWER_DELIVERY;
                 }
 
                 // send and receive
@@ -1280,7 +1280,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -1298,7 +1298,7 @@ public class USerialAdapter extends DSPortAdapter {
                     owState.levelChangeOnNextBit = false;
 
                     // set new level state
-                    owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                    owState.oneWireLevel = Level.POWER_DELIVERY;
                 }
 
                 // send and receive
@@ -1443,7 +1443,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // set the correct baud rate to stream this operation
@@ -1464,7 +1464,7 @@ public class USerialAdapter extends DSPortAdapter {
                     ret_data = uTransaction(uBuild);
 
                     // set new level state
-                    owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                    owState.oneWireLevel = Level.POWER_DELIVERY;
 
                     // extract the result byte
                     dataBlock[off] = uBuild.interpretPrimedByte(ret_data, data_offset);
@@ -1517,7 +1517,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -1614,17 +1614,17 @@ public class USerialAdapter extends DSPortAdapter {
 
             if (changeCondition == CONDITION_AFTER_BIT) {
                 owState.levelChangeOnNextBit = true;
-                owState.primedLevelValue = LEVEL_POWER_DELIVERY;
+                owState.primedLevelValue = Level.POWER_DELIVERY;
             } else if (changeCondition == CONDITION_AFTER_BYTE) {
                 owState.levelChangeOnNextByte = true;
-                owState.primedLevelValue = LEVEL_POWER_DELIVERY;
+                owState.primedLevelValue = Level.POWER_DELIVERY;
             } else if (changeCondition == CONDITION_NOW) {
 
                 // make sure adapter is present
                 if (uAdapterPresent()) {
 
                     // check for pending power conditions
-                    if (owState.oneWireLevel != LEVEL_NORMAL)
+                    if (owState.oneWireLevel != Level.NORMAL)
                         setPowerNormal();
 
                     // flush out the com buffer
@@ -1645,7 +1645,7 @@ public class USerialAdapter extends DSPortAdapter {
 
                     // check the result
                     if (result_array.length == (set_SPUD_offset + 1)) {
-                        owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                        owState.oneWireLevel = Level.POWER_DELIVERY;
 
                         return true;
                     }
@@ -1773,7 +1773,7 @@ public class USerialAdapter extends DSPortAdapter {
             sleep(200);
 
             // set the level state
-            owState.oneWireLevel = LEVEL_BREAK;
+            owState.oneWireLevel = Level.BREAK;
         } finally {
 
             // release local exclusive use of port
@@ -1799,7 +1799,7 @@ public class USerialAdapter extends DSPortAdapter {
             // acquire exclusive use of the port
             beginLocalExclusive();
 
-            if (owState.oneWireLevel == LEVEL_POWER_DELIVERY) {
+            if (owState.oneWireLevel == Level.POWER_DELIVERY) {
 
                 // make sure adapter is present
                 if (uAdapterPresent()) {
@@ -1830,7 +1830,7 @@ public class USerialAdapter extends DSPortAdapter {
 
                     // check the result
                     if (result_array.length == (pulse_response_offset + 1)) {
-                        owState.oneWireLevel = LEVEL_NORMAL;
+                        owState.oneWireLevel = Level.NORMAL;
 
                         // \\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                         // shughes - 8-28-2003
@@ -1844,7 +1844,7 @@ public class USerialAdapter extends DSPortAdapter {
                     } else
                         throw new OneWireIOException("Did not get a response back from stop power delivery");
                 }
-            } else if (owState.oneWireLevel == LEVEL_BREAK) {
+            } else if (owState.oneWireLevel == Level.BREAK) {
 
                 // restore power
                 serial.setDTR(true);
@@ -1854,7 +1854,7 @@ public class USerialAdapter extends DSPortAdapter {
                 sleep(300);
 
                 // set the level state
-                owState.oneWireLevel = LEVEL_NORMAL;
+                owState.oneWireLevel = Level.NORMAL;
 
                 // set the DS2480 to the correct mode and verify
                 adapterPresent = false;
@@ -1962,7 +1962,7 @@ public class USerialAdapter extends DSPortAdapter {
         if (uAdapterPresent()) {
 
             // check for pending power conditions
-            if (owState.oneWireLevel != LEVEL_NORMAL)
+            if (owState.oneWireLevel != Level.NORMAL)
                 setPowerNormal();
 
             // set the correct baud rate to stream this operation

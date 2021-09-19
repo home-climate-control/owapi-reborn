@@ -37,10 +37,6 @@ package com.dalsemi.onewire.adapter;
 class OneWireState
 {
 
-   //--------
-   //-------- Variables
-   //--------
-
    /**
     * This is the current logical speed that the 1-Wire Network is operating at.
     */
@@ -56,7 +52,7 @@ class OneWireState
     * <li> LEVEL_PROGRAM
     * </ul>
     */
-   public char oneWireLevel;
+   public DSPortAdapter.Level oneWireLevel;
 
    /**
     * True if programming voltage is available
@@ -87,7 +83,7 @@ class OneWireState
     * <li> LEVEL_PROGRAM
     * </ul>
     */
-   public char primedLevelValue;
+   public DSPortAdapter.Level primedLevelValue;
 
    /**
     * The amount of time that the 'level' value will be on for. <p>
@@ -160,12 +156,12 @@ class OneWireState
 
       // speed, level
       oneWireSpeed = DSPortAdapter.Speed.REGULAR;
-      oneWireLevel = DSPortAdapter.LEVEL_NORMAL;
+      oneWireLevel = DSPortAdapter.Level.NORMAL;
 
       // level primed
       levelChangeOnNextBit  = false;
       levelChangeOnNextByte = false;
-      primedLevelValue      = DSPortAdapter.LEVEL_NORMAL;
+      primedLevelValue      = DSPortAdapter.Level.NORMAL;
       levelTimeFactor       = DSPortAdapter.DELIVERY_INFINITE;
 
       // adapter abilities
