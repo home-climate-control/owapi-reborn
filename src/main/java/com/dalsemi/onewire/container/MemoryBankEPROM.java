@@ -1496,7 +1496,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
         }
 
         // send the pulse
-        ib.adapter.startProgramPulse(DSPortAdapter.CONDITION_NOW);
+        ib.adapter.startProgramPulse(DSPortAdapter.PowerChangeCondition.NOW);
 
         // return the result
         return ( byte ) ib.adapter.getByte();

@@ -143,9 +143,9 @@ import java.util.Vector;
  * <LI> 1-Wire Speed and Power Selection
  * <UL>
  * <LI> {@link #setPowerDuration(int) setPowerDuration}
- * <LI> {@link #startPowerDelivery(int) startPowerDelivery}
+ * <LI> {@link #startPowerDelivery(PowerChangeCondition)}
  * <LI> {@link #setProgramPulseDuration(int) setProgramPulseDuration}
- * <LI> {@link #startProgramPulse(int) startProgramPulse}
+ * <LI> {@link #startProgramPulse(PowerChangeCondition)}
  * <LI> {@link #startBreak() startBreak}
  * <LI> {@link #setPowerNormal() setPowerNormal}
  * <LI> {@link #setSpeed(Speed)}  setSpeed}
@@ -239,14 +239,21 @@ public abstract class DSPortAdapter {
         }
     }
 
-    /** Condition for power state change, immediate */
-    public static final int CONDITION_NOW = 0;
+    /**
+     * Condition for power change.
+     */
+    public enum PowerChangeCondition {
 
-    /** Condition for power state change, after next bit communication */
-    public static final int CONDITION_AFTER_BIT = 1;
+        NOW(0),
+        AFTER_NEXT_BIT(1),
+        AFTER_NEXT_BYTE(2);
 
-    /** Condition for power state change, after next byte communication */
-    public static final int CONDITION_AFTER_BYTE = 2;
+        public final int code;
+
+        PowerChangeCondition(int code) {
+            this.code = code;
+        }
+    }
 
     /** Duration used in delivering power to the 1-Wire, 1/2 second */
     public static final int DELIVERY_HALF_SECOND = 0;
@@ -1332,7 +1339,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
     public void setPowerDuration(int timeFactor) throws OneWireException {
-
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Power delivery not supported by this adapter type");
     }
 
@@ -1358,8 +1365,8 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean startPowerDelivery(int changeCondition) throws OneWireException {
-
+    public boolean startPowerDelivery(PowerChangeCondition changeCondition) throws OneWireException {
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Power delivery not supported by this adapter type");
     }
 
@@ -1382,7 +1389,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
     public void setProgramPulseDuration(int timeFactor) throws OneWireException {
-
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Program pulse delivery not supported by this adapter type");
     }
 
@@ -1409,8 +1416,8 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    public boolean startProgramPulse(int changeCondition) throws OneWireException {
-
+    public boolean startProgramPulse(PowerChangeCondition changeCondition) throws OneWireException {
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Program pulse delivery not supported by this adapter type");
     }
 
@@ -1424,7 +1431,7 @@ public abstract class DSPortAdapter {
      * adapter does not support this operation
      */
     public void startBreak() throws OneWireException {
-
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Break delivery not supported by this adapter type");
     }
 
@@ -1467,8 +1474,10 @@ public abstract class DSPortAdapter {
      */
     public void setSpeed(Speed speed) throws OneWireException {
 
-        if (speed != Speed.REGULAR)
+        if (speed != Speed.REGULAR) {
+            // VT: FIXME: Replace with UnsupportedOperationException?
             throw new OneWireException("Speed " + speed + " not supported by this adapter type");
+        }
     }
 
     /**

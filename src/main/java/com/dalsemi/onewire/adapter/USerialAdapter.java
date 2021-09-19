@@ -1605,20 +1605,20 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean startPowerDelivery(int changeCondition) throws OneWireIOException, OneWireException {
+    public boolean startPowerDelivery(PowerChangeCondition changeCondition) throws OneWireIOException, OneWireException {
 
         try {
 
             // acquire exclusive use of the port
             beginLocalExclusive();
 
-            if (changeCondition == CONDITION_AFTER_BIT) {
+            if (changeCondition == PowerChangeCondition.AFTER_NEXT_BIT) {
                 owState.levelChangeOnNextBit = true;
                 owState.primedLevelValue = Level.POWER_DELIVERY;
-            } else if (changeCondition == CONDITION_AFTER_BYTE) {
+            } else if (changeCondition == PowerChangeCondition.AFTER_NEXT_BYTE) {
                 owState.levelChangeOnNextByte = true;
                 owState.primedLevelValue = Level.POWER_DELIVERY;
-            } else if (changeCondition == CONDITION_NOW) {
+            } else if (changeCondition == PowerChangeCondition.NOW) {
 
                 // make sure adapter is present
                 if (uAdapterPresent()) {
@@ -1711,14 +1711,14 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    public boolean startProgramPulse(int changeCondition) throws OneWireIOException, OneWireException {
+    public boolean startProgramPulse(PowerChangeCondition changeCondition) throws OneWireIOException, OneWireException {
 
         // check if adapter supports program
         if (!uState.programVoltageAvailable)
             throw new OneWireException("USerialAdapter: startProgramPulse, program voltage not available");
 
         // check if correct change condition
-        if (changeCondition != CONDITION_NOW)
+        if (changeCondition != PowerChangeCondition.NOW)
             throw new OneWireException("USerialAdapter: startProgramPulse, CONDITION_NOW only currently supported");
 
         try {

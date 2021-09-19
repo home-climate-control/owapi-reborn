@@ -369,7 +369,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
 
         // Setup Power Delivery
         adapter.setPowerDuration(adapter.DELIVERY_INFINITE);
-        adapter.startPowerDelivery(adapter.CONDITION_AFTER_BYTE);
+        adapter.startPowerDelivery(DSPortAdapter.PowerChangeCondition.AFTER_NEXT_BYTE);
         // send the convert temperature command
         adapter.putByte(CONVERT_TEMPERATURE_COMMAND);
 
@@ -813,7 +813,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
 
         // apply the power delivery
         adapter.setPowerDuration(adapter.DELIVERY_INFINITE);
-        adapter.startPowerDelivery(adapter.CONDITION_AFTER_BYTE);
+        adapter.startPowerDelivery(DSPortAdapter.PowerChangeCondition.AFTER_NEXT_BYTE);
 
         // send the convert temperature command
         adapter.putByte(COPY_SCRATCHPAD_COMMAND);
@@ -822,6 +822,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         try {
             Thread.sleep(10);
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             logger.debug("Interrupted", ex);
         }
 
