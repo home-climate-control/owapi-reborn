@@ -222,17 +222,22 @@ public abstract class DSPortAdapter {
         }
     }
 
-    /** 1-Wire Network reset result = no presence */
-    public static final int RESET_NOPRESENCE = 0x00;
+    /**
+     * 1-Wire bus reeset result.
+     */
+    public enum ResetResult {
 
-    /** 1-Wire Network reset result = presence */
-    public static final int RESET_PRESENCE = 0x01;
+        NOPRESENCE(0x00),
+        PRESENCE(0x01),
+        ALARM(0x02),
+        SHORT(0x03);
 
-    /** 1-Wire Network reset result = alarm */
-    public static final int RESET_ALARM = 0x02;
+        public final int code;
 
-    /** 1-Wire Network reset result = shorted */
-    public static final int RESET_SHORT = 0x03;
+        ResetResult(int code) {
+            this.code = code;
+        }
+    }
 
     /** Condition for power state change, immediate */
     public static final int CONDITION_NOW = 0;
@@ -884,7 +889,7 @@ public abstract class DSPortAdapter {
     public boolean select(byte[] address) throws OneWireException {
 
         // send 1-Wire Reset
-        int rslt = reset();
+        var rslt = reset();
 
         // broadcast the MATCH ROM command and address
 
@@ -897,7 +902,7 @@ public abstract class DSPortAdapter {
         dataBlock(buffer, 0, 9);
 
         // success if any device present on 1-Wire Network
-        return ((rslt == RESET_PRESENCE) || (rslt == RESET_ALARM));
+        return ((rslt == ResetResult.PRESENCE) || (rslt == ResetResult.ALARM));
     }
 
     /**
@@ -1297,7 +1302,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract int reset() throws OneWireException;
+    public abstract ResetResult reset() throws OneWireException;
 
     // --------
     // -------- 1-Wire Network power methods

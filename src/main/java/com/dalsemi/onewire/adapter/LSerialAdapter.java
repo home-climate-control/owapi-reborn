@@ -72,7 +72,7 @@ import com.dalsemi.onewire.utils.CRC8;
  * </UL>
  * <LI> <B> 1-Wire Network Semaphore </B>
  * <UL>
- * <LI> {@link #beginExclusive(boolean) beginExclusive}
+ * <LI> {@link #beginExclusive()}
  * <LI> {@link #endExclusive() endExclusive}
  * </UL>
  * <LI> <B> 1-Wire Device Discovery </B>
@@ -144,7 +144,7 @@ import com.dalsemi.onewire.utils.CRC8;
  * <LI> {@link #startProgramPulse(int) startProgramPulse}
  * <LI> {@link #startBreak() startBreak}
  * <LI> {@link #setPowerNormal() setPowerNormal}
- * <LI> {@link #setSpeed(int) setSpeed}
+ * <LI> {@link #setSpeed(Speed)}
  * <LI> {@link #getSpeed() getSpeed}
  * </UL>
  * </UL>
@@ -866,7 +866,7 @@ public class LSerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
     @Override
-    public int reset() throws OneWireIOException, OneWireException {
+    public ResetResult reset() throws OneWireIOException, OneWireException {
 
         try {
             // acquire exclusive use of the port
@@ -885,22 +885,22 @@ public class LSerialAdapter extends DSPortAdapter {
                 // does not work: return ((c.length > 1) ? RESET_PRESENCE :
                 // RESET_NOPRESENCE);
 
-                return RESET_PRESENCE;
+                return ResetResult.PRESENCE;
             }
 
-            return RESET_NOPRESENCE;
+            return ResetResult.NOPRESENCE;
 
         } catch (IOException ioe) {
 
             ioe.printStackTrace();
-            return RESET_NOPRESENCE;
+            return ResetResult.NOPRESENCE;
 
         } catch (OneWireIOException e) {
 
             System.err.println("DS9097EAdapter: Not detected ");
             e.printStackTrace();
 
-            return RESET_NOPRESENCE;
+            return ResetResult.NOPRESENCE;
 
         } finally {
             // release local exclusive use of port
@@ -945,7 +945,7 @@ public class LSerialAdapter extends DSPortAdapter {
             if (!skipResetOnSearch) {
                 // reset the 1-wire
                 // if there are no parts on 1-wire, return false
-                if (reset() != RESET_PRESENCE) {
+                if (reset() != ResetResult.PRESENCE) {
                     // reset the search
                     LastDiscrepancy = 0;
                     //LastFamilyDiscrepancy = 0;

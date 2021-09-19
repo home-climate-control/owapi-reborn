@@ -746,7 +746,7 @@ class UPacketBuilder {
      * @return the number representing the result of a 1-Wire reset
      */
     @SuppressWarnings("static-access")
-    public int interpretOneWireReset (char resetResponse)
+    public DSPortAdapter.ResetResult interpretOneWireReset (char resetResponse)
     {
 
         // make sure the response byte structure is correct
@@ -768,7 +768,7 @@ class UPacketBuilder {
             {
 
             case RESPONSE_RESET_SHORT :
-                return DSPortAdapter.RESET_SHORT;
+                return DSPortAdapter.ResetResult.SHORT;
             case RESPONSE_RESET_PRESENCE :
 
                 // if in long alarm check, record this as a non alarm reset
@@ -780,21 +780,21 @@ class UPacketBuilder {
                         uState.longAlarmCheck = false;
                 }
 
-                return DSPortAdapter.RESET_PRESENCE;
+                return DSPortAdapter.ResetResult.PRESENCE;
             case RESPONSE_RESET_ALARM :
 
                 // alarm presense so go into DS2480 long alarm check mode
                 uState.longAlarmCheck = true;
                 uState.lastAlarmCount = 0;
 
-                return DSPortAdapter.RESET_ALARM;
+                return DSPortAdapter.ResetResult.ALARM;
             case RESPONSE_RESET_NOPRESENCE :
             default :
-                return DSPortAdapter.RESET_NOPRESENCE;
+                return DSPortAdapter.ResetResult.NOPRESENCE;
             }
         }
         else
-            return DSPortAdapter.RESET_NOPRESENCE;
+            return DSPortAdapter.ResetResult.NOPRESENCE;
     }
 
     /**

@@ -1506,7 +1506,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public int reset() throws OneWireIOException, OneWireException {
+    public ResetResult reset() throws OneWireIOException, OneWireException {
 
         try {
 
