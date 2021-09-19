@@ -326,41 +326,27 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    // --------
-    // -------- Adapter detection
-    // --------
-
-    /**
-     * Detect adapter presence on the selected port.
-     *
-     * @return <code>true</code> if the adapter is confirmed to be connected
-     * to the selected port, <code>false</code> if the adapter is not
-     * connected.
-     * @throws OneWireIOException
-     * @throws OneWireException
-     */
     @Override
-    public boolean adapterDetected() throws OneWireIOException, OneWireException {
+    public boolean adapterDetected() {
 
-        boolean rt;
-
+        ThreadContext.push("adapterDetected");
         try {
 
             // acquire exclusive use of the port
             beginLocalExclusive();
             uAdapterPresent();
 
-            rt = uVerify();
+            return uVerify();
+
         } catch (OneWireException ex) {
-            logger.debug("rt=false", ex);
-            rt = false;
+            logger.error("Error trying to detect the adapter", ex);
+            return false;
         } finally {
 
             // release local exclusive use of port
             endLocalExclusive();
+            ThreadContext.pop();
         }
-
-        return rt;
     }
 
     /**
