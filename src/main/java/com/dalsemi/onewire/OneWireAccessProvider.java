@@ -43,9 +43,9 @@ import java.util.Properties;
 
 /**
  * The OneWireAccessProvider class manages the Dallas Semiconductor adapter
- * class derivatives of <code>DSPortAdapter</code>. An enumeration of all
+ * class derivatives of <code>DSPortAdapter</code>. A list of all
  * available adapters can be accessed through the member function
- * <code>EnumerateAllAdapters</code>. This enables an application to be
+ * {@link #getAdapters()}. This enables an application to be
  * adapter independent. There are also facilities to get a system appropriate
  * default adapter/port combination.
  * <p>
@@ -95,7 +95,7 @@ import java.util.Properties;
  * @see DSPortAdapter
  * @version 0.00, 30 August 2000
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireAccessProvider {
 
@@ -109,12 +109,11 @@ public class OneWireAccessProvider {
     }
 
     /**
-     * Gets an <code>Enumeration</code> of all 1-Wire adapter types supported.
-     * Using this enumeration with the port enumeration for each adapter, a
+     * Gets a list of all 1-Wire adapter types supported.
+     * Using this list with the port list for each adapter, a
      * search can be done to find all available hardware adapters.
      *
-     * @return <code>Enumeration</code> of <code>DSPortAdapters</code> in
-     * the system
+     * @return list of {@link DSPortAdapter} instances in the system.
      */
     public static synchronized List<DSPortAdapter> getAdapters() {
 
@@ -127,8 +126,8 @@ public class OneWireAccessProvider {
 
             // check if has any ports (common javax.comm problem)
             if (adapterInstance.getPortNames().isEmpty()) {
-                logger.warn("Warning: serial communications API not setup properly, no ports in enumeration ");
-                logger.warn("Pure-Java DS9097U adapter will not work, not added to adapter enum");
+                logger.warn("Warning: serial communications API not setup properly, no ports detected ");
+                logger.warn("Pure-Java DS9097U adapter will not work, not added to adapter list");
             } else {
                 adaptersFound.add(adapterInstance);
             }
@@ -188,7 +187,7 @@ public class OneWireAccessProvider {
         DSPortAdapter found = null;
 
 
-        // enumerature through available adapters to find the correct one
+        // iterate through available adapters to find the correct one
         for (DSPortAdapter adapter : getAdapters()) {
             // cast the enum as a DSPortAdapter
             // see if this is the type of adapter we want

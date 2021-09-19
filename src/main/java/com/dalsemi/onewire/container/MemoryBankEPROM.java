@@ -41,7 +41,7 @@ import com.dalsemi.onewire.utils.CRC8;
  *
  *  @version    0.00, 28 Aug 2000
  *  @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 class MemoryBankEPROM implements OTPMemoryBank {
 

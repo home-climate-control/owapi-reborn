@@ -83,7 +83,7 @@ import com.dalsemi.onewire.utils.Bit;
  * @author DSS
  * @author Stability enhancements &copy; <a
  *         href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a>
- *         2001-2009
+ *         2001-2021
  */
 public class OneWireContainer1F extends OneWireContainer implements
         SwitchContainer {

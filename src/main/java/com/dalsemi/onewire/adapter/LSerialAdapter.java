@@ -160,6 +160,7 @@ import java.util.Set;
  * @see com.dalsemi.onewire.container.OneWireContainer
  * @version 0.00, 4 Dec 2001
  * @author DS
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class LSerialAdapter extends DSPortAdapter {
 

@@ -164,7 +164,7 @@ import java.util.Set;
  * @see OneWireContainer
  * @version 0.10, 24 Aug 2001
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class USerialAdapter extends DSPortAdapter {
 
