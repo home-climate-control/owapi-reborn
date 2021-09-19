@@ -42,16 +42,9 @@ class OneWireState
    //--------
 
    /**
-    * This is the current logical speed that the 1-Wire Network is operating at. <p>
-    * The valid values for this are:
-    * <ul>
-    * <li> SPEED_REGULAR
-    * <li> SPEED_FLEX
-    * <li> SPEED_OVERDRIVE
-    * <li> SPEED_HYPERDRIVE
-    * </ul>
+    * This is the current logical speed that the 1-Wire Network is operating at.
     */
-   public char oneWireSpeed;
+   public DSPortAdapter.Speed oneWireSpeed;
 
    /**
     * This is the current logical 1-Wire Network pullup level.<p>
@@ -166,7 +159,7 @@ class OneWireState
    {
 
       // speed, level
-      oneWireSpeed = DSPortAdapter.SPEED_REGULAR;
+      oneWireSpeed = DSPortAdapter.Speed.REGULAR;
       oneWireLevel = DSPortAdapter.LEVEL_NORMAL;
 
       // level primed
@@ -178,7 +171,7 @@ class OneWireState
       // adapter abilities
       canProgram = false;
 
-      // search options 
+      // search options
       searchIncludeFamilies     = new byte [0];
       searchExcludeFamilies     = new byte [0];
       searchOnlyAlarmingButtons = false;

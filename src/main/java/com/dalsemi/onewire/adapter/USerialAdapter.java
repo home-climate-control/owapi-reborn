@@ -78,7 +78,7 @@ import com.dalsemi.onewire.utils.Address;
  * </UL>
  * <LI> <B> 1-Wire Network Semaphore </B>
  * <UL>
- * <LI> {@link #beginExclusive(boolean) beginExclusive}
+ * <LI> {@link #beginExclusive()}
  * <LI> {@link #endExclusive() endExclusive}
  * </UL>
  * <LI> <B> 1-Wire Device Discovery </B>
@@ -150,7 +150,7 @@ import com.dalsemi.onewire.utils.Address;
  * <LI> {@link #startProgramPulse(int) startProgramPulse}
  * <LI> {@link #startBreak() startBreak}
  * <LI> {@link #setPowerNormal() setPowerNormal}
- * <LI> {@link #setSpeed(int) setSpeed}
+ * <LI> {@link #setSpeed(Speed)}
  * <LI> {@link #getSpeed() getSpeed}
  * </UL>
  * </UL>
@@ -581,7 +581,7 @@ public class USerialAdapter extends DSPortAdapter {
 
             // Drain.
             logger.fatal("DalSemi ignored this exception", ex);
-            
+
         } finally {
 
             // restore the old state
@@ -916,7 +916,7 @@ public class USerialAdapter extends DSPortAdapter {
                     setPowerNormal();
 
                 // if in overdrive, then use the block method in super
-                if (owState.oneWireSpeed == SPEED_OVERDRIVE)
+                if (owState.oneWireSpeed == Speed.OVERDRIVE)
                     return blockIsPresent(address, false);
 
                 // create a private OneWireState
@@ -981,7 +981,7 @@ public class USerialAdapter extends DSPortAdapter {
                     setPowerNormal();
 
                 // if in overdrive, then use the block method in super
-                if (owState.oneWireSpeed == SPEED_OVERDRIVE)
+                if (owState.oneWireSpeed == Speed.OVERDRIVE)
                     return blockIsPresent(address, true);
 
                 // create a private OneWireState
@@ -1893,8 +1893,8 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    @SuppressWarnings("static-access")
-    public void setSpeed(int speed) throws OneWireIOException, OneWireException {
+    @Override
+    public void setSpeed(Speed speed) throws OneWireIOException, OneWireException {
 
         try {
 
@@ -1902,14 +1902,14 @@ public class USerialAdapter extends DSPortAdapter {
             beginLocalExclusive();
 
             // check for valid speed
-            if ((speed == SPEED_REGULAR) || (speed == SPEED_OVERDRIVE) || (speed == SPEED_FLEX)) {
+            if ((speed == Speed.REGULAR) || (speed == Speed.OVERDRIVE) || (speed == Speed.FLEX)) {
 
                 // change 1-Wire speed
-                owState.oneWireSpeed = (char) speed;
+                owState.oneWireSpeed = speed;
 
                 // set adapter to communicate at this new speed (regular == flex
                 // for now)
-                if (speed == SPEED_OVERDRIVE)
+                if (speed == Speed.OVERDRIVE)
                     uState.uSpeedMode = uState.USPEED_OVERDRIVE;
                 else
                     uState.uSpeedMode = uState.USPEED_FLEX;
@@ -1937,7 +1937,7 @@ public class USerialAdapter extends DSPortAdapter {
      * <li> >3 future speeds
      * </ul>
      */
-    public int getSpeed() {
+    public Speed getSpeed() {
 
         return owState.oneWireSpeed;
     }
@@ -2080,7 +2080,7 @@ public class USerialAdapter extends DSPortAdapter {
                 return;
             }
 
-            logger.debug("Changing baud rate from " + serial.getBaudRate() + " to " + baud);
+            logger.debug("Changing baud rate from {} to {}", serial.getBaudRate(), baud);
 
             // convert this baud to 'u' baud
             char ubaud;
@@ -2246,7 +2246,7 @@ public class USerialAdapter extends DSPortAdapter {
                 uState.ubaud = uState.BAUD_9600;
 
                 // put back to standard speed
-                owState.oneWireSpeed = SPEED_REGULAR;
+                owState.oneWireSpeed = Speed.REGULAR;
                 uState.uSpeedMode = uState.USPEED_FLEX;
                 uState.ubaud = uState.BAUD_9600;
 
@@ -2288,7 +2288,7 @@ public class USerialAdapter extends DSPortAdapter {
                 uState.ubaud = uState.BAUD_9600;
 
                 // put back to standard speed
-                owState.oneWireSpeed = SPEED_REGULAR;
+                owState.oneWireSpeed = Speed.REGULAR;
                 uState.uSpeedMode = uState.USPEED_FLEX;
                 uState.ubaud = uState.BAUD_9600;
 
@@ -2327,15 +2327,16 @@ public class USerialAdapter extends DSPortAdapter {
             // build a message to read the baud rate from the U brick
             uBuild.restart();
 
+            // VT: FIXME: Consider making uParameters a map
             uBuild.setParameter(UParameterSettings.PARAMETER_SLEW,
-                    uState.uParameters[owState.oneWireSpeed].pullDownSlewRate);
+                    uState.uParameters[owState.oneWireSpeed.code].pullDownSlewRate);
             uBuild.setParameter(UParameterSettings.PARAMETER_WRITE1LOW,
-                    uState.uParameters[owState.oneWireSpeed].write1LowTime);
+                    uState.uParameters[owState.oneWireSpeed.code].write1LowTime);
             uBuild.setParameter(UParameterSettings.PARAMETER_SAMPLEOFFSET,
-                    uState.uParameters[owState.oneWireSpeed].sampleOffsetTime);
+                    uState.uParameters[owState.oneWireSpeed.code].sampleOffsetTime);
             uBuild.setParameter(UParameterSettings.PARAMETER_5VPULSE, UParameterSettings.TIME5V_infinite);
-            int baud_offset = uBuild.getParameter(UParameterSettings.PARAMETER_BAUDRATE);
-            int bit_offset = uBuild.dataBit(true, false);
+            var baud_offset = uBuild.getParameter(UParameterSettings.PARAMETER_BAUDRATE);
+            var bit_offset = uBuild.dataBit(true, false);
 
             // send and receive
             char[] result_array = uTransaction(uBuild);

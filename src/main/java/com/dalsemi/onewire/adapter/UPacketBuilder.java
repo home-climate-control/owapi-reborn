@@ -98,7 +98,7 @@ class UPacketBuilder {
     /** DS9097U bit polarity zero  for function FUNCTION_BIT */
     public static final char BIT_ZERO = 0x00;
 
-    //-------- DS9097U 5V priming values 
+    //-------- DS9097U 5V priming values
 
     /** DS9097U 5V prime on for function FUNCTION_BIT    */
     public static final char PRIME5V_TRUE = 0x02;
@@ -106,7 +106,7 @@ class UPacketBuilder {
     /** DS9097U 5V prime off for function FUNCTION_BIT   */
     public static final char PRIME5V_FALSE = 0x00;
 
-    //-------- DS9097U command masks 
+    //-------- DS9097U command masks
 
     /** DS9097U mask to read or write a configuration parameter   */
     public static final char CONFIG_MASK = 0x01;
@@ -114,7 +114,7 @@ class UPacketBuilder {
     /** DS9097U mask to read the OneWire reset response byte */
     public static final char RESPONSE_RESET_MASK = 0x03;
 
-    //-------- DS9097U reset results 
+    //-------- DS9097U reset results
 
     /** DS9097U  OneWire reset result = shorted */
     public static final char RESPONSE_RESET_SHORT = 0x00;
@@ -128,7 +128,7 @@ class UPacketBuilder {
     /** DS9097U  OneWire reset result = no presence */
     public static final char RESPONSE_RESET_NOPRESENCE = 0x03;
 
-    //-------- DS9097U bit interpretation 
+    //-------- DS9097U bit interpretation
 
     /** DS9097U mask to read bit operation result   */
     public static final char RESPONSE_BIT_MASK = 0x03;
@@ -206,7 +206,7 @@ class UPacketBuilder {
     }
 
     //--------
-    //-------- Packet handling Methods 
+    //-------- Packet handling Methods
     //--------
 
     /**
@@ -258,7 +258,7 @@ class UPacketBuilder {
     }
 
     //--------
-    //-------- 1-Wire Network operation append methods 
+    //-------- 1-Wire Network operation append methods
     //--------
 
     /** Add the command to reset the OneWire at the current speed.
@@ -276,7 +276,7 @@ class UPacketBuilder {
         // append the reset command at the current speed
         packet.buffer.append(( char ) (FUNCTION_RESET | uState.uSpeedMode));
 
-        // count this as a return 
+        // count this as a return
         totalReturnLength++;
         packet.returnLength++;
 
@@ -284,7 +284,7 @@ class UPacketBuilder {
         if (!uState.streamResets)
             newPacket();
 
-        // check for 2480 wait on extra bytes packet 
+        // check for 2480 wait on extra bytes packet
         if (uState.longAlarmCheck
                 && ((uState.uSpeedMode == uState.USPEED_REGULAR)
                         || (uState.uSpeedMode == uState.USPEED_FLEX)))
@@ -313,7 +313,7 @@ class UPacketBuilder {
 
         logger.debug("UPacketbuilder-dataBytes[] length "+ dataBytesValue.length);
 
-        // record the current count location 
+        // record the current count location
         int ret_value = totalReturnLength;
 
         // check each byte to see if some need duplication
@@ -339,7 +339,7 @@ class UPacketBuilder {
                             + Integer.toHexString(( int ) dataBytesValue [i] & 0x00FF)
                             + "]");
 
-                // check for duplicates needed for special characters  
+                // check for duplicates needed for special characters
                 if ((( char ) (dataBytesValue [i] & 0x00FF) == uState.MODE_COMMAND)
                         || ((( char ) (dataBytesValue [i] & 0x00FF) == uState.MODE_SPECIAL)
                                 && (uState.revision == uState.CHIP_VERSION1)))
@@ -562,7 +562,7 @@ class UPacketBuilder {
     }
 
     //--------
-    //-------- U mode commands 
+    //-------- U mode commands
     //--------
 
     /**
@@ -693,23 +693,23 @@ class UPacketBuilder {
     }
 
     //--------
-    //-------- 1-Wire Network result interpretation methods 
+    //-------- 1-Wire Network result interpretation methods
     //--------
 
     /**
-     * Interpret the block of bytes 
+     * Interpret the block of bytes
      *
-     * @param dataByteResponse  
+     * @param dataByteResponse
      * @param responseOffset
      * @param result
      * @param offset
      * @param len
      */
-    public void interpretDataBytes (char[] dataByteResponse, int responseOffset, 
+    public void interpretDataBytes (char[] dataByteResponse, int responseOffset,
             byte[] result, int offset, int len)
     {
         char result_byte;
-        int temp_offset, i, j;     
+        int temp_offset, i, j;
 
         for (i = 0; i < len; i++)
         {
@@ -869,7 +869,7 @@ class UPacketBuilder {
             id [i] = ( byte ) temp_id [i];
         }
 
-        // check results 
+        // check results
         if ((!Address.isValid(id)) || (temp_last_descrepancy == 63)
                 || (temp_id [0] == 0))
             return false;
@@ -921,13 +921,13 @@ class UPacketBuilder {
     }
 
     //--------
-    //-------- Misc Utility methods 
+    //-------- Misc Utility methods
     //--------
 
     /**
      * Request the maximum rate to do an operation
      */
-    public static int getDesiredBaud (int operation, int owSpeed, int maxBaud)
+    public static int getDesiredBaud (int operation, DSPortAdapter.Speed owSpeed, int maxBaud)
     {
         int baud = 9600;
 
@@ -935,13 +935,13 @@ class UPacketBuilder {
         {
 
         case OPERATION_BYTE :
-            if (owSpeed == DSPortAdapter.SPEED_OVERDRIVE)
+            if (owSpeed == DSPortAdapter.Speed.OVERDRIVE)
                 baud = 115200;
             else
                 baud = 9600;
             break;
         case OPERATION_SEARCH :
-            if (owSpeed == DSPortAdapter.SPEED_OVERDRIVE)
+            if (owSpeed == DSPortAdapter.Speed.OVERDRIVE)
                 baud = 57600;
             else
                 baud = 9600;

@@ -218,17 +218,9 @@ public class OneWireContainer3A
       return "Dual Channel Addressable Switch";
    }
 
-   /**
-    * Returns the maximum speed this iButton or 1-Wire device can
-    * communicate at.
-    *
-    * @return maximum speed
-    * @see DSPortAdapter#setSpeed
-    */
    @Override
-   public int getMaxSpeed ()
-   {
-      return DSPortAdapter.SPEED_OVERDRIVE;
+   public DSPortAdapter.Speed getMaxSpeed () {
+      return DSPortAdapter.Speed.OVERDRIVE;
    }
 
    //--------

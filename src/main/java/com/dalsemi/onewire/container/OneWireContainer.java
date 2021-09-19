@@ -129,7 +129,7 @@ public class OneWireContainer {
      *
      * @see DSPortAdapter#setSpeed
      */
-    protected int speed;
+    protected DSPortAdapter.Speed speed;
 
     /**
      * Flag to indicate that falling back to a slower speed then requested
@@ -233,7 +233,7 @@ public class OneWireContainer {
         System.arraycopy(newAddress, 0, address, 0, 8);
 
         // set desired speed to be SPEED_REGULAR by default with no fallback
-        speed           = adapter.SPEED_REGULAR;
+        speed           = DSPortAdapter.Speed.REGULAR;
         speedFallBackOK = false;
     }
 
@@ -256,7 +256,7 @@ public class OneWireContainer {
         Address.toByteArray(newAddress, address);
 
         // set desired speed to be SPEED_REGULAR by default with no fallback
-        speed           = adapter.SPEED_REGULAR;
+        speed           = DSPortAdapter.Speed.REGULAR;
         speedFallBackOK = false;
     }
 
@@ -279,7 +279,7 @@ public class OneWireContainer {
         Address.toByteArray(newAddress, address);
 
         // set desired speed to be SPEED_REGULAR by default with no fallback
-        speed           = adapter.SPEED_REGULAR;
+        speed           = DSPortAdapter.Speed.REGULAR;
         speedFallBackOK = false;
     }
 
@@ -352,7 +352,7 @@ public class OneWireContainer {
      *                 speed if true
      *
      */
-    public void setSpeed(int newSpeed, boolean fallBack) {
+    public void setSpeed(DSPortAdapter.Speed newSpeed, boolean fallBack) {
         speed           = newSpeed;
         speedFallBackOK = fallBack;
     }
@@ -366,9 +366,8 @@ public class OneWireContainer {
      * @return maximum speed
      * @see DSPortAdapter#setSpeed
      */
-    @SuppressWarnings("static-access")
-    public int getMaxSpeed() {
-        return adapter.SPEED_REGULAR;
+    public DSPortAdapter.Speed getMaxSpeed() {
+        return DSPortAdapter.Speed.REGULAR;
     }
 
     /**
@@ -456,7 +455,7 @@ public class OneWireContainer {
      * @throws OneWireIOException WHEN selected speed fails and fallback
      *                                 is false
      * @throws OneWireException WHEN hypterdrive is selected speed
-     * @see #setSpeed(int,boolean)
+     * @see #setSpeed(com.dalsemi.onewire.adapter.DSPortAdapter.Speed,boolean)
      */
     @SuppressWarnings("static-access")
     public void doSpeed() throws OneWireException {
@@ -473,14 +472,14 @@ public class OneWireContainer {
         }
 
         // speed Overdrive
-        if (speed == adapter.SPEED_OVERDRIVE) {
+        if (speed == DSPortAdapter.Speed.OVERDRIVE) {
 
             try {
                 // get this device and adapter to overdrive
-                adapter.setSpeed(adapter.SPEED_REGULAR);
+                adapter.setSpeed(DSPortAdapter.Speed.REGULAR);
                 adapter.reset();
                 adapter.putByte(( byte ) 0x69);
-                adapter.setSpeed(adapter.SPEED_OVERDRIVE);
+                adapter.setSpeed(DSPortAdapter.Speed.OVERDRIVE);
 
             } catch (OneWireIOException ex) {
                 // VOID
@@ -512,15 +511,15 @@ public class OneWireContainer {
 
                 // check if allow fallback
                 if (speedFallBackOK) {
-                    adapter.setSpeed(adapter.SPEED_REGULAR);
+                    adapter.setSpeed(DSPortAdapter.Speed.REGULAR);
                 } else {
                     throw new OneWireIOException(address, "Failed to get device to selected speed (overdrive)");
                 }
             }
         }
         // speed regular or flex
-        else if ((speed == adapter.SPEED_REGULAR)
-                || (speed == adapter.SPEED_FLEX)) {
+        else if ((speed == DSPortAdapter.Speed.REGULAR)
+                || (speed == DSPortAdapter.Speed.FLEX)) {
             adapter.setSpeed(speed);
         // speed hyperdrive, don't know how to do this
         } else {

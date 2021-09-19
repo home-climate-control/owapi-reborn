@@ -76,7 +76,7 @@ import java.util.Vector;
  * </UL>
  * <LI> <B> 1-Wire Network Semaphore </B>
  * <UL>
- * <LI> {@link #beginExclusive(boolean) beginExclusive}
+ * <LI> {@link #beginExclusive()}
  * <LI> {@link #endExclusive() endExclusive}
  * </UL>
  * <LI> <B> 1-Wire Device Discovery </B>
@@ -148,7 +148,7 @@ import java.util.Vector;
  * <LI> {@link #startProgramPulse(int) startProgramPulse}
  * <LI> {@link #startBreak() startBreak}
  * <LI> {@link #setPowerNormal() setPowerNormal}
- * <LI> {@link #setSpeed(int) setSpeed}
+ * <LI> {@link #setSpeed(Speed)}  setSpeed}
  * <LI> {@link #getSpeed() getSpeed}
  * </UL>
  * </UL>
@@ -167,25 +167,28 @@ import java.util.Vector;
  */
 public abstract class DSPortAdapter {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger();
 
-    // --------
-    // -------- Finals
-    // --------
+    /**
+     * Adapter speed.
+     *
+     * {@link #FLEX} is used for long lines, for others see application notes.
+     */
+    public enum Speed {
+
+        REGULAR(0),
+        FLEX(1),
+        OVERDRIVE(2),
+        HYPERDRIVE(3);
+
+        public final int code;
+
+        Speed(int code) {
+            this.code = code;
+        }
+    }
 
     public static final String CLASS_NAME_ONEWIRECONTAINER = "com.dalsemi.onewire.container.OneWireContainer";
-
-    /** Speed modes for 1-Wire Network, regular */
-    public static final int SPEED_REGULAR = 0;
-
-    /** Speed modes for 1-Wire Network, flexible for long lines */
-    public static final int SPEED_FLEX = 1;
-
-    /** Speed modes for 1-Wire Network, overdrive */
-    public static final int SPEED_OVERDRIVE = 2;
-
-    /** Speed modes for 1-Wire Network, hyperdrive */
-    public static final int SPEED_HYPERDRIVE = 3;
 
     /** 1-Wire Network level, normal (weak 5Volt pullup) */
     public static final char LEVEL_NORMAL = 0;
@@ -1437,10 +1440,10 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    public void setSpeed(int speed) throws OneWireException {
+    public void setSpeed(Speed speed) throws OneWireException {
 
-        if (speed != SPEED_REGULAR)
-            throw new OneWireException("Non-regular 1-Wire speed not supported by this adapter type");
+        if (speed != Speed.REGULAR)
+            throw new OneWireException("Speed " + speed + " not supported by this adapter type");
     }
 
     /**
@@ -1457,9 +1460,8 @@ public abstract class DSPortAdapter {
      * <li> >3 future speeds
      * </ul>
      */
-    public int getSpeed() {
-
-        return SPEED_REGULAR;
+    public Speed getSpeed() {
+        return Speed.REGULAR;
     }
 
     // --------
