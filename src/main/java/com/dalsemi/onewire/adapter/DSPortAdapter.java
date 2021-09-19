@@ -53,7 +53,6 @@ import java.util.TreeMap;
  * <UL>
  * <LI> {@link #getAdapterName() getAdapterName}
  * <LI> {@link #getPortTypeDescription() getPortTypeDescription}
- * <LI> {@link #getClassVersion() getClassVersion}
  * <LI> {@link #adapterDetected() adapterDetected}
  * <LI> {@link #getAdapterVersion() getAdapterVersion}
  * <LI> {@link #getAdapterAddress() getAdapterAddress}
@@ -310,13 +309,6 @@ public abstract class DSPortAdapter {
      * @return {@code String} description of the port type required.
      */
     public abstract String getPortTypeDescription();
-
-    /**
-     * Retrieves a version string for this class.
-     *
-     * @return version string
-     */
-    public abstract String getClassVersion();
 
     /**
      * Retrieves a list of the platform appropriate port names for this adapter.

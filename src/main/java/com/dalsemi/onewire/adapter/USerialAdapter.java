@@ -27,6 +27,7 @@
 
 package com.dalsemi.onewire.adapter;
 
+import com.dalsemi.onewire.Family;
 import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.container.OneWireContainer;
@@ -53,7 +54,6 @@ import java.util.Enumeration;
  * <UL>
  * <LI> {@link #getAdapterName() getAdapterName}
  * <LI> {@link #getPortTypeDescription() getPortTypeDescription}
- * <LI> {@link #getClassVersion() getClassVersion}
  * <LI> {@link #adapterDetected() adapterDetected}
  * <LI> {@link #getAdapterVersion() getAdapterVersion}
  * <LI> {@link #getAdapterAddress() getAdapterAddress}
@@ -168,12 +168,8 @@ import java.util.Enumeration;
  */
 public class USerialAdapter extends DSPortAdapter {
 
-    // --------
-    // -------- Finals
-    // --------
-
     /** Family code for the EPROM iButton DS1982 */
-    private static final int ADAPTER_ID_FAMILY = 0x09;
+    private static final Family ADAPTER_ID_FAMILY = Family.F09;
 
     /** Extended read page command for DS1982 */
     private static final int EXTENDED_READ_PAGE = 0xC3;
@@ -184,30 +180,14 @@ public class USerialAdapter extends DSPortAdapter {
     /** Conditional Search, only 'alarming' devices participate */
     private static final char ALARM_SEARCH_CMD = 0xEC;
 
-    // --------
-    // -------- Static Variables
-    // --------
-
-    /** Version string for this adapter class */
-    private static String classVersion = "0.10";
-
-    /** Hashtable to contain SerialService instances */
-    // private static Hashtable serailServiceHash = new Hashtable(4);
     /** Max baud rate supported by DS9097U */
     private static int maxBaud;
-
-    // --------
-    // -------- Variables
-    // --------
 
     /** Reference to the current SerialService */
     private SerialService serial;
 
     /** String name of the current opened port */
     private boolean adapterPresent;
-
-    /** Flag to indicate more than expected byte received in a transaction */
-    //private boolean extraBytesReceived;
 
     /** U Adapter packet builder */
     UPacketBuilder uBuild;
@@ -234,31 +214,6 @@ public class USerialAdapter extends DSPortAdapter {
         adapterPresent = false;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-
-        freePort();
-
-        super.finalize();
-    }
-
-    /**
-     * Cleans up the resources used by the thread argument. If another thread
-     * starts communicating with this port, and then goes away, there is no way
-     * to relinquish the port without stopping the process. This method allows
-     * other threads to clean up.
-     *
-     * @param thread that may have used a {@link USerialAdapter}.
-     *
-     * @deprecated Apparently, never used.
-     */
-    @Deprecated
-    public static void cleanUpByThread(Thread thread) {
-
-        LogManager.getLogger(USerialAdapter.class).debug("CleanUpByThread called: Thread=" + thread);
-        SerialService.cleanUpByThread(thread);
-    }
-
     /**
      * Retrieve the name of the port adapter as a string. The 'Adapter' is a
      * device that connects to a 'port' that allows one to communicate with an
@@ -268,7 +223,6 @@ public class USerialAdapter extends DSPortAdapter {
      */
     @Override
     public String getAdapterName() {
-
         return "DS9097U";
     }
 
@@ -280,25 +234,8 @@ public class USerialAdapter extends DSPortAdapter {
      */
     @Override
     public String getPortTypeDescription() {
-
-        return "serial communication port";
+        return "Serial communication port";
     }
-
-    /**
-     * Retrieve a version string for this class.
-     *
-     * @return version string
-     */
-    @Override
-    public String getClassVersion() {
-
-        return classVersion;
-    }
-
-    // --------
-    // -------- Port Selection
-
-    // --------
 
     /**
      * Retrieve a list of the platform appropriate port names for this adapter.
@@ -311,7 +248,6 @@ public class USerialAdapter extends DSPortAdapter {
      */
     @Override
     public Enumeration<String> getPortNames() {
-
         return serial.getSerialPortIdentifiers();
     }
 
@@ -509,7 +445,7 @@ public class USerialAdapter extends DSPortAdapter {
                 // set the search to find all of the available DS1982's
                 this.setSearchAllDevices();
                 this.targetAllFamilies();
-                this.targetFamily(ADAPTER_ID_FAMILY);
+                this.targetFamily(ADAPTER_ID_FAMILY.code);
 
                 // 8 bytes
                 byte[] address = {

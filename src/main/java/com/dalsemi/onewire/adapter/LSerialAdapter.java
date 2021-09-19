@@ -28,11 +28,12 @@
 package com.dalsemi.onewire.adapter;
 
 // imports
-import java.io.IOException;
-import java.util.Enumeration;
 
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.utils.CRC8;
+
+import java.io.IOException;
+import java.util.Enumeration;
 
 /**
  * The LSerialAdapter class implememts the DSPortAdapter interface for a legacy
@@ -48,7 +49,6 @@ import com.dalsemi.onewire.utils.CRC8;
  * <UL>
  * <LI> {@link #getAdapterName() getAdapterName}
  * <LI> {@link #getPortTypeDescription() getPortTypeDescription}
- * <LI> {@link #getClassVersion() getClassVersion}
  * <LI> {@link #adapterDetected() adapterDetected}
  * <LI> {@link #getAdapterVersion() getAdapterVersion}
  * <LI> {@link #getAdapterAddress() getAdapterAddress}
@@ -246,17 +246,6 @@ public class LSerialAdapter extends DSPortAdapter {
         return "serial communication port";
     }
 
-    /**
-     * Retrieve a version string for this class.
-     *
-     * @return version string
-     */
-    @Override
-    public String getClassVersion() {
-
-        return classVersion;
-    }
-
     // --------
     // -------- Port Selection
     // --------
@@ -270,7 +259,6 @@ public class LSerialAdapter extends DSPortAdapter {
      * @return enumeration of type <code>String</code> that contains the port
      * names
      */
-    @SuppressWarnings("static-access")
     @Override
     public Enumeration<String> getPortNames() {
 
@@ -291,7 +279,6 @@ public class LSerialAdapter extends DSPortAdapter {
      * communicate with port.
      * @throws OneWireException If port does not exist
      */
-    @SuppressWarnings("static-access")
     @Override
     public boolean selectPort(String newPortName) throws OneWireIOException, OneWireException {
 
