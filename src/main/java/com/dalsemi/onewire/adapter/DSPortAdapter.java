@@ -35,9 +35,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -311,15 +311,14 @@ public abstract class DSPortAdapter {
     public abstract String getPortTypeDescription();
 
     /**
-     * Retrieves a list of the platform appropriate port names for this adapter.
+     * Retrieves a set of the platform appropriate port names for this adapter.
      * A port must be selected with the method 'selectPort' before any other
      * communication methods can be used. Using a communication method before
      * 'selectPort' will result in a {@code OneWireException} exception.
      *
-     * @return {@code Enumeration} of type {@code String} that contains the port
-     * names
+     * @return Set of port names.
      */
-    public abstract Enumeration<String> getPortNames();
+    public abstract Set<String> getPortNames();
 
     /**
      * Address to device container map.

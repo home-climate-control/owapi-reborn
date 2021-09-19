@@ -33,7 +33,7 @@ import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.utils.CRC8;
 
 import java.io.IOException;
-import java.util.Enumeration;
+import java.util.Set;
 
 /**
  * The LSerialAdapter class implememts the DSPortAdapter interface for a legacy
@@ -246,22 +246,8 @@ public class LSerialAdapter extends DSPortAdapter {
         return "serial communication port";
     }
 
-    // --------
-    // -------- Port Selection
-    // --------
-
-    /**
-     * Retrieve a list of the platform appropriate port names for this adapter.
-     * A port must be selected with the method 'selectPort' before any other
-     * communication methods can be used. Using a communcation method before
-     * 'selectPort' will result in a <code>OneWireException</code> exception.
-     *
-     * @return enumeration of type <code>String</code> that contains the port
-     * names
-     */
     @Override
-    public Enumeration<String> getPortNames() {
-
+    public Set<String> getPortNames() {
         return serial.getSerialPortIdentifiers();
     }
 

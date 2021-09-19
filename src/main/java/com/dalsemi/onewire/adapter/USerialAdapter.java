@@ -39,6 +39,7 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Set;
 
 /**
  * The USerialAdapter class implememts the DSPortAdapter interface for a DS2480
@@ -237,18 +238,9 @@ public class USerialAdapter extends DSPortAdapter {
         return "Serial communication port";
     }
 
-    /**
-     * Retrieve a list of the platform appropriate port names for this adapter.
-     * A port must be selected with the method 'selectPort' before any other
-     * communication methods can be used. Using a communcation method before
-     * 'selectPort' will result in a <code>OneWireException</code> exception.
-     *
-     * @return enumeration of type <code>String</code> that contains the port
-     * names
-     */
     @Override
-    public Enumeration<String> getPortNames() {
-        return serial.getSerialPortIdentifiers();
+    public Set<String> getPortNames() {
+        return SerialService.getSerialPortIdentifiers();
     }
 
     /**
@@ -266,7 +258,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireException If port does not exist
      */
     @Override
-    public boolean selectPort(String newPortName) throws OneWireIOException, OneWireException {
+    public boolean selectPort(String newPortName) throws OneWireException {
 
         // find the port reference
         serial = SerialService.getSerialService(newPortName);

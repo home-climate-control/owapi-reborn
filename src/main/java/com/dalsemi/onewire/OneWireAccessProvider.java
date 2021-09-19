@@ -28,17 +28,17 @@
 // OneWireAccessProvider.java
 package com.dalsemi.onewire;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
-
+import com.dalsemi.onewire.adapter.DSPortAdapter;
+import com.dalsemi.onewire.adapter.OneWireIOException;
+import com.dalsemi.onewire.adapter.USerialAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.dalsemi.onewire.adapter.DSPortAdapter;
-import com.dalsemi.onewire.adapter.OneWireIOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 
 /**
@@ -126,54 +126,30 @@ public class OneWireAccessProvider {
      * @return <code>Enumeration</code> of <code>DSPortAdapters</code> in
      * the system
      */
-    public synchronized static Enumeration<DSPortAdapter> enumerateAllAdapters() {
+    public synchronized static List<DSPortAdapter> getAdapters() {
 
-        Vector<DSPortAdapter> adaptersFound = new Vector<DSPortAdapter>(3, 1);
-        boolean TMEX_loaded = false;
-        boolean serial_loaded = false;
+        var adaptersFound = new ArrayList<DSPortAdapter>();
 
-        // check for override
         if (useOverrideAdapter) {
-            adaptersFound.addElement(overrideAdapter);
-            return (adaptersFound.elements());
+            return List.of(overrideAdapter);
         }
 
         // get the pure java adapter
         try {
-            Class<?> adapterClass = Class.forName("com.dalsemi.onewire.adapter.USerialAdapter");
+            Class<?> adapterClass = Class.forName(USerialAdapter.class.getName());
             DSPortAdapter adapterInstance = (DSPortAdapter) adapterClass.newInstance();
 
             // check if has any ports (common javax.comm problem)
-            if (!adapterInstance.getPortNames().hasMoreElements()) {
-                if (!TMEX_loaded) {
-                    logger.warn("Warning: serial communications API not setup properly, no ports in enumeration ");
-                    logger.warn("Pure-Java DS9097U adapter will not work, not added to adapter enum");
-                }
+            if (adapterInstance.getPortNames().isEmpty()) {
+                logger.warn("Warning: serial communications API not setup properly, no ports in enumeration ");
+                logger.warn("Pure-Java DS9097U adapter will not work, not added to adapter enum");
             } else {
-                adaptersFound.addElement(adapterInstance);
-                serial_loaded = true;
+                adaptersFound.add(adapterInstance);
             }
-        } catch (UnsatisfiedLinkError e) {
-            if (!TMEX_loaded) {
-                logger.warn("Could not load serial comm API for pure-Java DS9097U adapter.");
-                logger.warn("This message can be safely ignored if you are using TMEX Drivers or");
-                logger.warn("the NetAdapter to connect to the 1-Wire Network.");
-            }
-        } catch (NoClassDefFoundError e) {
-            if (!TMEX_loaded) {
-                logger.warn("Could not load serial comm API for pure-Java DS9097U adapter: " + e);
-                logger.warn("This message can be safely ignored if you are using TMEX Drivers or");
-                logger.warn("the NetAdapter to connect to the 1-Wire Network.");
-            }
+
         } catch (Exception ex) {
             // DRAIN
             logger.fatal("DalSemi ignored this exception", ex);
-        }
-
-        if (!TMEX_loaded && !serial_loaded) {
-            logger.error("Standard drivers for 1-Wire are not found.");
-            logger.error("Please download the latest drivers from http://www.ibutton.com ");
-            logger.error("Or install RXTX Serial Communications API from http://www.rxtx.org ");
         }
 
         // get adapters from property file with keys
@@ -196,14 +172,8 @@ public class OneWireAccessProvider {
                 // add it to the enum
                 Class<?> adapterClass = Class.forName(className);
                 DSPortAdapter adapterInstance = (DSPortAdapter) adapterClass.newInstance();
-                adaptersFound.addElement(adapterInstance);
+                adaptersFound.add(adapterInstance);
             }
-        } catch (UnsatisfiedLinkError e) {
-            logger.warn("Adapter \"" + className + "\" was registered in "
-                    + "properties file, but the class could not be loaded");
-        } catch (ClassNotFoundException e) {
-            logger.error("Adapter \"" + className + "\" was registered in properties file, "
-                    + " but the class was not found");
         } catch (Exception ex) {
             // DRAIN
             logger.fatal("DalSemi ignored this exception", ex);
@@ -213,7 +183,7 @@ public class OneWireAccessProvider {
         if (adaptersFound.isEmpty())
             logger.error("No 1-Wire adapter classes found");
 
-        return (adaptersFound.elements());
+        return (adaptersFound);
     }
 
     /**
@@ -237,9 +207,9 @@ public class OneWireAccessProvider {
 
 
         // enumerature through available adapters to find the correct one
-        for (Enumeration<DSPortAdapter> e = enumerateAllAdapters(); e.hasMoreElements();) {
+        for (var e = getAdapters().iterator(); e.hasNext();) {
             // cast the enum as a DSPortAdapter
-            DSPortAdapter adapter = e.nextElement();
+            DSPortAdapter adapter = e.next();
 
             // see if this is the type of adapter we want
             if ((found != null) || (!adapter.getAdapterName().equals(adapterName))) {
@@ -408,12 +378,15 @@ public class OneWireAccessProvider {
                 ret_str = "DS9097U";
             else if (propName.equals("onewire.port.default")) {
                 try {
-                    adapter_class = Class.forName("com.dalsemi.onewire.adapter.USerialAdapter");
+
+                    adapter_class = Class.forName(USerialAdapter.class.getName());
                     adapter_instance = (DSPortAdapter) adapter_class.newInstance();
 
                     // check if has any ports (common javax.comm problem)
-                    if (adapter_instance.getPortNames().hasMoreElements())
-                        ret_str = adapter_instance.getPortNames().nextElement();
+                    if (!adapter_instance.getPortNames().isEmpty()) {
+                        ret_str = adapter_instance.getPortNames().iterator().next();
+                    }
+
                 } catch (Throwable t) {
                     // DRAIN
                     logger.fatal("DalSemi ignored this exception", t);

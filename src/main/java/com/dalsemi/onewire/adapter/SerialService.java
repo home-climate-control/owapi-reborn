@@ -1,5 +1,17 @@
 package com.dalsemi.onewire.adapter;
 
+import com.dalsemi.onewire.OneWireAccessProvider;
+import com.dalsemi.onewire.utils.Convert;
+import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -8,21 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
+import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
-import gnu.io.UnsupportedCommOperationException;
-import com.dalsemi.onewire.OneWireAccessProvider;
-import com.dalsemi.onewire.utils.Convert;
 
 /**
  * @author Original implementation &copy; Dallas Semiconductor
@@ -30,7 +29,7 @@ import com.dalsemi.onewire.utils.Convert;
  */
 public class SerialService implements SerialPortEventListener {
 
-    protected final static Logger logger = LogManager.getLogger(OneWireAccessProvider.class);
+    protected static final Logger logger = LogManager.getLogger(SerialService.class);
 
     /**
      * The serial port name of this object (e.g. COM1, /dev/ttyS0).
@@ -65,7 +64,7 @@ public class SerialService implements SerialPortEventListener {
     /**
      * Vector of thread hash codes that have done an open but no close.
      */
-    private final Set<Thread> users = new HashSet<Thread>();
+    private final Set<Thread> users = new HashSet<>();
 
     /**
      * Flag to indicate byte banging on read.
@@ -75,70 +74,23 @@ public class SerialService implements SerialPortEventListener {
     /**
      * Vector of serial port ID strings (i.e. "COM1", "COM2", etc).
      */
-    private static final Vector<String> vPortIDs = new Vector<String>();
+    private static final Set<String> vPortIDs = new TreeSet<>();
 
     /**
      * Static list of threadIDs to the services they are using.
      */
-    private static final Map<Thread, SerialService> knownServices = new HashMap<Thread, SerialService>();
+    private static final Map<Thread, SerialService> knownServices = new HashMap<>();
 
     /**
      * Static list of all unique SerialService classes.
      */
-    private static final Map<String, SerialService> uniqueServices = new HashMap<String, SerialService>();
-
-
-    /**
-     * Cleans up the resources used by the thread argument.  If another
-     * thread starts communicating with this port, and then goes away,
-     * there is no way to relinquish the port without stopping the
-     * process. This method allows other threads to clean up.
-     *
-     * @param thread thread that may have used a {@link USerialAdapter}
-     *
-     * @deprecated Apparently not used anywhere.
-     */
-    @Deprecated
-    public static void cleanUpByThread(Thread thread) {
-
-        logger.debug("SerialService.CleanUpByThread(Thread)");
-
-        try {
-
-            SerialService serialService = knownServices.get(thread);
-
-            if (serialService == null) {
-                return;
-            }
-
-            // VT: FIXME: Stuff below doesn't make sense together with changed lock semantics - if you started it, you gotta clean it up...
-
-            /*
-      synchronized(serialService) {
-
-        if (thread.hashCode() == serialService.currentThreadHash) {
-
-          //then we need to release the lock...
-          serialService.currentThreadHash = 0;
-        }
-      }
-             */
-
-            serialService.closePortByThreadID(thread);
-
-        } catch(Exception ex) {
-
-            logger.error("cleanUpByThread(" + thread + ") failed", ex);
-        }
-    }
+    private static final Map<String, SerialService> uniqueServices = new HashMap<>();
 
     /**
      * do not use default constructor
      * use getSerialService(String) instead.
      */
-    @SuppressWarnings("unused")
     private SerialService() {
-
         throw new IllegalStateException("Use getSerialService(String) instead");
     }
 
@@ -156,14 +108,14 @@ public class SerialService implements SerialPortEventListener {
     }
 
     public static SerialService getSerialService(String portName) {
-        
+
         ThreadContext.push("getSerialService");
-        
+
         try {
 
             synchronized(uniqueServices) {
 
-                logger.debug("requested: " + portName);
+                logger.debug("requested: {}", portName);
 
                 String portId = portName.toLowerCase();
                 SerialService existingService = uniqueServices.get(portId);
@@ -188,6 +140,7 @@ public class SerialService implements SerialPortEventListener {
      * method on this object, so that all blocking methods are kicked
      * awake whenever a serialEvent occurs.
      */
+    @Override
     public void serialEvent(SerialPortEvent spe) {
 
         switch(spe.getEventType())
@@ -223,7 +176,7 @@ public class SerialService implements SerialPortEventListener {
             logger.debug("SerialPortEvent: Ring indicator.");
             break;
         }
-        
+
         logger.debug("SerialService.SerialEvent: oldValue=" + spe.getOldValue());
         logger.debug("SerialService.SerialEvent: newValue=" + spe.getNewValue());
     }
@@ -237,7 +190,7 @@ public class SerialService implements SerialPortEventListener {
     }
 
     public synchronized void openPort(SerialPortEventListener spel) throws IOException {
-        
+
         ThreadContext.push("openPort");
 
         try {
@@ -275,7 +228,7 @@ public class SerialService implements SerialPortEventListener {
                 logger.debug("getOutputBufferSize = " + serialPort.getOutputBufferSize());
 
                 serialPort.addEventListener(spel != null ? spel : this);
-                
+
                 serialPort.notifyOnOutputEmpty(true);
                 serialPort.notifyOnDataAvailable(true);
 
@@ -319,16 +272,11 @@ public class SerialService implements SerialPortEventListener {
         }
     }
 
-    public synchronized void setNotifyOnDataAvailable(boolean notify) {
-        serialPort.notifyOnDataAvailable(notify);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static Enumeration<String> getSerialPortIdentifiers() {
+    public static Set<String> getSerialPortIdentifiers() {
 
         synchronized(vPortIDs) {
 
-            if(vPortIDs.isEmpty()) {
+            if( vPortIDs.isEmpty()) {
 
                 for (Enumeration<CommPortIdentifier> e = CommPortIdentifier.getPortIdentifiers(); e.hasMoreElements(); ) {
 
@@ -340,7 +288,7 @@ public class SerialService implements SerialPortEventListener {
                 }
             }
 
-            return vPortIDs.elements();
+            return vPortIDs;
         }
     }
 
@@ -384,7 +332,7 @@ public class SerialService implements SerialPortEventListener {
     public synchronized void setBaudRate(int baudRate) throws IOException {
 
         ThreadContext.push("setBaudRate(" + baudRate + ")");
-        
+
         try {
             if(!isPortOpen())
                 throw new IOException(null, new IllegalStateException("Port Not Open"));
@@ -465,7 +413,7 @@ public class SerialService implements SerialPortEventListener {
      * Allows clean up port by thread.
      */
     private synchronized void closePortByThreadID(Thread t) {
-        
+
         ThreadContext.push("closePortByThreadID");
 
         try {
@@ -489,7 +437,7 @@ public class SerialService implements SerialPortEventListener {
                 serialInputStream = null;
                 serialOutputStream = null;
             }
-            
+
         } finally {
             ThreadContext.pop();
         }
@@ -532,9 +480,9 @@ public class SerialService implements SerialPortEventListener {
     }
 
     public synchronized int readWithTimeout(byte[] buffer, int offset, int length) throws IOException {
-        
+
         ThreadContext.push("readWithTimeout");
-        
+
         try {
 
             if (!isPortOpen()) {
@@ -562,9 +510,9 @@ public class SerialService implements SerialPortEventListener {
     }
 
     private int readWithTimeoutByteBang(byte[] buffer, int offset, int length, long timeout) throws IOException {
-        
+
         ThreadContext.push("readWithTimeoutByteBang");
-        
+
         int count = 0;
         try {
 
@@ -657,7 +605,7 @@ public class SerialService implements SerialPortEventListener {
      * {@inheritDoc}
      */
     public synchronized void write(int data) throws IOException {
-        
+
         ThreadContext.push("write");
 
         if(!isPortOpen()) {
@@ -684,9 +632,9 @@ public class SerialService implements SerialPortEventListener {
     }
 
     public synchronized void write(byte[] data, int offset, int length) throws IOException {
-        
+
         ThreadContext.push("write");
-        
+
         try {
 
             if (!isPortOpen()) {
@@ -735,15 +683,15 @@ public class SerialService implements SerialPortEventListener {
     }
 
     public synchronized void write(char[] data, int offset, int length) throws IOException {
-        
+
         ThreadContext.push("write");
-        
+
         try {
 
             if (length > tempArray.length) {
-                
+
                 logger.warn("Extending temp buffer to " + length + " bytes");
-                
+
                 tempArray = new byte[length];
             }
 
@@ -752,7 +700,7 @@ public class SerialService implements SerialPortEventListener {
             }
 
             write(tempArray, 0, length);
-        
+
         } finally {
             ThreadContext.pop();
         }
