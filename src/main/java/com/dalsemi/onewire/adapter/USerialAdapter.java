@@ -143,10 +143,10 @@ import java.util.Enumeration;
  * </UL>
  * <LI> 1-Wire Speed and Power Selection
  * <UL>
- * <LI> {@link #setPowerDuration(int) setPowerDuration}
- * <LI> {@link #startPowerDelivery(int) startPowerDelivery}
- * <LI> {@link #setProgramPulseDuration(int) setProgramPulseDuration}
- * <LI> {@link #startProgramPulse(int) startProgramPulse}
+ * <LI> {@link #setPowerDuration(PowerDeliveryDuration)}
+ * <LI> {@link #startPowerDelivery(PowerChangeCondition)}
+ * <LI> {@link #setProgramPulseDuration(PowerDeliveryDuration)}
+ * <LI> {@link #startProgramPulse(PowerChangeCondition)}
  * <LI> {@link #startBreak() startBreak}
  * <LI> {@link #setPowerNormal() setPowerNormal}
  * <LI> {@link #setSpeed(Speed)}
@@ -511,8 +511,6 @@ public class USerialAdapter extends DSPortAdapter {
                 this.targetAllFamilies();
                 this.targetFamily(ADAPTER_ID_FAMILY);
 
-                Enumeration<OneWireContainer> e = this.getAllDeviceContainers();
-
                 // 8 bytes
                 byte[] address = {
                         (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
@@ -520,10 +518,8 @@ public class USerialAdapter extends DSPortAdapter {
                         };
 
                 // loop through each of the DS1982's to find an adapter ID
-                for (; e.hasMoreElements();) {
-                    OneWireContainer ibutton = e.nextElement();
-
-                    System.arraycopy(ibutton.getAddress(), 0, address, 0, 8);
+                for (var device : getAllDeviceContainers()) {
+                    System.arraycopy(device.getAddress(), 0, address, 0, 8);
 
                     // select this device
                     if (select(address)) {
@@ -531,17 +527,17 @@ public class USerialAdapter extends DSPortAdapter {
                         // create a buffer to read the first page
                         // 37 bytes
                         byte[] read_buffer = {
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
                                 (byte) 0x00
-                                };
+                        };
                         int cnt = 0;
                         int i;
 
@@ -575,7 +571,7 @@ public class USerialAdapter extends DSPortAdapter {
 
                                 // must be the one!
                                 if (i == 36)
-                                    return ibutton.getAddressAsString();
+                                    return device.getAddressAsString();
                             }
                         }
                     }

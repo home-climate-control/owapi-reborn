@@ -34,10 +34,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
 
 /**
  * The abstract base class for all 1-Wire port adapter objects. An
@@ -543,37 +544,30 @@ public abstract class DSPortAdapter {
     }
 
     /**
-     * Returns an enumeration of {@code OneWireContainer} objects corresponding
+     * Returns an iterator of {@code OneWireContainer} objects corresponding
      * to all of the iButtons or 1-Wire devices found on the 1-Wire Network. If
      * no devices are found, then an empty enumeration will be returned. In most
      * cases, all further communication with the device is done through the
      * OneWireContainer.
      *
-     * @return {@code Enumeration} of {@code OneWireContainer} objects found on
-     * the 1-Wire Network.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code Enumeration} of {@code OneWireContainer} objects found on the 1-Wire Network.
+     * @throws OneWireIOException on a 1-Wire communication error.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
-    public Enumeration<OneWireContainer> getAllDeviceContainers() throws OneWireException {
+    public List<OneWireContainer> getAllDeviceContainers() throws OneWireException {
 
-        Vector<OneWireContainer> ibutton_vector = new Vector<>();
-        OneWireContainer temp_ibutton;
+        var result = new ArrayList<OneWireContainer>();
+        var device = getFirstDeviceContainer();
 
-        temp_ibutton = getFirstDeviceContainer();
+        while (true) {
 
-        if (temp_ibutton != null) {
-            ibutton_vector.addElement(temp_ibutton);
+            if (device == null) {
+                return result;
+            }
 
-            // loop to get all of the ibuttons
-            do {
-                temp_ibutton = getNextDeviceContainer();
-
-                if (temp_ibutton != null)
-                    ibutton_vector.addElement(temp_ibutton);
-            } while (temp_ibutton != null);
+            result.add(device);
+            device = getNextDeviceContainer();
         }
-
-        return ibutton_vector.elements();
     }
 
     /**
