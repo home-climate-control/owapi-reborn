@@ -36,8 +36,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Memory bank class for the DS2438.
  *
- *  @version    0.00, 30 Oct 2001
- *  @author     DS
+ * @author DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 class MemoryBankSBM implements MemoryBank {

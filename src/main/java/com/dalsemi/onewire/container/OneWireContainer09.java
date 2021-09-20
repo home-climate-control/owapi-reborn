@@ -29,9 +29,10 @@
 package com.dalsemi.onewire.container;
 
 // imports
+
 import com.dalsemi.onewire.adapter.DSPortAdapter;
-import java.util.Vector;
-import java.util.Enumeration;
+
+import java.util.List;
 
 
 /**
@@ -271,8 +272,9 @@ public class OneWireContainer09 extends OneWireContainer {
     * @return <CODE>Enumeration</CODE> of memory banks
     */
     @Override
-    public Enumeration<MemoryBank> getMemoryBanks() {
-        Vector<MemoryBank> bank_vector = new Vector<MemoryBank>(2);
+    public List<MemoryBank> getMemoryBanks() {
+
+        // VT: FIXME: Shouldn't this be done once and not on every call?
 
       // EPROM main bank
       MemoryBankEPROM mn = new MemoryBankEPROM(this);
@@ -286,8 +288,6 @@ public class OneWireContainer09 extends OneWireContainer {
       mn.numCRCBytes          = 1;
       mn.normalReadCRC        = true;
       mn.READ_PAGE_WITH_CRC   = ( byte ) 0xC3;
-
-      bank_vector.addElement(mn);
 
       // EPROM status write protect pages bank
       MemoryBankEPROM st = new MemoryBankEPROM(this);
@@ -305,8 +305,6 @@ public class OneWireContainer09 extends OneWireContainer {
       st.READ_PAGE_WITH_CRC   = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
       st.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
 
-      bank_vector.addElement(st);
-
       // setup OTP features in main memory
       mn.mbLock         = st;
       mn.lockPage       = true;
@@ -314,6 +312,6 @@ public class OneWireContainer09 extends OneWireContainer {
       mn.redirectOffset = 1;
       mn.redirectPage   = true;
 
-      return bank_vector.elements();
+      return List.of(mn, st);
    }
 }

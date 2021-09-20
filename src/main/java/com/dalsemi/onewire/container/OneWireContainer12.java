@@ -33,8 +33,7 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.utils.CRC16;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * <P> 1-Wire&#174 container for a Dual Addressable Switch, DS2406 or DS2407.
@@ -391,20 +390,18 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
      * Gets an enumeration of memory bank instances that implement one or more
      * of the following interfaces:
      * {@link MemoryBank}, {@link PagedMemoryBank}, and {@link OTPMemoryBank}.
-     * @return <CODE>Enumeration</CODE> of memory banks
+     * @return List of memory banks.
      */
     @Override
-    public Enumeration<MemoryBank> getMemoryBanks() {
+    public List<MemoryBank> getMemoryBanks() {
 
-        Vector<MemoryBank> bank_vector = new Vector<>(2);
+        // VT: FIXME: Shouldn't this be done once and not on every call?
 
         // EPROM main bank
         var mn = new MemoryBankEPROM(this);
 
         mn.numberPages = 4;
         mn.size        = 128;
-
-        bank_vector.addElement(mn);
 
         // EPROM status write protect pages bank
         MemoryBankEPROM st = new MemoryBankEPROM(this);
@@ -422,8 +419,6 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
         st.READ_PAGE_WITH_CRC   = MemoryBankEPROM.STATUS_READ_PAGE_COMMAND;
         st.WRITE_MEMORY_COMMAND = MemoryBankEPROM.STATUS_WRITE_COMMAND;
 
-        bank_vector.addElement(st);
-
         // setup OTP features in main memory
         mn.mbLock         = st;
         mn.lockPage       = true;
@@ -431,7 +426,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
         mn.redirectOffset = 1;
         mn.redirectPage   = true;
 
-        return bank_vector.elements();
+        return List.of(mn, st);
     }
 
     /**

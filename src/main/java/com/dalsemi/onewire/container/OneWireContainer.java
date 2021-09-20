@@ -37,8 +37,7 @@ import com.dalsemi.onewire.utils.Address;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.List;
 
 
 /**
@@ -59,23 +58,20 @@ import java.util.Vector;
  *
  * <DL>
  * <DD> <H4> Example 1</H4>
- * Enumerate memory banks retrieved from the OneWireContainer
+ * Iterate through memory banks retrieved from the OneWireContainer
  * instance 'owd' and cast to the highest interface.  See the
  * interface descriptions
- * {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
- * {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank}, and
- * {@link com.dalsemi.onewire.container.PagedMemoryBank OTPMemoryBank}
- * for specific examples.
+ * {@link MemoryBank}, {@link PagedMemoryBank}, and {@link OTPMemoryBank} for specific examples.
  * <PRE> <CODE>
  *  MemoryBank      mb;
  *  PagedMemoryBank pg_mb;
  *  OTPMemoryBank   otp_mb;
  *
- *  for(Enumeration bank_enum = owd.getMemoryBanks();
+ *  for(var bank_enum = owd.getMemoryBanks().iterator();
  *                      bank_enum.hasMoreElements(); )
  *  {
  *     // get the next memory bank, cast to MemoryBank
- *     mb = (MemoryBank)bank_enum.nextElement();
+ *     mb = (MemoryBank)bank_enum.next();
  *
  *     // check if has paged services
  *     if (mb instanceof PagedMemoryBank)
@@ -92,8 +88,7 @@ import java.util.Vector;
  * @see com.dalsemi.onewire.container.PagedMemoryBank
  * @see com.dalsemi.onewire.container.OTPMemoryBank
  *
- *  @version    0.00, 28 Aug 2000
- *  @author     DS
+ * @author DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireContainer {
@@ -363,14 +358,12 @@ public class OneWireContainer {
     }
 
     /**
-     * Returns an <code>Enumeration</code> of <code>MemoryBank</code>.  Default is no memory banks.
+     * Returns a list of memory banks, default is none.
      *
-     * @return enumeration of memory banks to read and write memory
-     *   on this iButton or 1-Wire device
-     * @see MemoryBank
+     * @return List of memory banks to read and write memory on this iButton or 1-Wire device.
      */
-    public Enumeration<MemoryBank> getMemoryBanks() {
-        return new Vector<MemoryBank>(0).elements();
+    public List<MemoryBank> getMemoryBanks() {
+        return List.of();
     }
 
     /**

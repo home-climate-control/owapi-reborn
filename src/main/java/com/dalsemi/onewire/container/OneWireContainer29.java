@@ -31,8 +31,7 @@ import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * <P> 1-Wire&#174 container for a Single Addressable Switch, DS2408.  This container
@@ -177,14 +176,8 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      * @return <CODE>Enumeration</CODE> of memory banks
      */
     @Override
-    public Enumeration<MemoryBank> getMemoryBanks() {
-
-        Vector<MemoryBank> bank_vector = new Vector<>(5);
-
-        bank_vector.addElement(map);
-        bank_vector.addElement(search);
-
-        return bank_vector.elements();
+    public List<MemoryBank> getMemoryBanks() {
+        return List.of(map, search);
     }
 
     @Override
