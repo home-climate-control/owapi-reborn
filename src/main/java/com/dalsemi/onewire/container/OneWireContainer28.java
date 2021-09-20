@@ -32,7 +32,6 @@ import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.utils.CRC8;
-import com.dalsemi.onewire.utils.Convert;
 
 //----------------------------------------------------------------------------
 
@@ -59,7 +58,7 @@ import com.dalsemi.onewire.utils.Convert;
  *
  * <DL>
  * <DD> See the usage example in
- * {@link com.dalsemi.onewire.container.TemperatureContainer TemperatureContainer}
+ * {@link TemperatureContainer}
  * for temperature specific operations.
  * </DL>
  *
@@ -68,9 +67,8 @@ import com.dalsemi.onewire.utils.Convert;
  * <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS18B20.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS18B20.pdf</A>
  * </DL>
  *
- * @see com.dalsemi.onewire.container.TemperatureContainer
+ * @see TemperatureContainer
  *
- * @version    1.00, 15 September 2000
  * @author     BH
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -172,41 +170,16 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         super(sourceAdapter, newAddress);
     }
 
-    //--------
-    //-------- Information methods
-    //--------
-
-    /**
-     * Retrieves the Dallas Semiconductor part number of this
-     * <code>OneWireContainer28</code> as a <code>String</code>.
-     * For example 'DS18B20'.
-     *
-     * @return this <code>OneWireContainer28</code> name
-     */
     @Override
     public String getName() {
         return "DS18B20";
     }
 
-    /**
-     * Retrieves the alternate Dallas Semiconductor part numbers or names.
-     * A 'family' of 1-Wire Network devices may have more than one part number
-     * depending on packaging.  There can also be nicknames such as
-     * 'Crypto iButton'.
-     *
-     * @return this <code>OneWireContainer28</code> alternate names
-     */
     @Override
     public String getAlternateNames() {
         return "DS1820B, DS18B20X";
     }
 
-    /**
-     * Retrieves a short description of the function of this
-     * <code>OneWireContainer28</code> type.
-     *
-     * @return <code>OneWireContainer28</code> functional description
-     */
     @Override
     public String getDescription() {
 
@@ -216,128 +189,46 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         + "resolution is programmable at 9, 10, 11, and 12 bits. ";
     }
 
-    //--------
-    //-------- Temperature Feature methods
-    //--------
-
-    /**
-     * Checks to see if this temperature measuring device has high/low
-     * trip alarms.
-     *
-     * @return <code>true</code> if this <code>OneWireContainer28</code>
-     *         has high/low trip alarms
-     *
-     * @see    #getTemperatureAlarm
-     * @see    #setTemperatureAlarm
-     */
     @Override
     public boolean hasTemperatureAlarms() {
         return true;
     }
 
-    /**
-     * Checks to see if this device has selectable temperature resolution.
-     *
-     * @return <code>true</code> if this <code>OneWireContainer28</code>
-     *         has selectable temperature resolution
-     *
-     * @see    #getTemperatureResolution
-     * @see    #getTemperatureResolutions
-     * @see    #setTemperatureResolution
-     */
     @Override
     public boolean hasSelectableTemperatureResolution() {
         return true;
     }
 
-    /**
-     * Gets an array of available temperature resolutions in Celsius.
-     *
-     * @return byte array of available temperature resolutions in Celsius for
-     *         this <code>OneWireContainer28</code>. The minimum resolution is
-     *         returned as the first element and maximum resolution as the last
-     *         element.
-     *
-     * @see    #hasSelectableTemperatureResolution
-     * @see    #getTemperatureResolution
-     * @see    #setTemperatureResolution
-     */
     @Override
     public double[] getTemperatureResolutions() {
 
         double[] resolutions = new double [4];
 
-        resolutions [0] = ( double ) 0.5;      // 9-bit
-        resolutions [1] = ( double ) 0.25;     // 10-bit
-        resolutions [2] = ( double ) 0.125;    // 11-bit
-        resolutions [3] = ( double ) 0.0625;   // 12-bit
+        resolutions [0] = 0.5;      // 9-bit
+        resolutions [1] = 0.25;     // 10-bit
+        resolutions [2] = 0.125;    // 11-bit
+        resolutions [3] = 0.0625;   // 12-bit
 
         return resolutions;
     }
 
-    /**
-     * Gets the temperature alarm resolution in Celsius.
-     *
-     * @return temperature alarm resolution in Celsius for this
-     *         <code>OneWireContainer28</code>
-     *
-     * @see    #hasTemperatureAlarms
-     * @see    #getTemperatureAlarm
-     * @see    #setTemperatureAlarm
-     *
-     */
     @Override
     public double getTemperatureAlarmResolution() {
         return 1.0;
     }
 
-    /**
-     * Gets the maximum temperature in Celsius.
-     *
-     * @return maximum temperature in Celsius for this
-     *         <code>OneWireContainer28</code>
-     *
-     * @see    #getMinTemperature
-     */
     @Override
     public double getMaxTemperature() {
         return 125.0;
     }
 
-    /**
-     * Gets the minimum temperature in Celsius.
-     *
-     * @return minimum temperature in Celsius for this
-     *         <code>OneWireContainer28</code>
-     *
-     * @see    #getMaxTemperature
-     */
     @Override
     public double getMinTemperature() {
         return -55.0;
     }
 
-    //--------
-    //-------- Temperature I/O Methods
-    //--------
-
-    /**
-     * Performs a temperature conversion on <code>state</code> information.
-     *
-     * @param  state byte array with device state information
-     *
-     * @throws OneWireIOException on a 1-Wire communication error such as
-     *         reading an incorrect CRC from this <code>OneWireContainer28</code>.
-     *         This could be caused by a physical interruption in the 1-Wire
-     *         Network due to shorts or a newly arriving 1-Wire device issuing a
-     *         'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire
-     *         adapter
-     *
-     * @see    #getTemperature
-     */
     @Override
-    public void doTemperatureConvert(byte[] state) throws OneWireIOException, OneWireException {
+    public void doTemperatureConvert(byte[] state) throws OneWireException {
 
         int msDelay = 750;   // in milliseconds
 
@@ -388,28 +279,6 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         }
     }
 
-    //--------
-    //-------- Temperature 'get' Methods
-    //--------
-
-    /**
-     * Gets the temperature value in Celsius from the <code>state</code>
-     * data retrieved from the <code>readDevice()</code> method.
-     *
-     * @param  state byte array with device state information for this
-     *         <code>OneWireContainer28</code>
-     *
-     * @return temperature in Celsius from the last
-     *                     <code>doTemperatureConvert()</code>
-     *
-     * @throws OneWireIOException on a 1-Wire communication error such as
-     *         reading an incorrect CRC from this <code>OneWireContainer28</code>.
-     *         This could be caused by a physical interruption in the 1-Wire
-     *         Network due to shorts or a newly arriving 1-Wire device issuing a
-     *         'presence pulse'.
-     *
-     * @see    #doTemperatureConvert
-     */
     @Override
     public double getTemperature(byte[] state) throws OneWireIOException {
 
@@ -427,102 +296,47 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         //     0xFF5E = -10.125C
         //     0xFE6F = -25.0625C
         //     0xFC90 = -55.0C
-        double theTemperature = ( double ) 0.0;
         int    inttemperature = state [1];   // inttemperature is automatically sign extended here.
 
         inttemperature = (inttemperature << 8) | (state [0] & 0xFF);   // this converts 2 bytes into integer
-        theTemperature = ( double ) (( double ) inttemperature / ( double ) 16);   // converts integer to a double
-
-        return (theTemperature);
+        return (( double ) inttemperature / ( double ) 16);   // converts integer to a double
     }
 
-    /**
-     * Gets the specified temperature alarm value in Celsius from the
-     * <code>state</code> data retrieved from the  <code>readDevice()</code>
-     * method.
-     *
-     * @param  alarmType valid value: <code>ALARM_HIGH</code> or
-     *                   <code>ALARM_LOW</code>
-     * @param  state     byte array with device state information
-     *
-     * @return temperature alarm trip values in Celsius for this
-     *         <code>OneWireContainer28</code>
-     *
-     * @see    #hasTemperatureAlarms
-     * @see    #setTemperatureAlarm
-     */
     @Override
     public double getTemperatureAlarm(int alarmType, byte[] state) {
-
-        return (double) state[alarmType == ALARM_LOW ? 3 : 2];
+        return state[alarmType == ALARM_LOW ? 3 : 2];
     }
 
-    /**
-     * Gets the current temperature resolution in Celsius from the
-     * <code>state</code> data retrieved from the <code>readDevice()</code>
-     * method.
-     *
-     * @param  state byte array with device state information
-     *
-     * @return temperature resolution in Celsius for this
-     *         <code>OneWireContainer28</code>
-     *
-     * @see    #RESOLUTION_9_BIT
-     * @see    #RESOLUTION_10_BIT
-     * @see    #RESOLUTION_11_BIT
-     * @see    #RESOLUTION_12_BIT
-     * @see    #hasSelectableTemperatureResolution
-     * @see    #getTemperatureResolutions
-     * @see    #setTemperatureResolution
-     */
     @Override
     public double getTemperatureResolution(byte[] state) {
 
-        double tempres = (double) 0.0;
+        double tempres;
 
         // calculate temperature resolution according to configuration byte
         switch (state[4]) {
 
         case RESOLUTION_9_BIT:
-            tempres = (double) 0.5;
+            tempres = 0.5;
             break;
         case RESOLUTION_10_BIT:
-            tempres = (double) 0.25;
+            tempres = 0.25;
             break;
         case RESOLUTION_11_BIT:
-            tempres = (double) 0.125;
+            tempres = 0.125;
             break;
         case RESOLUTION_12_BIT:
-            tempres = (double) 0.0625;
+            tempres = 0.0625;
             break;
         default:
-            tempres = (double) 0.0;
+            tempres = 0.0;
         } // switch
 
         return tempres;
     }
 
-    //--------
-    //-------- Temperature 'set' Methods
-    //--------
-
-    /**
-     * Sets the temperature alarm value in Celsius in the provided
-     * <code>state</code> data.
-     * Use the method <code>writeDevice()</code> with
-     * this data to finalize the change to the device.
-     *
-     * @param  alarmType  valid value: <code>ALARM_HIGH</code> or
-     *                    <code>ALARM_LOW</code>
-     * @param  alarmValue alarm trip value in Celsius
-     * @param  state      byte array with device state information
-     *
-     * @see    #hasTemperatureAlarms
-     * @see    #getTemperatureAlarm
-     */
     @Override
     public void setTemperatureAlarm(int alarmType, double alarmValue,
-            byte[] state) throws OneWireException, OneWireIOException {
+            byte[] state) throws OneWireIOException {
 
         if ((alarmType != ALARM_LOW) && (alarmType != ALARM_HIGH)) {
             throw new IllegalArgumentException("Invalid alarm type.");
@@ -626,26 +440,8 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         recallE2(buffer);
     }
 
-    /**
-     * Writes to this <code>OneWireContainer28</code> <code>state</code>
-     * information that have been changed by '<code>set</code>' methods.
-     * Only the state registers that changed are updated.  This is done
-     * by referencing a field information appended to the state data.
-     *
-     * @param  state      byte array with device state information
-     *
-     * @throws OneWireIOException on a 1-Wire communication error such as
-     *         reading an incorrect CRC from this <code>OneWireContainer28</code>.
-     *         This could be caused by a physical interruption in the 1-Wire
-     *         Network due to shorts or a newly arriving 1-Wire device issuing a
-     *         'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire
-     *         adapter
-     *
-     * @see    #readDevice
-     */
     @Override
-    public void writeDevice(byte[] state) throws OneWireIOException, OneWireException {
+    public void writeDevice(byte[] state) throws OneWireException {
 
         byte[] temp = {state[2], state[3], state[4]};
 
@@ -655,11 +451,6 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         // Place in memory.
         copyScratchpad();
     }
-
-    //--------
-    //-------- Custom Methods for this iButton Type
-    //--------
-    //-------------------------------------------------------------------------
 
     /**
      * Reads the Scratchpad of the DS18B20.
@@ -673,9 +464,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      *         'presence pulse'.
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
-     * @deprecated Use {@link #readScratchpad(byte[])} instead, it doesn't allocate memory.
      */
-    @Deprecated(forRemoval = false)
     public byte[] readScratchpad() throws OneWireException {
 
         byte[] resultBlock = new byte [9];
@@ -719,8 +508,6 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         throw new OneWireIOException(address, "OneWireContainer28-Error reading CRC8 from device.");
     }
 
-    //-------------------------------------------------------------------------
-
     /**
      * Writes to the Scratchpad of the DS18B20.
      *
@@ -738,7 +525,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      *         adapter
      * @throws IllegalArgumentException when data is of invalid length
      */
-    public void writeScratchpad(byte[] data) throws OneWireIOException, OneWireException {
+    public void writeScratchpad(byte[] data) throws OneWireException {
 
         // setup buffer to write to scratchpad
         byte[] writeBuffer = {Command.WRITE_SCRATCHPAD.code, data[0], data[1], data[2]};
@@ -764,8 +551,6 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         }
     }
 
-    //-------------------------------------------------------------------------
-
     /**
      * Copies the Scratchpad to the E-squared memory of the DS18B20.
      *
@@ -777,7 +562,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    public void copyScratchpad() throws OneWireIOException, OneWireException {
+    public void copyScratchpad() throws OneWireException {
 
         // first, let's read the scratchpad to compare later.
         byte[] readfirstbuffer;
@@ -822,8 +607,6 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         }
     }
 
-    //-------------------------------------------------------------------------
-
     /**
      * Recalls the DS18B20 temperature trigger values (<code>ALARM_HIGH</code>
      * and <code>ALARM_LOW</code>) and the configuration register to the
@@ -838,9 +621,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      *         'presence pulse'.
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
-     * @deprecated Use {@link #recallE2(byte[])} instead, it doesn't allocate memory.
      */
-    @Deprecated(forRemoval = false)
     public byte[] recallE2() throws OneWireException {
 
         // select the device
@@ -871,8 +652,6 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         // read scratchpad
         readScratchpad(buffer);
     }
-
-    //-------------------------------------------------------------------------
 
     /**
      * Reads the way power is supplied to the DS18B20.
@@ -912,23 +691,5 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         }
 
         return result;
-    }
-
-    //-------------------------------------------------------------------------
-
-    /**
-     * Converts a temperature reading from Celsius to Fahrenheit.
-     *
-     * @param   celsiusTemperature temperature value in Celsius
-     *
-     * @return  the Fahrenheit conversion of the supplied temperature
-     *
-     * @deprecated Replace with call to com.dalsemi.onewire.utils.Convert.toFahrenheit()
-     *
-     * @see com.dalsemi.onewire.utils.Convert#toFahrenheit(double)
-     */
-    @Deprecated(forRemoval = true)
-    public float convertToFahrenheit(float celsiusTemperature) {
-        return (float) Convert.toFahrenheit(celsiusTemperature);
     }
 }
