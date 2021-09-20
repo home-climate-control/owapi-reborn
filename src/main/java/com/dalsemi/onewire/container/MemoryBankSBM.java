@@ -113,10 +113,6 @@ class MemoryBankSBM implements MemoryBank {
     */
    protected boolean doSetSpeed;
 
-   //--------
-   //-------- Constructor
-   //--------
-
    /**
     * Memory bank contstuctor.  Requires reference to the OneWireContainer
     * this memory bank resides on.

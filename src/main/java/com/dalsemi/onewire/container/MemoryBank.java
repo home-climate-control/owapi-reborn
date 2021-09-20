@@ -107,7 +107,6 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  * @see com.dalsemi.onewire.container.OneWireContainer09
  * @see com.dalsemi.onewire.container.OneWireContainer12
  *
- * @version    0.00, 28 Aug 2000
  * @author     DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */

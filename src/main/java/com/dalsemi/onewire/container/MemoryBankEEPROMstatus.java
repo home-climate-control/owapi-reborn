@@ -44,11 +44,7 @@ import org.apache.logging.log4j.Logger;
  */
 class MemoryBankEEPROMstatus implements MemoryBank {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
-
-    // --------
-    // -------- Static Final Variables
-    // --------
+    protected final Logger logger = LogManager.getLogger();
 
     /**
      * Read Memory Command
@@ -75,10 +71,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
      */
     public static final byte CHANNEL_ACCESS_WRITE = (byte) 0x5A;
 
-    // --------
-    // -------- Variables
-    // --------
-
     /**
      * Reference to the OneWireContainer this bank resides on.
      */
@@ -93,10 +85,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
      * Flag to indicate that speed needs to be set
      */
     protected boolean doSetSpeed;
-
-    // --------
-    // -------- Protected Variables for MemoryBank implementation
-    // --------
 
     /**
      * Size of memory bank in bytes
@@ -156,10 +144,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
      */
     protected boolean writeVerification;
 
-    // --------
-    // -------- Protected Variables for PagedMemoryBank implementation
-    // --------
-
     /**
      * Number of pages in memory bank
      */
@@ -179,10 +163,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
      * Flag if memory bank has page auto-CRC generation
      */
     protected boolean pageAutoCRC;
-
-    // --------
-    // -------- Constructor
-    // --------
 
     /**
      * Memory bank contstuctor. Requires reference to the OneWireContainer this
@@ -218,123 +198,55 @@ class MemoryBankEEPROMstatus implements MemoryBank {
         }
     }
 
-    // --------
-    // -------- MemoryBank query methods
-    // --------
-
-    /**
-     * Query to see get a string description of the current memory bank.
-     *
-     * @return String containing the memory bank description
-     */
     @Override
     public String getBankDescription() {
         return bankDescription;
     }
 
-    /**
-     * Query to see if the current memory bank is general purpose user memory.
-     * If it is NOT then it is Memory-Mapped and writing values to this memory
-     * will affect the behavior of the 1-Wire device.
-     *
-     * @return 'true' if current memory bank is general purpose
-     */
     @Override
     public boolean isGeneralPurposeMemory() {
         return generalPurposeMemory;
     }
 
-    /**
-     * Query to see if current memory bank is read/write.
-     *
-     * @return 'true' if current memory bank is read/write
-     */
     @Override
     public boolean isReadWrite() {
         return readWrite;
     }
 
-    /**
-     * Query to see if current memory bank is write write once such as with
-     * EPROM technology.
-     *
-     * @return 'true' if current memory bank can only be written once
-     */
     @Override
     public boolean isWriteOnce() {
         return writeOnce;
     }
 
-    /**
-     * Query to see if current memory bank is read only.
-     *
-     * @return 'true' if current memory bank can only be read
-     */
     @Override
     public boolean isReadOnly() {
         return readOnly;
     }
 
-    /**
-     * Query to see if current memory bank non-volatile. Memory is non-volatile
-     * if it retains its contents even when removed from the 1-Wire network.
-     *
-     * @return 'true' if current memory bank non volatile.
-     */
     @Override
     public boolean isNonVolatile() {
         return nonVolatile;
     }
 
-    /**
-     * Query to see if current memory bank pages need the adapter to have a
-     * 'ProgramPulse' in order to write to the memory.
-     *
-     * @return 'true' if writing to the current memory bank pages requires a
-     *         'ProgramPulse'.
-     */
     @Override
     public boolean needsProgramPulse() {
         return programPulse;
     }
 
-    /**
-     * Query to see if current memory bank pages need the adapter to have a
-     * 'PowerDelivery' feature in order to write to the memory.
-     *
-     * @return 'true' if writing to the current memory bank pages requires
-     *         'PowerDelivery'.
-     */
     @Override
     public boolean needsPowerDelivery() {
         return powerDelivery;
     }
 
-    /**
-     * Query to get the starting physical address of this bank. Physical banks
-     * are sometimes sub-divided into logical banks due to changes in
-     * attributes.
-     *
-     * @return physical starting address of this logical bank.
-     */
     @Override
     public int getStartPhysicalAddress() {
         return startPhysicalAddress;
     }
 
-    /**
-     * Query to get the memory bank size in bytes.
-     *
-     * @return memory bank size in bytes.
-     */
     @Override
     public int getSize() {
         return size;
     }
-
-    // --------
-    // -------- PagedMemoryBank query methods
-    // --------
 
     /**
      * Query to get the number of pages in current memory bank.
@@ -421,46 +333,11 @@ class MemoryBankEEPROMstatus implements MemoryBank {
         return null;
     }
 
-    /**
-     * Set the write verification for the 'write()' method.
-     *
-     * @param doReadVerf
-     *            true (default) verify write in 'write' false, don't verify
-     *            write (used on Write-Once bit manipulation)
-     */
     @Override
     public void setWriteVerification(boolean doReadVerf) {
         writeVerification = doReadVerf;
     }
 
-    // --------
-    // -------- MemoryBank I/O methods
-    // --------
-
-    /**
-     * Read memory in the current bank with no CRC checking (device or data).
-     * The resulting data from this API may or may not be what is on the 1-Wire
-     * device. It is recommends that the data contain some kind of checking
-     * (CRC) like in the readPagePacket() method or have the 1-Wire device
-     * provide the CRC as in readPageCRC(). readPageCRC() however is not
-     * supported on all memory types, see 'hasPageAutoCRC()'. If neither is an
-     * option then this method could be called more then once to at least verify
-     * that the same thing is read consistantly.
-     *
-     * @param startAddr
-     *            starting physical address
-     * @param readContinue
-     *            if 'true' then device read is continued without re-selecting.
-     *            This can only be used if the new read() continious where the
-     *            last one led off and it is inside a
-     *            'beginExclusive/endExclusive' block.
-     * @param readBuf
-     *            byte array to place read data into
-     * @param offset
-     *            offset into readBuf to place data
-     * @param len
-     *            length in bytes to read
-     */
     @Override
     public void read(int startAddr, boolean readContinue, byte[] readBuf,
             int offset, int len) throws OneWireException {
@@ -501,27 +378,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
         }
     }
 
-    /**
-     * Write memory in the current bank. It is recommended that when writing
-     * data that some structure in the data is created to provide error free
-     * reading back with read(). Or the method 'writePagePacket()' could be used
-     * which automatically wraps the data in a length and CRC.
-     *
-     * When using on Write-Once devices care must be taken to write into into
-     * empty space. If write() is used to write over an unlocked page on a
-     * Write-Once device it will fail. If write verification is turned off with
-     * the method 'setWriteVerification(false)' then the result will be an 'AND'
-     * of the existing data and the new data.
-     *
-     * @param startAddr
-     *            starting address
-     * @param writeBuf
-     *            byte array containing data to write
-     * @param offset
-     *            offset into writeBuf to get data
-     * @param len
-     *            length in bytes to write
-     */
     @Override
     public void write(int startAddr, byte[] writeBuf, int offset, int len)
             throws OneWireException {
@@ -624,10 +480,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             throw new OneWireIOException("Trying to write read-only memory.");
     }
 
-    // --------
-    // -------- checkSpeed methods
-    // --------
-
     /**
      * Check the device speed if has not been done before or if an error was
      * detected.
@@ -714,11 +566,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
     /**
      * Copy all 8 bytes of the Sratch Pad to a certain address in memory.
-     *
-     * @param addr
-     *            the address to copy the data to
-     * @param auth
-     *            byte[] containing write authorization
      */
     public synchronized void copyScratchpad(byte[] es_data)
             throws OneWireException {
@@ -769,17 +616,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
     /**
      * Read from the Scratch Pad, which is a max of 8 bytes.
-     *
-     * @param readBuf
-     *            byte array to place read data into length of array is always
-     *            pageLength.
-     * @param offset
-     *            offset into readBuf to pug data
-     * @param len
-     *            length in bytes to read
-     * @param extraInfo
-     *            byte array to put extra info read into (TA1, TA2, e/s byte)
-     *            Can be 'null' if extra info is not needed.
      */
     public boolean readScratchpad(byte[] readBuf, int offset, int len,
             byte[] es_data) throws OneWireException {
