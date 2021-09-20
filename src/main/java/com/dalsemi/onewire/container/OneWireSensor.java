@@ -119,10 +119,7 @@ public interface OneWireSensor {
      *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
-     *
-     * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
      */
-    @Deprecated(forRemoval = false)
     byte[] readDevice() throws OneWireException;
 
     void readDevice(byte[] outputBuffer) throws OneWireException;

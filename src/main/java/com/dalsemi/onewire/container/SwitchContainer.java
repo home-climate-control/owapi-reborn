@@ -79,17 +79,12 @@ import com.dalsemi.onewire.OneWireException;
  * @see OneWireSensor
  * @see ClockContainer
  * @see TemperatureContainer
- * @see PotentiometerContainer
  * @see ADContainer
  *
- * @version    0.00, 27 August 2000
  * @author     DS, KLA
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface SwitchContainer extends OneWireSensor {
-
-    //--------
-    //-------- Switch Feature methods
-    //--------
 
     /**
      * Checks to see if the channels of this switch are 'high side'
@@ -158,10 +153,6 @@ public interface SwitchContainer extends OneWireSensor {
      */
     boolean onlySingleChannelOn();
 
-    //--------
-    //-------- Switch 'get' Methods
-    //--------
-
     /**
      * Gets the number of channels supported by this switch.
      * Channel specific methods will use a channel number specified
@@ -202,7 +193,7 @@ public interface SwitchContainer extends OneWireSensor {
      * @return <code>true</code> if channel latch is 'on'
      * or conducting and <code>false</code> if channel latch is 'off' and not
      * conducting.  Note that the actual output when the latch is 'on'
-     * is returned from the <code>isHighSideSwitch()</code> method.
+     * is returned from the {@link #isHighSideSwitch()} method.
      *
      * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
      * @see #isHighSideSwitch()
@@ -228,10 +219,6 @@ public interface SwitchContainer extends OneWireSensor {
      * @see #clearActivity()
      */
     boolean getSensedActivity(int channel, byte[] state) throws OneWireException;
-
-    //--------
-    //-------- Switch 'set' Methods
-    //--------
 
     /**
      * Sets the latch state of the indicated channel.
@@ -261,10 +248,10 @@ public interface SwitchContainer extends OneWireSensor {
      * example, on a DS2406/07, this happens the next time the
      * status is read with <code>readDevice()</code>.</p>
      *
-     * <p>The activity latches will only be cleared once.  With the 
+     * <p>The activity latches will only be cleared once.  With the
      * DS2406/07, this means that only the first call to <code>readDevice()</code>
      * will clear the activity latches.  Subsequent calls to <code>readDevice()</code>
-     * will leave the activity latch states intact, unless this method has been invoked 
+     * will leave the activity latch states intact, unless this method has been invoked
      * since the last call to <code>readDevice()</code>.</p>
      *
      * @throws OneWireException if this device does not support activity sensing
