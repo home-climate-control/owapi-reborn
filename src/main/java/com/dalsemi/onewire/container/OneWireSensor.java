@@ -91,19 +91,13 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  *
  * @see com.dalsemi.onewire.container.ADContainer
  * @see com.dalsemi.onewire.container.ClockContainer
- * @see com.dalsemi.onewire.container.PotentiometerContainer
  * @see com.dalsemi.onewire.container.SwitchContainer
  * @see com.dalsemi.onewire.container.TemperatureContainer
  *
- * @version    0.00, 28 Aug 2000
  * @author     DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface OneWireSensor {
-
-    //--------
-    //-------- Sensor I/O methods
-    //--------
 
     /**
      * Retrieves the 1-Wire device sensor state.  This state is
@@ -139,5 +133,5 @@ public interface OneWireSensor {
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    void writeDevice(byte[] state) throws OneWireIOException, OneWireException;
+    void writeDevice(byte[] state) throws OneWireException;
 }
