@@ -209,7 +209,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     }
 
     /**
-     * Gets an enumeration of memory bank instances that implement one or more
+     * Gets a list of memory bank instances that implement one or more
      * of the following interfaces:
      * {@link MemoryBank}, {@link PagedMemoryBank}, and {@link OTPMemoryBank}.
      * @return List of memory banks.

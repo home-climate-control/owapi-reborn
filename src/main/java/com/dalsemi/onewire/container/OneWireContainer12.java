@@ -146,7 +146,7 @@ import java.util.List;
  * <uL>
  * <li> See the usage example in
  * {@link OneWireContainer}
- * to enumerate the MemoryBanks.
+ * to iterate through the MemoryBanks.
  * <li> See the usage examples in
  * {@link MemoryBank} and
  * {@link PagedMemoryBank}
@@ -165,7 +165,6 @@ import java.util.List;
  * @see SwitchContainer
  * @see OneWireContainer05
  *
- *  @version    0.00, 28 Aug 2000
  *  @author     KLA,DSS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -387,7 +386,7 @@ public class OneWireContainer12 extends OneWireContainer implements SwitchContai
     }
 
     /**
-     * Gets an enumeration of memory bank instances that implement one or more
+     * Gets a list of memory bank instances that implement one or more
      * of the following interfaces:
      * {@link MemoryBank}, {@link PagedMemoryBank}, and {@link OTPMemoryBank}.
      * @return List of memory banks.

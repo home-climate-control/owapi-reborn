@@ -29,31 +29,25 @@
 package com.dalsemi.onewire.adapter;
 
 // imports
-import java.util.Enumeration;
-import java.util.Vector;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.utils.Address;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 
 /** UPacketBuilder contains the methods to build a communication packet
  *  to the DS2480 based serial adapter.
  *
- *  @version    0.00, 28 Aug 2000
- *  @author     DS
+ * @author DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 class UPacketBuilder {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
-
-    //--------
-    //-------- Finals
-    //--------
-    //-------- Misc
+    protected final Logger logger = LogManager.getLogger();
 
     /** Byte operation                                     */
     public static final int OPERATION_BYTE = 0;
@@ -139,17 +133,13 @@ class UPacketBuilder {
     /** DS9097U read bit operation 0 */
     public static final char RESPONSE_BIT_ZERO = 0x00;
 
-    //--------
-    //-------- Variables
-    //--------
-
     /**
      * The current state of the U brick, passed into constructor.
      */
     private UAdapterState uState;
 
     /**
-     * The current current count for the number of return bytes from
+     * The current count for the number of return bytes from
      * the packet being created.
      */
     protected int totalReturnLength;
@@ -162,7 +152,7 @@ class UPacketBuilder {
     /**
      * Vector of raw send packets
      */
-    protected final Vector<RawSendPacket> packetsVector = new Vector<RawSendPacket>();
+    protected final Vector<RawSendPacket> packetsVector = new Vector<>();
 
     /**
      * Flag to send only 'bit' commands to the DS2480
@@ -192,15 +182,15 @@ class UPacketBuilder {
         restart();
 
         // Default on SunOS to bit-banging
-        bitsOnly = (System.getProperty("os.name").indexOf("SunOS") != -1);
+        bitsOnly = (System.getProperty("os.name").contains("SunOS"));
 
         // check for a bits only property
         String bits = OneWireAccessProvider.getProperty("onewire.serial.forcebitsonly");
         if (bits != null)
         {
-            if (bits.indexOf("true") != -1)
+            if (bits.contains("true"))
                 bitsOnly = true;
-            else if (bits.indexOf("false") != -1)
+            else if (bits.contains("false"))
                 bitsOnly = false;
         }
     }
@@ -232,8 +222,7 @@ class UPacketBuilder {
      * indicates a place where we need to wait for the results from
      * DS9097U adapter.
      */
-    public void newPacket ()
-    {
+    public void newPacket () {
 
         // add the packet
         packetsVector.addElement(packet);
@@ -243,12 +232,11 @@ class UPacketBuilder {
     }
 
     /**
-     * Retrieve enumeration of raw send packets
+     * Retrieve List of raw send packets
      *
      * @return  the enumeration of packets
      */
-    public Enumeration<RawSendPacket> getPackets ()
-    {
+    public Enumeration<RawSendPacket> getPackets () {
 
         // put the last packet into the vector if it is non zero
         if (packet.buffer.length() > 0)
@@ -266,7 +254,6 @@ class UPacketBuilder {
      *  @return the number offset in the return packet to get the
      *          result of this operation
      */
-    @SuppressWarnings("static-access")
     public int oneWireReset ()
     {
 
@@ -286,8 +273,8 @@ class UPacketBuilder {
 
         // check for 2480 wait on extra bytes packet
         if (uState.longAlarmCheck
-                && ((uState.uSpeedMode == uState.USPEED_REGULAR)
-                        || (uState.uSpeedMode == uState.USPEED_FLEX)))
+                && ((uState.uSpeedMode == UAdapterState.USPEED_REGULAR)
+                        || (uState.uSpeedMode == UAdapterState.USPEED_FLEX)))
             newPacket();
 
         return totalReturnLength - 1;
@@ -301,8 +288,7 @@ class UPacketBuilder {
      * @return the number offset in the return packet to get the
      *          result of this operation
      */
-    @SuppressWarnings("static-access")
-    public int dataBytes (char dataBytesValue [])
+    public int dataBytes (char[] dataBytesValue)
     {
         char byte_value;
         int i,j;
@@ -311,7 +297,7 @@ class UPacketBuilder {
         if (!bitsOnly)
             setToDataMode();
 
-        logger.debug("UPacketbuilder-dataBytes[] length "+ dataBytesValue.length);
+        logger.debug("UPacketbuilder-dataBytes[] length {}", dataBytesValue.length);
 
         // record the current count location
         int ret_value = totalReturnLength;
@@ -335,14 +321,12 @@ class UPacketBuilder {
                 // append the data
                 packet.buffer.append(dataBytesValue [i]);
 
-                logger.debug("UPacketbuilder-dataBytes[] byte["
-                            + Integer.toHexString(( int ) dataBytesValue [i] & 0x00FF)
-                            + "]");
+                logger.debug("UPacketbuilder-dataBytes[] byte[{}]", Integer.toHexString(dataBytesValue [i] & 0x00FF));
 
                 // check for duplicates needed for special characters
-                if ((( char ) (dataBytesValue [i] & 0x00FF) == uState.MODE_COMMAND)
-                        || ((( char ) (dataBytesValue [i] & 0x00FF) == uState.MODE_SPECIAL)
-                                && (uState.revision == uState.CHIP_VERSION1)))
+                if ((( char ) (dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_COMMAND)
+                        || ((( char ) (dataBytesValue [i] & 0x00FF) == UAdapterState.MODE_SPECIAL)
+                                && (uState.revision == UAdapterState.CHIP_VERSION1)))
                 {
                     // duplicate this data byte
                     packet.buffer.append(dataBytesValue [i]);
@@ -352,9 +336,7 @@ class UPacketBuilder {
                 totalReturnLength++;
                 packet.returnLength++;
 
-                logger.debug("UPacketbuilder-dataBytes[] returnlength "
-                        + packet.returnLength + " bufferLength "
-                        + packet.buffer.length());
+                logger.debug("UPacketbuilder-dataBytes[] returnlength {} bufferLength {}", packet.returnLength, packet.buffer.length());
 
                 // check for packet too large or not streaming bytes
                 if ((packet.buffer.length() > MAX_BYTES_STREAMED)
@@ -403,8 +385,7 @@ class UPacketBuilder {
 
         temp_char_array [0] = dataByteValue;
 
-        logger.debug("UPacketbuilder-dataBytes ["
-                + Integer.toHexString(( int ) dataByteValue & 0x00FF) + "]");
+        logger.debug("UPacketbuilder-dataBytes [{}]", () -> Integer.toHexString(dataByteValue & 0x00FF));
 
         return dataBytes(temp_char_array);
     }
@@ -504,8 +485,7 @@ class UPacketBuilder {
         for (int i = 0; i < 16; i++)
             search_sequence [i] = 0;
 
-        logger.debug("DEBUG: UPacketbuilder-search ["
-                + Integer.toHexString(( int ) id.length) + "]");
+        logger.debug("DEBUG: UPacketbuilder-search [{}]", ()  -> Integer.toHexString(id.length));
 
         // only modify bits if not the first search
         if (mState.searchLastDiscrepancy != 0xFF)
@@ -568,14 +548,13 @@ class UPacketBuilder {
     /**
      * Set the U state to command mode.
      */
-    @SuppressWarnings("static-access")
     public void setToCommandMode ()
     {
         if (!uState.inCommandMode)
         {
 
             // append the command to switch
-            packet.buffer.append(uState.MODE_COMMAND);
+            packet.buffer.append(UAdapterState.MODE_COMMAND);
 
             // switch the state
             uState.inCommandMode = true;
@@ -585,14 +564,13 @@ class UPacketBuilder {
     /**
      * Set the U state to data mode.
      */
-    @SuppressWarnings("static-access")
     public void setToDataMode ()
     {
         if (uState.inCommandMode)
         {
 
             // append the command to switch
-            packet.buffer.append(uState.MODE_DATA);
+            packet.buffer.append(UAdapterState.MODE_DATA);
 
             // switch the state
             uState.inCommandMode = false;
@@ -667,8 +645,7 @@ class UPacketBuilder {
      * @return the number offset in the return packet to get the
      *          result of this operation (if there is one)
      */
-    public int sendCommand (char command, boolean expectResponse)
-    {
+    public int sendCommand (char command, boolean expectResponse) {
 
         // set to command mode
         setToCommandMode();
@@ -698,12 +675,6 @@ class UPacketBuilder {
 
     /**
      * Interpret the block of bytes
-     *
-     * @param dataByteResponse
-     * @param responseOffset
-     * @param result
-     * @param offset
-     * @param len
      */
     public void interpretDataBytes (char[] dataByteResponse, int responseOffset,
             byte[] result, int offset, int len)
@@ -718,8 +689,7 @@ class UPacketBuilder {
             {
                 temp_offset = responseOffset + 8 * i;
 
-                logger.debug("UPacketbuilder-interpretDataBytes[] responseOffset "
-                        + responseOffset + " offset " + offset + " lenbuf " + dataByteResponse.length);
+                logger.debug("UPacketbuilder-interpretDataBytes[] responseOffset {} offset {}  lenbuf {}", responseOffset, offset, dataByteResponse.length);
 
                 // loop through and interpret each bit
                 result_byte = 0;
@@ -745,7 +715,6 @@ class UPacketBuilder {
      *
      * @return the number representing the result of a 1-Wire reset
      */
-    @SuppressWarnings("static-access")
     public DSPortAdapter.ResetResult interpretOneWireReset (char resetResponse)
     {
 
@@ -759,9 +728,7 @@ class UPacketBuilder {
             uState.programVoltageAvailable = ((UAdapterState.PROGRAM_VOLTAGE_MASK
                     & resetResponse) != 0);
 
-            logger.debug("DEBUG: UPacketbuilder-reset response "
-                    + Integer.toHexString(( int ) resetResponse
-                            & 0x00FF));
+            logger.debug("DEBUG: UPacketbuilder-reset response {}", () -> Integer.toHexString(resetResponse & 0x00FF));
 
             // convert the response byte to the OneWire reset result
             switch (resetResponse & RESPONSE_RESET_MASK)
@@ -776,7 +743,7 @@ class UPacketBuilder {
                 {
 
                     // check if can give up checking
-                    if (uState.lastAlarmCount++ > uState.MAX_ALARM_COUNT)
+                    if (uState.lastAlarmCount++ > UAdapterState.MAX_ALARM_COUNT)
                         uState.longAlarmCheck = false;
                 }
 
@@ -817,11 +784,7 @@ class UPacketBuilder {
     /**
      * Interpret the search response and set the 1-Wire state accordingly.
      *
-     * @param  bitResponse  bit response byte from U
-     *
-     * @param mState
-     * @param searchResponse
-     * @param responseOffset
+     * @param  // bitResponse  bit response byte from U
      *
      * @return boolean return is true if a valid ID was found when
      *                 interpreting the search results
@@ -898,9 +861,6 @@ class UPacketBuilder {
     /**
      * Interpret the data response byte from a primed byte operation
      *
-     * @param primedDataResponse
-     * @param responseOffset
-     *
      * @return the byte representing the result of a 1-Wire data byte
      */
     public byte interpretPrimedByte (char[] primedDataResponse,
@@ -927,8 +887,7 @@ class UPacketBuilder {
     /**
      * Request the maximum rate to do an operation
      */
-    public static int getDesiredBaud (int operation, DSPortAdapter.Speed owSpeed, int maxBaud)
-    {
+    public static int getDesiredBaud (int operation, DSPortAdapter.Speed owSpeed, int maxBaud) {
         int baud = 9600;
 
         switch (operation)

@@ -52,9 +52,9 @@ import java.util.List;
  * <H3> Usage </H3>
  *
  *
- * @see com.dalsemi.onewire.container.OneWireSensor
- * @see com.dalsemi.onewire.container.SwitchContainer
- * @see com.dalsemi.onewire.container.OneWireContainer
+ * @see OneWireSensor
+ * @see SwitchContainer
+ * @see OneWireContainer
  *
  * @author     JPE
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
@@ -168,12 +168,12 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
     }
 
     /**
-     * Gets an enumeration of memory bank instances that implement one or more
+     * Gets a list of memory bank instances that implement one or more
      * of the following interfaces:
      * {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
      * {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank},
      * and {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank}.
-     * @return <CODE>Enumeration</CODE> of memory banks
+     * @return List of memory banks.
      */
     @Override
     public List<MemoryBank> getMemoryBanks() {

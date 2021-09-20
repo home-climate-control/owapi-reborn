@@ -80,9 +80,9 @@ import java.util.List;
  * <UL>
  *   <LI> <B> Main Memory </B>
  *      <UL>
- *         <LI> <I> Implements </I> {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
- *                  {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank},
- *                  {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank}
+ *         <LI> <I> Implements </I> {@link MemoryBank},
+ *                  {@link PagedMemoryBank},
+ *                  {@link OTPMemoryBank}
  *         <LI> <I> Size </I> 128 starting at physical address 0
  *         <LI> <I> Features</I> Write-once general-purpose non-volatile needs-program-pulse
  *         <LI> <I> Pages</I> 4 pages of length 32 bytes giving 29 bytes Packet data payload
@@ -90,9 +90,9 @@ import java.util.List;
  *      </UL>
  *   <LI> <B> Write protect pages and Page redirection </B>
  *      <UL>
- *         <LI> <I> Implements </I> {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
- *                  {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank},
- *                  {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank}
+ *         <LI> <I> Implements </I> {@link MemoryBank},
+ *                  {@link PagedMemoryBank},
+ *                  {@link OTPMemoryBank}
  *         <LI> <I> Size </I> 8 starting at physical address 0 (in STATUS memory area)
  *         <LI> <I> Features</I> Write-once not-general-purpose non-volatile needs-program-pulse
  *         <LI> <I> Pages</I> 1 pages of length 8 bytes
@@ -104,12 +104,12 @@ import java.util.List;
  *
  * <DL>
  * <DD> See the usage example in
- * {@link com.dalsemi.onewire.container.OneWireContainer OneWireContainer}
- * to enumerate the MemoryBanks.
+ * {@link OneWireContainer}
+ * to iterate through the MemoryBanks.
  * <DD> See the usage examples in
- * {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
- * {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank}, and
- * {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank}
+ * {@link MemoryBank},
+ * {@link PagedMemoryBank}, and
+ * {@link OTPMemoryBank}
  * for bank specific operations.
  * </DL>
  *
@@ -119,21 +119,14 @@ import java.util.List;
  * <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS1982.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS1982.pdf</A>
  * </DL>
  *
- * @see com.dalsemi.onewire.container.MemoryBank
- * @see com.dalsemi.onewire.container.PagedMemoryBank
- * @see com.dalsemi.onewire.container.OTPMemoryBank
- * @see com.dalsemi.onewire.container.OneWireContainer0B
- * @see com.dalsemi.onewire.container.OneWireContainer0F
+ * @see MemoryBank
+ * @see PagedMemoryBank
+ * @see OTPMemoryBank
  *
- * @version    0.00, 28 Aug 2000
- * @author     DS
+ * @author DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireContainer09 extends OneWireContainer {
-
-   //--------
-   //-------- Constructors
-   //--------
 
    /**
     * Create an empty container that is not complete until after a call
@@ -204,40 +197,16 @@ public class OneWireContainer09 extends OneWireContainer {
         super(sourceAdapter, newAddress);
     }
 
-   //--------
-   //-------- Methods
-   //--------
-
-   /**
-    * Get the Dallas Semiconductor part number of the iButton
-    * or 1-Wire Device as a string.  For example 'DS1992'.
-    *
-    * @return iButton or 1-Wire device name
-    */
     @Override
     public String getName() {
         return "DS1982";
     }
 
-   /**
-    * Get the alternate Dallas Semiconductor part numbers or names.
-    * A 'family' of 1-Wire Network devices may have more than one part number
-    * depending on packaging.  There can also be nicknames such as
-    * 'Crypto iButton'.
-    *
-    * @return 1-Wire device alternate names
-    */
     @Override
     public String getAlternateNames() {
         return "DS2502";
     }
 
-   /**
-    * Get a short description of the function of this iButton
-    * or 1-Wire Device type.
-    *
-    * @return device description
-    */
     @Override
     public String getDescription() {
       return "1024 bit Electrically Programmable Read Only Memory "
@@ -248,28 +217,16 @@ public class OneWireContainer09 extends OneWireContainer {
              + "a newly programmed page.";
    }
 
-   /**
-    * Get the maximum speed this iButton or 1-Wire device can
-    * communicate at.
-    * Override this method if derived iButton type can go faster then
-    * SPEED_REGULAR(0).
-    *
-    * @return maximum speed
-    * @see com.dalsemi.onewire.container.OneWireContainer#setSpeed super.setSpeed
-    * @see com.dalsemi.onewire.adapter.DSPortAdapter.Speed
-    */
     @Override
     public DSPortAdapter.Speed getMaxSpeed() {
         return DSPortAdapter.Speed.OVERDRIVE;
     }
 
    /**
-    * Get an enumeration of memory bank instances that implement one or more
+    * Get the list of memory bank instances that implement one or more
     * of the following interfaces:
-    * {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
-    * {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank},
-    * and {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank}.
-    * @return <CODE>Enumeration</CODE> of memory banks
+    * {@link MemoryBank}, {@link PagedMemoryBank}, and {@link OTPMemoryBank}.
+    * @return List of memory banks.
     */
     @Override
     public List<MemoryBank> getMemoryBanks() {

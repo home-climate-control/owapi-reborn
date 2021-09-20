@@ -36,9 +36,9 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  * <P>Memory bank interface class for basic memory communication with
  * iButtons (or 1-Wire devices).  The method <CODE> getMemoryBanks </CODE>
  * in all 1-Wire Containers ({@link com.dalsemi.onewire.container.OneWireContainer OneWireContainer})
- * returns an Enumeration of this interface to be used to read or write it's
+ * returns a list of this interface to be used to read or write it's
  * memory. If the 1-Wire device does not have memory or the memory is non-standard,
- * then this enumeration may be empty.
+ * then this collection may be empty.
  * A MemoryBank returned from this method may also implement the
  * {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank},
  * or {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank} interfaces,

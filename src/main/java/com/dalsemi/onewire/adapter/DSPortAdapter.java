@@ -537,11 +537,11 @@ public abstract class DSPortAdapter {
     /**
      * Returns an iterator of {@code OneWireContainer} objects corresponding
      * to all of the iButtons or 1-Wire devices found on the 1-Wire Network. If
-     * no devices are found, then an empty enumeration will be returned. In most
+     * no devices are found, then an empty collection will be returned. In most
      * cases, all further communication with the device is done through the
-     * OneWireContainer.
+     * {@link OneWireContainer}.
      *
-     * @return {@code Enumeration} of {@code OneWireContainer} objects found on the 1-Wire Network.
+     * @return List of {@code OneWireContainer} objects found on the 1-Wire Network.
      * @throws OneWireIOException on a 1-Wire communication error.
      * @throws OneWireException on a setup error with the 1-Wire adapter.
      */

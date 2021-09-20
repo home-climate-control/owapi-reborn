@@ -66,16 +66,16 @@ import java.util.Properties;
  * <DL>
  * <DD>
  * <H4> Example 2</H4>
- * Enumerate through the available adapters and ports.
+ * Iterate through the available adapters and ports.
  *
  * <PRE> <CODE> DSPortAdapter adapter; String port; // get the adapters for
- * (Enumeration adapter_enum = OneWireAccessProvider.enumerateAllAdapters();
- * adapter_enum.hasMoreElements(); ) { // cast the enum as a DSPortAdapter
- * adapter = ( DSPortAdapter ) adapter_enum.nextElement();
+ * (Iterator adapter_enum = OneWireAccessProvider.getAllAdapters().iterator();
+ * adapter_enum.hasNext(); ) { // cast the enum as a DSPortAdapter
+ * adapter = ( DSPortAdapter ) adapter_enum.next();
  * System.out.print("Adapter: " + adapter.getAdapterName() + " with ports: "); //
- * get the ports for (Enumeration port_enum = adapter.getPortNames();
- * port_enum.hasMoreElements(); ) { // cast the enum as a String port = ( String )
- * port_enum.nextElement(); System.out.print(port + " "); }
+ * get the ports for (Iterator port_enum = adapter.getPortNames().iterator();
+ * port_enum.hasNext(); ) { // cast the enum as a String port = ( String )
+ * port_enum.next(); System.out.print(port + " "); }
  * System.out.println(); } </CODE> </PRE>
  *
  * </DL>
