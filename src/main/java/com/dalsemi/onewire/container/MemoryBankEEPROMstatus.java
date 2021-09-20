@@ -38,7 +38,6 @@ import org.apache.logging.log4j.Logger;
  * Memory bank class for the EEPROM section of iButtons and 1-Wire devices on
  * the DS2408.
  *
- * @version 0.00, 28 Aug 2000
  * @author DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -47,27 +46,26 @@ class MemoryBankEEPROMstatus implements MemoryBank {
     protected final Logger logger = LogManager.getLogger();
 
     /**
-     * Read Memory Command
+     * Commands.
+     *
+     * Note that this set is different from the one in {@link Command}, hence inner enum.
      */
-    public static final byte READ_MEMORY_COMMAND = (byte) 0xF0;
+    enum MBCommand {
+
+        READ_MEMORY(0xF0),
+        WRITE_SCRATCHPAD(0x0F),
+        READ_SCRATCHPAD(0xAA),
+        COPY_SCRATCHPAD(0x55);
+
+        public final byte code;
+
+        MBCommand(int code) {
+            this.code = (byte) code;
+        }
+    }
 
     /**
-     * Write Scratchpad Command
-     */
-    public static final byte WRITE_SCRATCHPAD_COMMAND = (byte) 0x0F;
-
-    /**
-     * Read Scratchpad Command
-     */
-    public static final byte READ_SCRATCHPAD_COMMAND = (byte) 0xAA;
-
-    /**
-     * Copy Scratchpad Command
-     */
-    public static final byte COPY_SCRATCHPAD_COMMAND = (byte) 0x55;
-
-    /**
-     * Channel acces write to change the property of the channel
+     * Channel access write to change the property of the channel
      */
     public static final byte CHANNEL_ACCESS_WRITE = (byte) 0x5A;
 
@@ -357,7 +355,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
             // select the device
             if (ib.adapter.select(ib.address)) {
-                buff[0] = READ_MEMORY_COMMAND;
+                buff[0] = MBCommand.READ_MEMORY.code;
 
                 // address 1
                 buff[1] = (byte) (addr & 0xFF);
@@ -409,6 +407,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             buffer[0] = CHANNEL_ACCESS_WRITE;
             buffer[1] = writeBuf[offset];
             buffer[2] = (byte) ~writeBuf[offset];
+
             System.arraycopy(ffBlock, 0, buffer, 3, 2);
 
             ib.adapter.dataBlock(buffer, 0, 5);
@@ -430,8 +429,10 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             System.arraycopy(writeBuf, offset, buffer, 3, len);
 
             ib.adapter.dataBlock(buffer, 0, len + 3);
+
         } else if (((startPhysicalAddress + startAddr) > 127)
                 && ((startPhysicalAddress + startAddr + len) < 130)) {
+
             byte[] buffer = new byte[8];
             int addr = 128;
             byte[] buff = new byte[11];
@@ -440,7 +441,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
             ib.adapter.select(ib.address);
 
-            buff[0] = READ_MEMORY_COMMAND;
+            buff[0] = MBCommand.READ_MEMORY.code;
 
             // address 1
             buff[1] = (byte) (addr & 0xFF);
@@ -537,7 +538,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             int cnt = 0;
             // set data block up
             // start by sending the write scratchpad command
-            send_block[cnt++] = WRITE_SCRATCHPAD_COMMAND;
+            send_block[cnt++] = MBCommand.WRITE_SCRATCHPAD.code;
             // followed by the target address
             send_block[cnt++] = (byte) (addr & 0x00FF);
             send_block[cnt++] = (byte) (((addr & 0x00FFFF) >>> 8) & 0x00FF);
@@ -583,7 +584,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             send_block[1] = es_data[0];// TA1;
 
             // Copy command
-            send_block[0] = COPY_SCRATCHPAD_COMMAND;
+            send_block[0] = MBCommand.COPY_SCRATCHPAD.code;
 
             // send copy scratchpad command
             ib.adapter.dataBlock(send_block, 0, 3);
@@ -627,7 +628,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
         // build first block
         byte[] raw_buf = new byte[14];
-        raw_buf[0] = READ_SCRATCHPAD_COMMAND;
+        raw_buf[0] = MBCommand.READ_SCRATCHPAD.code;
         System.arraycopy(ffBlock, 0, raw_buf, 1, 13);
 
         // do data block for TA1, TA2, and E/S
