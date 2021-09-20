@@ -45,26 +45,6 @@ class MemoryBankSBM implements MemoryBank {
     protected final Logger logger = LogManager.getLogger();
 
    /**
-    * Read scratchpad command
-    */
-   private static final byte READ_SCRATCHPAD_COMMAND  = ( byte ) 0xBE;
-
-   /**
-    * Recall memory command
-    */
-   private static final byte RECALL_MEMORY_COMMAND    = ( byte ) 0xB8;
-
-   /**
-    * Copy scratchpad command
-    */
-   private static final byte COPY_SCRATCHPAD_COMMAND  = ( byte ) 0x48;
-
-   /**
-    * Write scratchpad command
-    */
-   private static final byte WRITE_SCRATCHPAD_COMMAND = ( byte ) 0x4E;
-
-   /**
     * Starting physical address in memory bank.  Needed for different
     * types of memory in the same logical memory bank.  This can be
     * used to seperate them into two virtual memory banks.  Example:
@@ -342,7 +322,7 @@ class MemoryBankSBM implements MemoryBank {
 
       if (ib.adapter.select(ib.address)) {
          /* recall memory to the scratchpad */
-         buffer [0] = RECALL_MEMORY_COMMAND;
+         buffer [0] = Command.RECALL_E2MEMORY.code;
          buffer [1] = ( byte ) page;
 
          ib.adapter.dataBlock(buffer, 0, 2);
@@ -350,7 +330,7 @@ class MemoryBankSBM implements MemoryBank {
          /* perform the read scratchpad */
          ib.adapter.select(ib.address);
 
-         buffer [0] = READ_SCRATCHPAD_COMMAND;
+         buffer [0] = Command.READ_SCRATCHPAD.code;
          buffer [1] = ( byte ) page;
 
          for (int i = 2; i < 11; i++) {
@@ -396,7 +376,7 @@ class MemoryBankSBM implements MemoryBank {
 
       if (ib.adapter.select(ib.address)) {
          // write the page to the scratchpad first
-         buffer [0] = WRITE_SCRATCHPAD_COMMAND;
+         buffer [0] = Command.WRITE_SCRATCHPAD.code;
          buffer [1] = ( byte ) page;
 
          System.arraycopy(source, offset, buffer, 2, 8);
@@ -405,7 +385,7 @@ class MemoryBankSBM implements MemoryBank {
          // read back the scrathpad
          if (ib.adapter.select(ib.address)) {
             // write the page to the scratchpad first
-            buffer [0] = READ_SCRATCHPAD_COMMAND;
+            buffer [0] = Command.READ_SCRATCHPAD.code;
             buffer [1] = ( byte ) page;
 
             System.arraycopy(ffBlock, 0, buffer, 2, 9);
@@ -421,7 +401,7 @@ class MemoryBankSBM implements MemoryBank {
             // now copy that part of the scratchpad to memory
             if (ib.adapter.select(ib.address)) {
 
-               buffer [0] = COPY_SCRATCHPAD_COMMAND;
+               buffer [0] = Command.COPY_SCRATCHPAD.code;
                buffer [1] = ( byte ) page;
 
                ib.adapter.dataBlock(buffer, 0, 2);
