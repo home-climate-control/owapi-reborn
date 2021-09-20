@@ -76,25 +76,6 @@ import com.dalsemi.onewire.utils.Convert;
  */
 public class OneWireContainer28 extends OneWireContainer implements TemperatureContainer {
 
-    //-------------------------------------------------------------------------
-    //-------- Static Final Variables
-    //-------------------------------------------------------------------------
-
-    /** DS18B20 writes data to scratchpad command */
-    public static final byte WRITE_SCRATCHPAD_COMMAND = ( byte ) 0x4E;
-
-    /** DS18B20 reads data from scratchpad command */
-    public static final byte READ_SCRATCHPAD_COMMAND = ( byte ) 0xBE;
-
-    /** DS18B20 copys data from scratchpad to E-squared memory command */
-    public static final byte COPY_SCRATCHPAD_COMMAND = ( byte ) 0x48;
-
-    /** DS18B20 converts temperature command */
-    public static final byte CONVERT_TEMPERATURE_COMMAND = ( byte ) 0x44;
-
-    /** DS18B20 recalls E-squared memory command */
-    public static final byte RECALL_E2MEMORY_COMMAND = ( byte ) 0xB8;
-
     /**
      * DS18B20 reads power supply command.  This command is used to determine
      * if external power is supplied.
@@ -355,7 +336,6 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      *
      * @see    #getTemperature
      */
-    @SuppressWarnings("static-access")
     @Override
     public void doTemperatureConvert(byte[] state) throws OneWireIOException, OneWireException {
 
@@ -371,7 +351,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         adapter.setPowerDuration(DSPortAdapter.PowerDeliveryDuration.INFINITE);
         adapter.startPowerDelivery(DSPortAdapter.PowerChangeCondition.AFTER_NEXT_BYTE);
         // send the convert temperature command
-        adapter.putByte(CONVERT_TEMPERATURE_COMMAND);
+        adapter.putByte(Command.CONVERT_TEMPERATURE.code);
 
         // calculate duration of delay according to resolution desired
         switch (state[4]) {
@@ -716,7 +696,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         // create a block to send that reads the scratchpad
         // 10 bytes
         byte[] sendBlock = {
-                READ_SCRATCHPAD_COMMAND, (byte) 0xFF, (byte) 0xFF,(byte) 0xFF,
+                Command.READ_SCRATCHPAD.code, (byte) 0xFF, (byte) 0xFF,(byte) 0xFF,
                 (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,(byte) 0xFF,
                 (byte) 0xFF,(byte) 0xFF,
         };
@@ -761,7 +741,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
     public void writeScratchpad(byte[] data) throws OneWireIOException, OneWireException {
 
         // setup buffer to write to scratchpad
-        byte[] writeBuffer = {WRITE_SCRATCHPAD_COMMAND, data[0], data[1], data[2]};
+        byte[] writeBuffer = {Command.WRITE_SCRATCHPAD.code, data[0], data[1], data[2]};
 
         // send command block to device
         if (!adapter.select(address)) {
@@ -797,7 +777,6 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    @SuppressWarnings("static-access")
     public void copyScratchpad() throws OneWireIOException, OneWireException {
 
         // first, let's read the scratchpad to compare later.
@@ -816,7 +795,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         adapter.startPowerDelivery(DSPortAdapter.PowerChangeCondition.AFTER_NEXT_BYTE);
 
         // send the convert temperature command
-        adapter.putByte(COPY_SCRATCHPAD_COMMAND);
+        adapter.putByte(Command.COPY_SCRATCHPAD.code);
 
         // sleep for 10 milliseconds to allow copy to take place.
         try {
@@ -868,7 +847,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         if (adapter.select(address)) {
 
             // send the Recall E-squared memory command
-            adapter.putByte(RECALL_E2MEMORY_COMMAND);
+            adapter.putByte(Command.RECALL_E2MEMORY.code);
 
             // read scratchpad
             return readScratchpad();
@@ -887,7 +866,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         }
 
         // send the Recall E-squared memory command
-        adapter.putByte(RECALL_E2MEMORY_COMMAND);
+        adapter.putByte(Command.RECALL_E2MEMORY.code);
 
         // read scratchpad
         readScratchpad(buffer);
@@ -909,7 +888,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
-    public boolean isExternalPowerSupplied() throws OneWireIOException, OneWireException {
+    public boolean isExternalPowerSupplied() throws OneWireException {
 
         int     intresult = 0;
         boolean result    = false;
@@ -918,7 +897,7 @@ public class OneWireContainer28 extends OneWireContainer implements TemperatureC
         if (adapter.select(address)) {
 
             // send the "Read Power Supply" memory command
-            adapter.putByte(READ_POWER_SUPPLY_COMMAND);
+            adapter.putByte(Command.READ_POWER_SUPPLY.code);
 
             // read results
             intresult = adapter.getByte();
