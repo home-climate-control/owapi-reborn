@@ -278,7 +278,7 @@ public class SerialService implements SerialPortEventListener {
 
             if( vPortIDs.isEmpty()) {
 
-                for (Enumeration<CommPortIdentifier> e = CommPortIdentifier.getPortIdentifiers(); e.hasMoreElements(); ) {
+                for (Enumeration<CommPortIdentifier> e = CommPortIdentifier.getPortIdentifiers(); e.hasMoreElements(); ) { // NOSONAR Nothing we can do here
 
                     CommPortIdentifier portID = e.nextElement();
 
