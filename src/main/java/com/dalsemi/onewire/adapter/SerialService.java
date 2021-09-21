@@ -62,7 +62,7 @@ public class SerialService implements SerialPortEventListener {
     private byte[] tempArray = new byte[128];
 
     /**
-     * Vector of thread hash codes that have done an open but no close.
+     * Set of thread hash codes that have done an open but no close.
      */
     private final Set<Thread> users = new HashSet<>();
 
@@ -72,14 +72,9 @@ public class SerialService implements SerialPortEventListener {
     private final boolean byteBang;
 
     /**
-     * Vector of serial port ID strings (i.e. "COM1", "COM2", etc).
+     * Set of serial port ID strings (i.e. "COM1", "COM2", etc).
      */
     private static final Set<String> vPortIDs = new TreeSet<>();
-
-    /**
-     * Static list of threadIDs to the services they are using.
-     */
-    private static final Map<Thread, SerialService> knownServices = new HashMap<>();
 
     /**
      * Static list of all unique SerialService classes.
@@ -177,8 +172,8 @@ public class SerialService implements SerialPortEventListener {
             break;
         }
 
-        logger.debug("SerialService.SerialEvent: oldValue=" + spe.getOldValue());
-        logger.debug("SerialService.SerialEvent: newValue=" + spe.getNewValue());
+        logger.debug("SerialService.SerialEvent: oldValue={}", spe.getOldValue());
+        logger.debug("SerialService.SerialEvent: newValue={}", spe.getNewValue());
     }
 
 
@@ -224,8 +219,8 @@ public class SerialService implements SerialPortEventListener {
                 //serialPort.setInputBufferSize(4096);
                 //serialPort.setOutputBufferSize(4096);
 
-                logger.debug("getInputBufferSize = " + serialPort.getInputBufferSize());
-                logger.debug("getOutputBufferSize = " + serialPort.getOutputBufferSize());
+                logger.debug("getInputBufferSize = {}", serialPort.getInputBufferSize());
+                logger.debug("getOutputBufferSize = {}", serialPort.getOutputBufferSize());
 
                 serialPort.addEventListener(spel != null ? spel : this);
 
@@ -254,7 +249,7 @@ public class SerialService implements SerialPortEventListener {
                 serialPort.setDTR(true);
                 serialPort.setRTS(true);
 
-                logger.debug("Port Opened (" + portName + ")");
+                logger.debug("Port Opened ({})", portName);
 
             } catch(Exception ex) {
 
@@ -344,7 +339,7 @@ public class SerialService implements SerialPortEventListener {
                         SerialPort.STOPBITS_1,
                         SerialPort.PARITY_NONE);
 
-                logger.debug("Set baudRate=" + baudRate);
+                logger.debug("Set baudRate={}", baudRate);
 
             } catch(UnsupportedCommOperationException ex) {
                 throw new IOException("Failed to set baud rate: ", ex);
@@ -418,7 +413,7 @@ public class SerialService implements SerialPortEventListener {
 
         try {
 
-            logger.debug("SerialService.closePortByThreadID(Thread), Thread=" + t);
+            logger.debug("SerialService.closePortByThreadID(Thread), Thread={}", t);
 
             // remove this thread as an owner
             users.remove(t);
@@ -490,17 +485,17 @@ public class SerialService implements SerialPortEventListener {
             }
 
             // set timeout to be very long
-            long timeout = System.currentTimeMillis() + length*20 + 800;
+            long timeout = System.currentTimeMillis() + length * 20L + 800;
 
-            logger.debug("SerialService.readWithTimeout(): length=" + length + ", timeout=" + timeout);
+            logger.debug("SerialService.readWithTimeout(): length={}, timeout={}", length, timeout);
 
 
             int count = byteBang
-            ? readWithTimeoutByteBang(buffer, offset, length, timeout)
+                    ? readWithTimeoutByteBang(buffer, offset, length, timeout)
                     : readWithTimeoutNoByteBang(buffer, offset, length, timeout);
 
-            logger.debug("SerialService.readWithTimeout: read " + count + " bytes");
-            logger.debug("SerialService.readWithTimeout: " + Convert.toHexString(buffer, offset, count));
+            logger.debug("SerialService.readWithTimeout: read {} bytes", count);
+            logger.debug("SerialService.readWithTimeout: {}", () -> Convert.toHexString(buffer, offset, count));
 
             return count;
 
@@ -529,7 +524,7 @@ public class SerialService implements SerialPortEventListener {
                 } else {
 
                     if (System.currentTimeMillis() > timeout) {
-                        logger.debug("premature return, timeout (" + timeout + ") exceeded");
+                        logger.debug("premature return, timeout ({}) exceeded", timeout);
                         return count;
                     }
 
@@ -544,7 +539,7 @@ public class SerialService implements SerialPortEventListener {
             return count;
 
         } finally {
-            logger.debug("returning " + count);
+            logger.debug("returning {}", count);
             ThreadContext.pop();
         }
     }
@@ -612,7 +607,7 @@ public class SerialService implements SerialPortEventListener {
             throw new IOException(null, new IllegalStateException("Port Not Open"));
         }
 
-        logger.debug("data: " + Convert.toHexString((byte)data));
+        logger.debug("data: {}", () -> Convert.toHexString((byte)data));
 
         try {
 
@@ -641,8 +636,8 @@ public class SerialService implements SerialPortEventListener {
                 throw new IOException("Port Not Open");
             }
 
-            logger.debug("length: " + length + " bytes");
-            logger.debug("data: " + Convert.toHexString(data, offset, length));
+            logger.debug("length: {} bytes", length);
+            logger.debug("data: {}", () -> Convert.toHexString(data, offset, length));
 
             try {
 
@@ -654,8 +649,8 @@ public class SerialService implements SerialPortEventListener {
                 // drain IOExceptions that are 'Interrrupted' on Linux
                 // convert the rest to IOExceptions
 
-                if (!((System.getProperty("os.name").indexOf("Linux") != -1)
-                        && (e.toString().indexOf("Interrupted") != -1))) {
+                if (!((System.getProperty("os.name").contains("Linux"))
+                        && (e.toString().contains("Interrupted")))) {
                     throw new IOException("write(char): " + e);
                 }
             }
@@ -690,7 +685,7 @@ public class SerialService implements SerialPortEventListener {
 
             if (length > tempArray.length) {
 
-                logger.warn("Extending temp buffer to " + length + " bytes");
+                logger.warn("Extending temp buffer to {} bytes", length);
 
                 tempArray = new byte[length];
             }

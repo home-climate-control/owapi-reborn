@@ -145,7 +145,7 @@ class UPacketBuilder {
     protected int totalReturnLength;
 
     /**
-     * Current raw send packet before it is added to the packetsVector
+     * Current raw send packet before it is added to the {@link #rawSendPackets}.
      */
     protected RawSendPacket packet;
 
@@ -159,18 +159,13 @@ class UPacketBuilder {
      */
     protected boolean bitsOnly;
 
-    //--------
-    //-------- Constructors
-    //--------
-
     /**
      * Constructs a new u packet builder.
      *
      * @param  startUState   the object that contains the U brick state
      *                        which is reference when creating packets
      */
-    public UPacketBuilder (UAdapterState startUState)
-    {
+    public UPacketBuilder (UAdapterState startUState) {
 
         // get a reference to the U state
         uState = startUState;
@@ -202,8 +197,7 @@ class UPacketBuilder {
     /**
      * Reset the packet builder to start a new one.
      */
-    public void restart ()
-    {
+    public void restart () {
 
         // clear the vector list of packets
         rawSendPackets.clear();
@@ -289,8 +283,7 @@ class UPacketBuilder {
      * @return the number offset in the return packet to get the
      *          result of this operation
      */
-    public int dataBytes (char[] dataBytesValue)
-    {
+    public int dataBytes (char[] dataBytesValue) {
         char byte_value;
         int i,j;
 
@@ -919,7 +912,7 @@ class UPacketBuilder {
      *
      * @param  bitBuffer array of chars where the bit to read is located
      * @param  address   bit location to read (LSBit of first Byte in bitBuffer
-     *                    is postion 0)
+     *                    is position 0)
      *
      * @return the boolean value of the bit position
      */
@@ -939,7 +932,7 @@ class UPacketBuilder {
      *
      * @param  bitBuffer array of chars where the bit to write is located
      * @param  address   bit location to write (LSBit of first Byte in bitBuffer
-     *                    is postion 0)
+     *                    is position 0)
      * @param  newBitState new bit state
      */
     public void bitWrite (char[] bitBuffer, int address, boolean newBitState)
