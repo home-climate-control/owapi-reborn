@@ -28,17 +28,16 @@
 
 package com.dalsemi.onewire.utils;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.SwitchContainer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 1-Wire&#174 Network path.  Large 1-Wire networks can be sub-divided into branches
@@ -69,62 +68,43 @@ import com.dalsemi.onewire.container.SwitchContainer;
  * </CODE> </PRE>
  * </DL>
  *
- * @see com.dalsemi.onewire.utils.OWPathElement
+ * @see OWPathElement
  * @see com.dalsemi.onewire.container.SwitchContainer
  * @see com.dalsemi.onewire.container.OneWireContainer05
  * @see com.dalsemi.onewire.container.OneWireContainer12
  * @see com.dalsemi.onewire.container.OneWireContainer1F
  *
- * @version    0.00, 12 September 2000
- * @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author DS
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OWPath implements Comparable<OWPath> {
 
     protected final Logger logger = LogManager.getLogger(getClass());
-    //--------
-    //-------- Variables
-    //--------
 
-    /** Elements of the path in a Vector */
-    private Vector<OWPathElement> elements;
-
-    /** Adapter where this path is based */
-    private DSPortAdapter adapter;
-
-    //--------
-    //-------- Constructor
-    //--------
+    private final List<OWPathElement> elements;
+    private final DSPortAdapter adapter;
 
     /**
-     * Create a new 1-Wire path with no elemements.  Elements
-     * can be added by using <CODE> copy </CODE> and/or
-     * <CODE> add </CODE>.
+     * Create a new 1-Wire path with no elements.  Elements
+     * can be added by using {@link #copy(OWPath)} and/or {@link #add(OneWireContainer, int)}.
      *
-     * @param  adapter where the path is based
-     *
-     * @see #copy(OWPath) copy
-     * @see #add(OneWireContainer, int) add
+     * @param adapter where the path is based.
      */
     public OWPath(DSPortAdapter adapter) {
-        
-        this.adapter = adapter;
-        elements     = new Vector<OWPathElement>(2, 1);
+        this(adapter, null);
     }
 
     /**
      * Create a new path with a starting path.  New elements
-     * can be added with <CODE>add</CODE>.
+     * can be added with {@link #add(OneWireContainer, int)}.
      *
      * @param  adapter where the 1-Wire path is based
-     * @param  currentPath starting value of this 1-Wire path
-     *
-     * @see #add(OneWireContainer, int) add
+     * @param  currentOWPath starting value of this 1-Wire path
      */
     public OWPath(DSPortAdapter adapter, OWPath currentOWPath) {
-        
+
         this.adapter = adapter;
-        elements     = new Vector<OWPathElement>(2, 1);
+        elements     = new ArrayList<>();
 
         copy(currentOWPath);
     }
@@ -132,25 +112,17 @@ public class OWPath implements Comparable<OWPath> {
     /**
      * Copy the elements from the provided 1-Wire path into this 1-Wire path.
      *
-     * @param  currentOWPath path to copy from
+     * @param  currentOWPath path to copy from.
      */
     public void copy(OWPath currentOWPath) {
 
-        elements.removeAllElements();
+        elements.clear();
 
-        if (currentOWPath != null) {
-
-            // VT: FIXME: addAll() might work, need to check later whether it preserves order
-            //elements.addAll(currentOWPath.elements);
-            
-            // enumerature through elements in current path
-            for (Enumeration<OWPathElement> path_enum = currentOWPath
-                    .getAllOWPathElements(); path_enum.hasMoreElements();) {
-
-                // cast the enum as a OWPathElements and add to vector
-                elements.addElement(path_enum.nextElement());
-            }
+        if (currentOWPath == null) {
+            return;
         }
+
+        elements.addAll(currentOWPath.asList());
     }
 
     /**
@@ -162,19 +134,16 @@ public class OWPath implements Comparable<OWPath> {
      * @see #copy(OWPath) copy
      */
     public void add(OneWireContainer owc, int channel) {
-        elements.addElement(new OWPathElement(owc, channel));
+        elements.add(new OWPathElement(owc, channel));
     }
 
     /**
-     * Get an enumeration of all of the 1-Wire path elements in
-     * this 1-Wire path.
+     * Get the list of all the 1-Wire path elements in this 1-Wire path.
      *
-     * @return enumeration of all of the 1-Wire path elements
-     *
-     * @see com.dalsemi.onewire.utils.OWPathElement
+     * @return The path as a list of elements.
      */
-    public Enumeration<OWPathElement> getAllOWPathElements() {
-        return elements.elements();
+    public List<OWPathElement> asList() {
+        return elements;
     }
 
     /**
@@ -182,6 +151,7 @@ public class OWPath implements Comparable<OWPath> {
      *
      * @return string 1-Wire path as string
      */
+    @Override
     public String toString () {
 
         StringBuilder sb = new StringBuilder();
@@ -195,7 +165,7 @@ public class OWPath implements Comparable<OWPath> {
         } catch (OneWireException ex) {
 
             // VT: FIXME: WTF? Swallowing exception?
-            
+
             logger.fatal("DalSemi ignored this exception", ex);
 
             // VT: FIXME: This also creates a problem with possibly different
@@ -211,14 +181,13 @@ public class OWPath implements Comparable<OWPath> {
             sb.append(adapter.getAdapterName()).append("/");
         }
 
-        for (int i = 0; i < elements.size(); i++) {
+        for (var owPathElement : elements) {
 
-            OWPathElement element = (OWPathElement)elements.elementAt(i);
-            OneWireContainer owc = element.getContainer();
+            OneWireContainer owc = owPathElement.getContainer();
 
             // append 'directory' name
 
-            sb.append(owc.getAddressAsString()).append("_").append(element.getChannel()).append("/");
+            sb.append(owc.getAddressAsString()).append("_").append((owPathElement).getChannel()).append("/");
         }
 
         return sb.toString();
@@ -234,17 +203,16 @@ public class OWPath implements Comparable<OWPath> {
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter.
      */
-    public void open() throws OneWireException, OneWireIOException {
+    public void open() throws OneWireException {
 
         OWPathElement path_element;
         SwitchContainer sw;
         byte[] sw_state;
 
-        // enumerature through elements in path
-        for (int i = 0; i < elements.size(); i++) {
+        for (var element : elements) {
 
             // cast the enum as a OWPathElement
-            path_element = (OWPathElement) elements.elementAt(i);
+            path_element = element;
 
             // get the switch
             sw = (SwitchContainer) path_element.getContainer();
@@ -273,7 +241,7 @@ public class OWPath implements Comparable<OWPath> {
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter.
      */
-    public void close() throws OneWireException, OneWireIOException {
+    public void close() throws OneWireException {
         OWPathElement path_element;
         SwitchContainer sw;
         byte[] sw_state;
@@ -282,7 +250,7 @@ public class OWPath implements Comparable<OWPath> {
         for (int i = elements.size() - 1; i >= 0; i--) {
 
             // cast the element as a OWPathElement
-            path_element = (OWPathElement) elements.elementAt(i);
+            path_element = elements.get(i);
 
             // get the switch
             sw = (SwitchContainer) path_element.getContainer();
@@ -294,43 +262,32 @@ public class OWPath implements Comparable<OWPath> {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int compareTo(OWPath other) {
-        
+
         if (other == null) {
             throw new IllegalArgumentException("other can't be null");
         }
-        
+
         return toString().compareTo(other.toString());
     }
 
-    /**
-     * Compare this 1-Wire path with another.
-     *
-     * @param other 1-Wire path to compare to.
-     *
-     * @return {@code true} if the 1-Wire paths are the same.
-     */
+    @Override
     public boolean equals(Object other) {
-        
-        if (other == null) {
 
+        if (other == null) {
             return false;
         }
 
         if (!(other instanceof OWPath)) {
-
             return false;
         }
 
         return this.toString().equals(other.toString());
     }
 
+    @Override
     public int hashCode() {
-
         return toString().hashCode();
     }
 
