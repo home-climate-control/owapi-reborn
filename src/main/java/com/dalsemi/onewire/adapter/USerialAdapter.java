@@ -535,7 +535,7 @@ public class USerialAdapter extends DSPortAdapter {
             }
 
             // check for 'first' and only 1 target
-            if ((owState.searchLastDiscrepancy == 0) && (owState.searchLastDevice == false)
+            if ((owState.searchLastDiscrepancy == 0) && (!owState.searchLastDevice)
                     && (owState.searchIncludeFamilies.length == 1)) {
 
                 // set the search to find the 1 target first
@@ -1472,7 +1472,7 @@ public class USerialAdapter extends DSPortAdapter {
         try {
 
             // get the desired baud rate for this operation
-            int baud = uBuild.getDesiredBaud(operation, owState.oneWireSpeed, maxBaud);
+            int baud = UPacketBuilder.getDesiredBaud(operation, owState.oneWireSpeed, maxBaud);
 
             // check if already at the correct speed
             if (baud == serial.getBaudRate()) {
@@ -1487,17 +1487,17 @@ public class USerialAdapter extends DSPortAdapter {
             switch (baud) {
 
             case 115200:
-                ubaud = uState.BAUD_115200;
+                ubaud = UAdapterState.BAUD_115200;
                 break;
             case 57600:
-                ubaud = uState.BAUD_57600;
+                ubaud = UAdapterState.BAUD_57600;
                 break;
             case 19200:
-                ubaud = uState.BAUD_19200;
+                ubaud = UAdapterState.BAUD_19200;
                 break;
             case 9600:
             default:
-                ubaud = uState.BAUD_9600;
+                ubaud = UAdapterState.BAUD_9600;
                 break;
             }
 
@@ -1518,7 +1518,7 @@ public class USerialAdapter extends DSPortAdapter {
                 // send command, no response at this baud rate
                 serial.flush();
 
-                RawSendPacket pkt = (RawSendPacket) uBuild.getPackets().iterator().next();
+                RawSendPacket pkt = uBuild.getPackets().iterator().next();
                 char[] temp_buf = new char[pkt.buffer.length()];
 
                 pkt.buffer.getChars(0, pkt.buffer.length(), temp_buf, 0);
@@ -1570,10 +1570,8 @@ public class USerialAdapter extends DSPortAdapter {
                         return;
                     }
                 }
-            } catch (IOException ex) {
-                logger.error("USerialAdapter-setStreamingSpeed: " + ex);
-            } catch (OneWireIOException ex) {
-                logger.error("USerialAdapter-setStreamingSpeed: ", ex);
+            } catch (IOException|OneWireIOException ex) {
+                logger.error("USerialAdapter-setStreamingSpeed", ex);
             }
 
             logger.error("Failed to change baud of DS2480");
@@ -1587,9 +1585,8 @@ public class USerialAdapter extends DSPortAdapter {
      * Verify that the DS2480 based adapter is present on the open port.
      *
      * @return 'true' if adapter present
-     * @throws OneWireException - if port not selected
      */
-    private synchronized boolean uAdapterPresent() throws OneWireException {
+    private synchronized boolean uAdapterPresent() {
 
         boolean rt = true;
 
@@ -1618,7 +1615,7 @@ public class USerialAdapter extends DSPortAdapter {
 
         adapterPresent = rt;
 
-        logger.debug("AdapterPresent result: " + rt);
+        logger.debug("AdapterPresent result: {}", rt);
 
         return rt;
     }
@@ -1641,12 +1638,10 @@ public class USerialAdapter extends DSPortAdapter {
                 // set the baud rate
                 serial.setBaudRate(9600);
 
-                uState.ubaud = uState.BAUD_9600;
-
                 // put back to standard speed
                 owState.oneWireSpeed = Speed.REGULAR;
-                uState.uSpeedMode = uState.USPEED_FLEX;
-                uState.ubaud = uState.BAUD_9600;
+                uState.uSpeedMode = UAdapterState.USPEED_FLEX;
+                uState.ubaud = UAdapterState.BAUD_9600;
 
                 // send a break to reset DS2480
                 serial.sendBreak(10);
@@ -1682,12 +1677,10 @@ public class USerialAdapter extends DSPortAdapter {
                 // set the baud rate
                 serial.setBaudRate(9600);
 
-                uState.ubaud = uState.BAUD_9600;
-
                 // put back to standard speed
                 owState.oneWireSpeed = Speed.REGULAR;
-                uState.uSpeedMode = uState.USPEED_FLEX;
-                uState.ubaud = uState.BAUD_9600;
+                uState.uSpeedMode = UAdapterState.USPEED_FLEX;
+                uState.ubaud = UAdapterState.BAUD_9600;
 
                 // power down DS2480
                 serial.setDTR(false);
@@ -1745,9 +1738,7 @@ public class USerialAdapter extends DSPortAdapter {
                         && ((result_array[bit_offset] & 0x0C) == uState.uSpeedMode))
                     return true;
             }
-        } catch (IOException ex) {
-            logger.error("USerialAdapter-uVerify: ", ex);
-        } catch (OneWireIOException ex) {
+        } catch (IOException | OneWireIOException ex) {
             logger.error("USerialAdapter-uVerify: ", ex);
         }
 
