@@ -29,3 +29,9 @@ to be separated so that it can continue life on its own - surprisingly, there's 
 
 It is what it is. `owapi` code was never a focus for independent improvement, the quality level was "good enough" (and it is, for its primary use case).
 Now that the project is independent again, hopefully, that will change.
+
+## BIG FAT WARNING: This is a subset.
+
+This library contains just a limited subset of containers, deciding factor for retaining or dropping being usefulness for the [Home Climate Control](https://github.com/home-climate-control/dz) project. This subset is being maintained, others were dropped long time ago.
+
+There are other copies of the original 1-Wire library code on the Internet, the most complete at the time being the one at https://github.com/onewire/onewire/tree/master/owapi - go there if you need a full set, but there are no guarantees about authenticity or heritage of that code. Fair warning, at the moment of writing it doesn't even build - bit rot is merciless. Good luck.
