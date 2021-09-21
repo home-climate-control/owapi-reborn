@@ -37,7 +37,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Set;
 
 /**
@@ -1519,7 +1518,7 @@ public class USerialAdapter extends DSPortAdapter {
                 // send command, no response at this baud rate
                 serial.flush();
 
-                RawSendPacket pkt = (RawSendPacket) uBuild.getPackets().nextElement();
+                RawSendPacket pkt = (RawSendPacket) uBuild.getPackets().iterator().next();
                 char[] temp_buf = new char[pkt.buffer.length()];
 
                 pkt.buffer.getChars(0, pkt.buffer.length(), temp_buf, 0);
@@ -1764,19 +1763,15 @@ public class USerialAdapter extends DSPortAdapter {
      */
     private char[] uTransaction(UPacketBuilder tempBuild) throws OneWireIOException {
 
-        //int offset;
-
         try {
             // clear the buffers
             serial.flush();
             inBuffer.setLength(0);
 
-            // loop to send all of the packets
-            for (Enumeration<RawSendPacket> packet_enum = tempBuild.getPackets(); packet_enum.hasMoreElements();) {
+            // loop to send all the packets
+            for (RawSendPacket pkt : tempBuild.getPackets()) {
 
                 // get the next packet
-                RawSendPacket pkt = packet_enum.nextElement();
-
                 // bogus packet to indicate need to wait for long DS2480 alarm
                 // reset
                 if ((pkt.buffer.length() == 0) && (pkt.returnLength == 0)) {
@@ -1791,9 +1786,6 @@ public class USerialAdapter extends DSPortAdapter {
 
                 pkt.buffer.getChars(0, pkt.buffer.length(), temp_buf, 0);
 
-                // remember number of bytes in input
-                //offset = inBuffer.length();
-
                 // send the packet
                 serial.write(temp_buf);
 
@@ -1805,9 +1797,6 @@ public class USerialAdapter extends DSPortAdapter {
             char[] ret_buffer = new char[inBuffer.length()];
 
             inBuffer.getChars(0, inBuffer.length(), ret_buffer, 0);
-
-            // check for extra bytes in inBuffer
-            //extraBytesReceived = (inBuffer.length() > tempBuild.totalReturnLength);
 
             // clear the inbuffer
             inBuffer.setLength(0);

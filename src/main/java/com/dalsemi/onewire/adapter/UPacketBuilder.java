@@ -35,8 +35,8 @@ import com.dalsemi.onewire.utils.Address;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /** UPacketBuilder contains the methods to build a communication packet
@@ -152,7 +152,7 @@ class UPacketBuilder {
     /**
      * Vector of raw send packets
      */
-    protected final Vector<RawSendPacket> packetsVector = new Vector<>();
+    protected final List<RawSendPacket> rawSendPackets = new ArrayList<>();
 
     /**
      * Flag to send only 'bit' commands to the DS2480
@@ -206,7 +206,7 @@ class UPacketBuilder {
     {
 
         // clear the vector list of packets
-        packetsVector.removeAllElements();
+        rawSendPackets.clear();
 
         // truncate the packet to 0 length
         packet.buffer.setLength(0);
@@ -225,7 +225,7 @@ class UPacketBuilder {
     public void newPacket () {
 
         // add the packet
-        packetsVector.addElement(packet);
+        rawSendPackets.add(packet);
 
         // get a new packet
         packet = new RawSendPacket();
@@ -234,15 +234,16 @@ class UPacketBuilder {
     /**
      * Retrieve List of raw send packets
      *
-     * @return  the enumeration of packets
+     * @return Packet list
      */
-    public Enumeration<RawSendPacket> getPackets () {
+    public List<RawSendPacket> getPackets () {
 
-        // put the last packet into the vector if it is non zero
-        if (packet.buffer.length() > 0)
+        // put the last packet into the vector if it is non-zero
+        if (packet.buffer.length() > 0) {
             newPacket();
+        }
 
-        return packetsVector.elements();
+        return rawSendPackets;
     }
 
     //--------
