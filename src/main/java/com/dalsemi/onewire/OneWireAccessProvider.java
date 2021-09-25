@@ -93,10 +93,13 @@ import java.util.Properties;
  * </DL>
  *
  * @see DSPortAdapter
- * @version 0.00, 30 August 2000
  * @author DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ *
+ * @deprecated Too cumbersome. Create an instance of {@link USerialAdapter#USerialAdapter()} directly, and then
+ * call {@link DSPortAdapter#selectPort(String)} on it.
  */
+@Deprecated(since = "2021-09-25", forRemoval = true)
 public class OneWireAccessProvider {
 
     protected static final Logger logger = LogManager.getLogger(OneWireAccessProvider.class);
