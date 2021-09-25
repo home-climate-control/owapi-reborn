@@ -5,8 +5,6 @@ import com.dalsemi.onewire.utils.Convert;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent;
-import gnu.io.SerialPortEventListener;
 import gnu.io.UnsupportedCommOperationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Original implementation &copy; Dallas Semiconductor
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class SerialService implements SerialPortEventListener {
+public class SerialService {
 
     protected static final Logger logger = LogManager.getLogger(SerialService.class);
 
@@ -130,62 +128,7 @@ public class SerialService implements SerialPortEventListener {
         }
     }
 
-    /**
-     * SerialPortEventListener method.  This just calls the notify
-     * method on this object, so that all blocking methods are kicked
-     * awake whenever a serialEvent occurs.
-     */
-    @Override
-    public void serialEvent(SerialPortEvent spe) {
-
-        switch(spe.getEventType())
-        {
-        case SerialPortEvent.BI:
-            logger.debug("SerialPortEvent: Break interrupt.");
-            break;
-        case SerialPortEvent.CD:
-            logger.debug("SerialPortEvent: Carrier detect.");
-            break;
-        case SerialPortEvent.CTS:
-            logger.debug("SerialPortEvent: Clear to send.");
-            break;
-        case SerialPortEvent.DATA_AVAILABLE:
-            logger.debug("SerialPortEvent: Data available at the serial port.");
-            break;
-        case SerialPortEvent.DSR:
-            logger.debug("SerialPortEvent: Data set ready.");
-            break;
-        case SerialPortEvent.FE:
-            logger.debug("SerialPortEvent: Framing error.");
-            break;
-        case SerialPortEvent.OE:
-            logger.debug("SerialPortEvent: Overrun error.");
-            break;
-        case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
-            logger.debug("SerialPortEvent: Output buffer is empty.");
-            break;
-        case SerialPortEvent.PE:
-            logger.debug("SerialPortEvent: Parity error.");
-            break;
-        case SerialPortEvent.RI:
-            logger.debug("SerialPortEvent: Ring indicator.");
-            break;
-        }
-
-        logger.debug("SerialService.SerialEvent: oldValue={}", spe.getOldValue());
-        logger.debug("SerialService.SerialEvent: newValue={}", spe.getNewValue());
-    }
-
-
     public synchronized void openPort() throws IOException {
-
-        logger.debug("SerialService.openPort() called");
-
-        openPort(null);
-    }
-
-    public synchronized void openPort(SerialPortEventListener spel) throws IOException {
-
         ThreadContext.push("openPort");
 
         try {
@@ -221,8 +164,6 @@ public class SerialService implements SerialPortEventListener {
 
                 logger.debug("getInputBufferSize = {}", serialPort.getInputBufferSize());
                 logger.debug("getOutputBufferSize = {}", serialPort.getOutputBufferSize());
-
-                serialPort.addEventListener(spel != null ? spel : this);
 
                 serialPort.notifyOnOutputEmpty(true);
                 serialPort.notifyOnDataAvailable(true);
