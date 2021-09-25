@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -58,11 +57,6 @@ public class SerialService {
      * Temporary array, used for converting characters to bytes.
      */
     private byte[] tempArray = new byte[128];
-
-    /**
-     * Set of thread hash codes that have done an open but no close.
-     */
-    private final Set<Thread> users = new HashSet<>();
 
     /**
      * Flag to indicate byte banging on read.
@@ -133,11 +127,8 @@ public class SerialService {
 
         try {
 
-            // record this thread as an owner. It's a Set, extra add() won't hurt
-            users.add(Thread.currentThread());
-
             if(isPortOpen()) {
-                return;
+                throw new IllegalStateException(portName + ": already open");
             }
 
             CommPortIdentifier port_id;
@@ -295,9 +286,12 @@ public class SerialService {
      */
     public synchronized void closePort() {
 
-        logger.debug("SerialService.closePort");
+        logger.debug("close(): {}", portName);
 
-        closePortByThreadID(Thread.currentThread());
+        serialPort.close();
+        serialPort = null;
+        serialInputStream = null;
+        serialOutputStream = null;
     }
 
     public synchronized void flush() throws IOException {
@@ -343,40 +337,6 @@ public class SerialService {
         logger.debug("SerialService.endExclusive");
 
         theLock.unlock();
-    }
-
-    /**
-     * Allows clean up port by thread.
-     */
-    private synchronized void closePortByThreadID(Thread t) {
-
-        ThreadContext.push("closePortByThreadID");
-
-        try {
-
-            logger.debug("SerialService.closePortByThreadID(Thread), Thread={}", t);
-
-            // remove this thread as an owner
-            users.remove(t);
-
-            // if this is the last owner then close the port
-            if (users.isEmpty()) {
-
-                // if don't own a port then just return
-                if (!isPortOpen()) {
-                    return;
-                }
-
-                // close the port
-                serialPort.close();
-                serialPort = null;
-                serialInputStream = null;
-                serialOutputStream = null;
-            }
-
-        } finally {
-            ThreadContext.pop();
-        }
     }
 
     public synchronized int available() throws IOException {
