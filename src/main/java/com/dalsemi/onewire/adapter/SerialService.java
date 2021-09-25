@@ -13,6 +13,8 @@ import org.apache.logging.log4j.ThreadContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +74,8 @@ public class SerialService {
      * Static list of all unique SerialService classes.
      */
     private static final Map<String, SerialService> uniqueServices = new HashMap<>();
+
+    private final Clock clock = Clock.systemUTC();
 
     /**
      * This constructor is intended to be used by {@link #getSerialService(java.lang.String)}.
@@ -352,7 +356,7 @@ public class SerialService {
             checkOpen();
 
             // set timeout to be very long
-            long timeout = System.currentTimeMillis() + length * 20L + 800;
+            var timeout = Duration.ofMillis(length * 20L + 800);
 
             logger.debug("SerialService.readWithTimeout(): length={}, timeout={}", length, timeout);
 
@@ -361,9 +365,7 @@ public class SerialService {
                     ? readWithTimeoutByteBang(buffer, offset, length, timeout)
                     : readWithTimeoutNoByteBang(buffer, offset, length, timeout);
 
-            logger.debug("SerialService.readWithTimeout: read {} bytes", count);
-            logger.debug("SerialService.readWithTimeout: {}", () -> Convert.toHexString(buffer, offset, count));
-
+            logger.debug("read {} bytes: {}", () -> count, () -> Convert.toHexString(buffer, offset, count));
             return count;
 
         } finally {
@@ -371,13 +373,13 @@ public class SerialService {
         }
     }
 
-    private int readWithTimeoutByteBang(byte[] buffer, int offset, int length, long timeout) throws IOException {
+    private int readWithTimeoutByteBang(byte[] buffer, int offset, int length, Duration timeout) throws IOException {
 
         ThreadContext.push("readWithTimeoutByteBang");
 
+        var start = clock.instant();
         int count = 0;
         try {
-
 
             do {
 
@@ -390,7 +392,7 @@ public class SerialService {
 
                 } else {
 
-                    if (System.currentTimeMillis() > timeout) {
+                    if (clock.instant().isAfter(start.plus(timeout))) {
                         logger.debug("premature return, timeout ({}) exceeded", timeout);
                         return count;
                     }
@@ -411,8 +413,9 @@ public class SerialService {
         }
     }
 
-    private int readWithTimeoutNoByteBang(byte[] buffer, int offset, int length, long timeout) throws IOException {
+    private int readWithTimeoutNoByteBang(byte[] buffer, int offset, int length, Duration timeout) throws IOException {
 
+        var start = clock.instant();
         int count = 0;
 
         do {
@@ -432,7 +435,7 @@ public class SerialService {
             } else {
 
                 // check for timeout
-                if (System.currentTimeMillis() > timeout  ) {
+                if (clock.instant().isAfter(start.plus(timeout))) {
                     length = 0;
                 }
 
@@ -463,9 +466,6 @@ public class SerialService {
         return returnBuffer;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public synchronized void write(int data) throws IOException {
 
         ThreadContext.push("write");
