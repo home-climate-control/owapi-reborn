@@ -30,15 +30,18 @@ package com.dalsemi.onewire.adapter;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.utils.Address;
+import gnu.io.CommPortIdentifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * The abstract base class for all 1-Wire port adapter objects. An
@@ -318,7 +321,21 @@ public abstract class DSPortAdapter {
      *
      * @return Set of port names.
      */
-    public abstract Set<String> getPortNames();
+    public static final Set<String> getPortNames() {
+
+        var result = new TreeSet<String>();
+
+        for (var e = (Enumeration<CommPortIdentifier>) CommPortIdentifier.getPortIdentifiers(); e.hasMoreElements(); ) { // NOSONAR Nothing we can do here
+
+            CommPortIdentifier portID = e.nextElement();
+
+            if (portID.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+                result.add(portID.getName());
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Address to device container map.

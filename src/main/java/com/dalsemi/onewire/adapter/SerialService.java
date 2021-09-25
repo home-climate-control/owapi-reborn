@@ -15,9 +15,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -62,11 +59,6 @@ public class SerialService {
      * Flag to indicate byte banging on read.
      * */
     private final boolean byteBang;
-
-    /**
-     * Set of serial port ID strings (i.e. "COM1", "COM2", etc).
-     */
-    private static final Set<String> vPortIDs = new TreeSet<>();
 
     private final Clock clock = Clock.systemUTC();
 
@@ -161,27 +153,6 @@ public class SerialService {
             ThreadContext.pop();
         }
     }
-
-    public static Set<String> getSerialPortIdentifiers() {
-
-        synchronized(vPortIDs) {
-
-            if( vPortIDs.isEmpty()) {
-
-                for (Enumeration<CommPortIdentifier> e = CommPortIdentifier.getPortIdentifiers(); e.hasMoreElements(); ) { // NOSONAR Nothing we can do here
-
-                    CommPortIdentifier portID = e.nextElement();
-
-                    if (portID.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-                        vPortIDs.add(portID.getName());
-                    }
-                }
-            }
-
-            return vPortIDs;
-        }
-    }
-
     public synchronized String getPortName() {
         return portName;
     }

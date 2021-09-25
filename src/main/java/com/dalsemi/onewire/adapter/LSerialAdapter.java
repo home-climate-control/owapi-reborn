@@ -33,7 +33,6 @@ import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.utils.CRC8;
 
 import java.io.IOException;
-import java.util.Set;
 
 /**
  * The LSerialAdapter class implememts the DSPortAdapter interface for a legacy
@@ -213,11 +212,6 @@ public class LSerialAdapter extends DSPortAdapter {
     @Override
     public String getPortTypeDescription() {
         return "serial communication port";
-    }
-
-    @Override
-    public Set<String> getPortNames() {
-        return SerialService.getSerialPortIdentifiers();
     }
 
     @Override

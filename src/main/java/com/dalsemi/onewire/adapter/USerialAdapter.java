@@ -37,7 +37,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
-import java.util.Set;
 
 /**
  * The USerialAdapter class implememts the DSPortAdapter interface for a DS2480
@@ -221,11 +220,6 @@ public class USerialAdapter extends DSPortAdapter {
     @Override
     public String getPortTypeDescription() {
         return "Serial communication port";
-    }
-
-    @Override
-    public Set<String> getPortNames() {
-        return SerialService.getSerialPortIdentifiers();
     }
 
     @Override

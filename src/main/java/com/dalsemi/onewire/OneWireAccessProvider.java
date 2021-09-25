@@ -125,7 +125,7 @@ public class OneWireAccessProvider {
             DSPortAdapter adapterInstance = (DSPortAdapter) adapterClass.newInstance();
 
             // check if has any ports (common javax.comm problem)
-            if (adapterInstance.getPortNames().isEmpty()) {
+            if (DSPortAdapter.getPortNames().isEmpty()) {
                 logger.warn("Warning: serial communications API not setup properly, no ports detected ");
                 logger.warn("Pure-Java DS9097U adapter will not work, not added to adapter list");
             } else {
@@ -317,8 +317,8 @@ public class OneWireAccessProvider {
                     adapter_instance = (DSPortAdapter) adapter_class.newInstance();
 
                     // check if has any ports (common javax.comm problem)
-                    if (!adapter_instance.getPortNames().isEmpty()) {
-                        ret_str = adapter_instance.getPortNames().iterator().next();
+                    if (!DSPortAdapter.getPortNames().isEmpty()) {
+                        ret_str = DSPortAdapter.getPortNames().iterator().next();
                     }
 
                 } catch (Throwable t) {
