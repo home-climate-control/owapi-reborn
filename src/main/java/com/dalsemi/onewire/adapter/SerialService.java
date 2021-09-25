@@ -74,14 +74,6 @@ public class SerialService {
     private static final Map<String, SerialService> uniqueServices = new HashMap<>();
 
     /**
-     * do not use default constructor
-     * use getSerialService(String) instead.
-     */
-    private SerialService() {
-        throw new IllegalStateException("Use getSerialService(String) instead");
-    }
-
-    /**
      * This constructor is intended to be used by {@link #getSerialService(java.lang.String)}.
      */
     protected SerialService(String portName) {
@@ -131,16 +123,16 @@ public class SerialService {
                 throw new IllegalStateException(portName + ": already open");
             }
 
-            CommPortIdentifier port_id;
+            CommPortIdentifier portId;
 
             try {
-                port_id = CommPortIdentifier.getPortIdentifier(portName);
+                portId = CommPortIdentifier.getPortIdentifier(portName);
             } catch(NoSuchPortException ex) {
                 throw new IOException(portName + ": no such port", ex);
             }
 
             // check if the port is currently used
-            if (port_id.isCurrentlyOwned()) {
+            if (portId.isCurrentlyOwned()) {
                 throw new IOException("Port In Use (" + portName + ")");
             }
 
@@ -148,7 +140,7 @@ public class SerialService {
             try {
 
                 // get the port object
-                serialPort = (SerialPort) port_id.open("Dallas Semiconductor", 2000);
+                serialPort = (SerialPort) portId.open("Dallas Semiconductor", 2000);
 
                 //serialPort.setInputBufferSize(4096);
                 //serialPort.setOutputBufferSize(4096);
@@ -192,7 +184,7 @@ public class SerialService {
 
                 serialPort = null;
 
-                throw new IOException("Could not open port (" + portName + ")", ex);
+                throw new IOException(portName + ": failed to open", ex);
             }
         } finally {
             ThreadContext.pop();
@@ -261,8 +253,7 @@ public class SerialService {
         ThreadContext.push("setBaudRate(" + baudRate + ")");
 
         try {
-            if(!isPortOpen())
-                throw new IOException(null, new IllegalStateException("Port Not Open"));
+            checkOpen();
 
             try {
                 // set baud rate
@@ -298,14 +289,11 @@ public class SerialService {
 
         logger.debug("SerialService.flush");
 
-        if (!isPortOpen()) {
-            throw new IOException(null, new IllegalStateException("Port Not Open"));
-        }
-
+        checkOpen();
         serialOutputStream.flush();
 
         while(serialInputStream.available() > 0) {
-            serialInputStream.read();
+            serialInputStream.read(); // NOSONAR this data is meant to be discarded
         }
     }
 
@@ -321,9 +309,7 @@ public class SerialService {
      * relinquished.
      */
     public void beginExclusive() {
-
-        logger.debug("SerialService.beginExclusive()");
-
+        logger.debug("{}: beginExclusive()", portName);
         theLock.lock();
     }
 
@@ -333,45 +319,27 @@ public class SerialService {
      * should be used when exclusive control is no longer needed.
      */
     public synchronized void endExclusive () {
-
-        logger.debug("SerialService.endExclusive");
-
+        logger.debug("{}: endExclusive()", portName);
         theLock.unlock();
     }
 
     public synchronized int available() throws IOException {
-
-        if(!isPortOpen()) {
-            throw new IOException(null, new IllegalStateException("Port Not Open"));
-        }
-
+        checkOpen();
         return serialInputStream.available();
     }
 
     public synchronized int read() throws IOException {
-
-        if (!isPortOpen()) {
-            throw new IOException(null, new IllegalStateException("Port Not Open"));
-        }
-
+        checkOpen();
         return serialInputStream.read();
     }
 
     public synchronized int read(byte[] buffer) throws IOException {
-
-        if(!isPortOpen()) {
-            throw new IOException(null, new IllegalStateException("Port Not Open"));
-        }
-
+        checkOpen();
         return read(buffer, 0, buffer.length);
     }
 
     public synchronized int read(byte[] buffer, int offset, int length) throws IOException {
-
-        if(!isPortOpen()) {
-            throw new IOException(null, new IllegalStateException("Port Not Open"));
-        }
-
+        checkOpen();
         return serialInputStream.read(buffer, offset, length);
     }
 
@@ -381,9 +349,7 @@ public class SerialService {
 
         try {
 
-            if (!isPortOpen()) {
-                throw new IOException(null, new IllegalStateException("Port Not Open"));
-            }
+            checkOpen();
 
             // set timeout to be very long
             long timeout = System.currentTimeMillis() + length * 20L + 800;
@@ -415,11 +381,11 @@ public class SerialService {
 
             do {
 
-                int new_byte = serialInputStream.read();
+                var read = serialInputStream.read();
 
-                if (new_byte != -1) {
+                if (read != -1) {
 
-                    buffer[count+offset] = (byte)new_byte;
+                    buffer[count+offset] = (byte)read;
                     count++;
 
                 } else {
@@ -504,9 +470,7 @@ public class SerialService {
 
         ThreadContext.push("write");
 
-        if(!isPortOpen()) {
-            throw new IOException(null, new IllegalStateException("Port Not Open"));
-        }
+        checkOpen();
 
         logger.debug("data: {}", () -> Convert.toHexString((byte)data));
 
@@ -533,9 +497,7 @@ public class SerialService {
 
         try {
 
-            if (!isPortOpen()) {
-                throw new IOException("Port Not Open");
-            }
+            checkOpen();
 
             logger.debug("length: {} bytes", length);
             logger.debug("data: {}", () -> Convert.toHexString(data, offset, length));
@@ -599,6 +561,12 @@ public class SerialService {
 
         } finally {
             ThreadContext.pop();
+        }
+    }
+
+    private void checkOpen() {
+        if (!isPortOpen()) {
+            throw new IllegalStateException(portName + ": port not open");
         }
     }
 }
