@@ -270,11 +270,7 @@ public class LSerialAdapter extends DSPortAdapter {
     public boolean selectPort(String newPortName) throws OneWireIOException, OneWireException {
 
         // find the port reference
-        serial = serial.getSerialService(newPortName);
-
-        // check if there is no such port
-        if (serial == null)
-            throw new OneWireException("DS9097EAdapter: selectPort(), Not such serial port: " + newPortName);
+        serial = new SerialService(newPortName);
 
         try {
 

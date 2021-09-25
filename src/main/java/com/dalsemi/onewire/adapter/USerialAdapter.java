@@ -231,8 +231,7 @@ public class USerialAdapter extends DSPortAdapter {
     @Override
     public boolean selectPort(String newPortName) throws OneWireException {
 
-        // find the port reference
-        serial = SerialService.getSerialService(newPortName);
+        serial = new SerialService(newPortName);
 
         try {
 
@@ -241,8 +240,8 @@ public class USerialAdapter extends DSPortAdapter {
 
             // attempt to open the port
             serial.openPort();
-
             return true;
+
         } catch (IOException ex) {
             throw new OneWireIOException("Oops", ex);
         } finally {

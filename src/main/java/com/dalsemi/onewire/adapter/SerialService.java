@@ -16,8 +16,6 @@ import java.io.OutputStream;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.locks.ReentrantLock;
@@ -70,15 +68,12 @@ public class SerialService {
      */
     private static final Set<String> vPortIDs = new TreeSet<>();
 
-    /**
-     * Static list of all unique SerialService classes.
-     */
-    private static final Map<String, SerialService> uniqueServices = new HashMap<>();
-
     private final Clock clock = Clock.systemUTC();
 
     /**
-     * This constructor is intended to be used by {@link #getSerialService(java.lang.String)}.
+     * Create an instance.
+     *
+     * @param portName Port name to use. Validity is only checked in {@link #openPort()}.
      */
     protected SerialService(String portName) {
 
@@ -88,34 +83,6 @@ public class SerialService {
         String prop = OneWireAccessProvider.getProperty("onewire.serial.bytebangread");
 
         byteBang = prop != null && prop.contains("true");
-    }
-
-    public static SerialService getSerialService(String portName) {
-
-        ThreadContext.push("getSerialService");
-
-        try {
-
-            synchronized(uniqueServices) {
-
-                logger.debug("requested: {}", portName);
-
-                String portId = portName.toLowerCase();
-                SerialService existingService = uniqueServices.get(portId);
-
-                if(existingService != null) {
-                    return existingService;
-                }
-
-                SerialService sps = new SerialService(portName);
-                uniqueServices.put(portId, sps);
-
-                return sps;
-            }
-
-        } finally {
-            ThreadContext.pop();
-        }
     }
 
     public synchronized void openPort() throws IOException {
