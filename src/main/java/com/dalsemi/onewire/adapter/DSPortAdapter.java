@@ -44,10 +44,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * The abstract base class for all 1-Wire port adapter objects. An
- * implementation class of this type is therefore independent of the adapter
- * type. Instances of valid DSPortAdapter's are retrieved from methods in
- * {@link com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider}.
+ * The abstract base class for all 1-Wire port adapter objects. An implementation class of this type is therefore
+ * independent of the adapter type. Instances of valid DSPortAdapter's can be retrieved from methods in
+ * {@link com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider}, but you probably want to instantiate them
+ * directly (that is most likely going to be {@link USerialAdapter}).
  * <P>
  * The DSPortAdapter methods can be organized into the following categories:
  * </P>
@@ -162,9 +162,7 @@ import java.util.TreeSet;
  * </UL>
  * </UL>
  *
- * @see com.dalsemi.onewire.OneWireAccessProvider
  * @see com.dalsemi.onewire.container.OneWireContainer
- * @version 0.00, 28 Aug 2000
  * @author DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -191,7 +189,7 @@ public abstract class DSPortAdapter {
         }
     }
 
-    public static final String CLASS_NAME_ONEWIRECONTAINER = "com.dalsemi.onewire.container.OneWireContainer";
+    public static final String CLASS_NAME_ONEWIRECONTAINER = OneWireContainer.class.getName();
 
     /**
      * Power level.
@@ -321,7 +319,7 @@ public abstract class DSPortAdapter {
      *
      * @return Set of port names.
      */
-    public static final Set<String> getPortNames() {
+    public static Set<String> getPortNames() {
 
         var result = new TreeSet<String>();
 
@@ -361,14 +359,14 @@ public abstract class DSPortAdapter {
      * removal of any entry associated with the family.
      *
      * @param family the code of the family type to associate with this class.
-     * @param OneWireContainerClass User provided class
+     * @param containerClass User provided class
      * @throws OneWireException If {@code OneWireContainerClass} is not found.
      * @throws ClassCastException If user supplied {@code OneWireContainer} does
      * not extend {@code com.dalsemi.onewire.container.OneWireContainer}.
      */
-    public synchronized void registerOneWireContainerClass(int family, Class<?> OneWireContainerClass) throws OneWireException {
+    public synchronized void registerOneWireContainerClass(int family, Class<?> containerClass) throws OneWireException {
 
-        if (OneWireContainerClass == null) {
+        if (containerClass == null) {
 
             // If a null is passed, remove the old container class.
             registeredOneWireContainerClasses.remove(family);
@@ -379,18 +377,18 @@ public abstract class DSPortAdapter {
 
             Class<?> defaultibc = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
 
-            if (defaultibc.isAssignableFrom(OneWireContainerClass)) {
+            if (defaultibc.isAssignableFrom(containerClass)) {
 
                 // Put the new container class in the hashtable, replacing any
                 // old one.
-                registeredOneWireContainerClasses.put(family, OneWireContainerClass);
+                registeredOneWireContainerClasses.put(family, containerClass);
 
             } else {
-                throw new ClassCastException(OneWireContainerClass.getName() + "does not extend " + CLASS_NAME_ONEWIRECONTAINER);
+                throw new ClassCastException(containerClass.getName() + "does not extend " + CLASS_NAME_ONEWIRECONTAINER);
             }
 
-        } catch (ClassNotFoundException e) {
-            throw new OneWireException("Could not find OneWireContainer class " + CLASS_NAME_ONEWIRECONTAINER);
+        } catch (ClassNotFoundException ex) {
+            throw new OneWireException("Could not find OneWireContainer class " + CLASS_NAME_ONEWIRECONTAINER, ex);
         }
     }
 
@@ -1470,7 +1468,7 @@ public abstract class DSPortAdapter {
 
                     // try to load the ibutton container class
                     try {
-                        logger.debug("Falling back to " + CLASS_NAME_ONEWIRECONTAINER);
+                        logger.debug("Falling back to {}", CLASS_NAME_ONEWIRECONTAINER);
                         deviceClass = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
                     } catch (Exception ex) {
                         logger.error("Unable to load OneWireContainer", ex);
