@@ -28,23 +28,18 @@
 package com.dalsemi.onewire.adapter;
 
 import com.dalsemi.onewire.Family;
-import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.utils.Bit;
 import com.dalsemi.onewire.utils.CRC8;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 
 /**
- * The USerialAdapter class implememts the DSPortAdapter interface for a DS2480
+ * The USerialAdapter class implements the DSPortAdapter interface for a DS2480
  * based serial adapter such as the DS9097U-009 or DS9097U-S09.
  * <p>
- * Instances of valid USerialAdapter's are retrieved from methods in
- * {@link OneWireAccessProvider OneWireAccessProvider}.
- * <P>
  * The DSPortAdapter methods can be organized into the following categories:
  * </P>
  * <UL>
@@ -158,9 +153,7 @@ import java.io.IOException;
  * </UL>
  * </UL>
  *
- * @see OneWireAccessProvider
  * @see OneWireContainer
- * @version 0.10, 24 Aug 2001
  * @author DS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -179,7 +172,7 @@ public class USerialAdapter extends DSPortAdapter {
     private static final char ALARM_SEARCH_CMD = 0xEC;
 
     /** Max baud rate supported by DS9097U */
-    private static int maxBaud;
+    private static final int maxBaud = 115200;
 
     /** Reference to the current SerialService */
     private SerialService serial;
@@ -1809,38 +1802,6 @@ public class USerialAdapter extends DSPortAdapter {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             logger.debug("sleep interrupted");
-        }
-    }
-
-    static {
-
-        // check properties to see if max baud set manualy
-        maxBaud = 115200;
-
-        String maxBaudStr = OneWireAccessProvider.getProperty("onewire.serial.maxbaud");
-
-        if (maxBaudStr != null) {
-            try {
-                maxBaud = Integer.parseInt(maxBaudStr);
-            } catch (NumberFormatException ex) {
-                maxBaud = 0;
-            }
-        }
-
-        LogManager.getLogger(USerialAdapter.class).debug("onewire.serial.maxbaud={}", maxBaud);
-
-        switch (maxBaud) {
-            case 9600:
-            case 19200:
-            case 57600:
-            case 115200:
-
-                // Looking good
-                break;
-
-            default:
-                LogManager.getLogger(USerialAdapter.class).warn("unsupported baud rate {}, reverting to 115200", maxBaud);
-                maxBaud = 115200;
         }
     }
 }
