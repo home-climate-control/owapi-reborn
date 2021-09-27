@@ -28,7 +28,7 @@
 
 package com.dalsemi.onewire.utils;
 
-import com.dalsemi.onewire.container.OneWireContainer;
+import com.dalsemi.onewire.container.SwitchContainer;
 
 
 /**
@@ -66,20 +66,24 @@ import com.dalsemi.onewire.container.OneWireContainer;
  */
 public class OWPathElement {
 
-    /** OneWireContainer of the path element */
-    public final OneWireContainer container;
+    /**
+     * Path element switch.
+     */
+    public final SwitchContainer container;
 
-    /** Channel the path is on */
+    /**
+     * Switch channel the path is on.
+     */
     public final int channel;
 
     /**
      * Create a new 1-Wire path element.
      *
-     * @param container device that is the path element. Must implement SwitchContainer.
-     * @param channelNumber channel number of the 1-Wire path.
+     * @param container Switch that is the path element.
+     * @param channel Channel number of the 1-Wire path.
      */
-    public OWPathElement(OneWireContainer container, int channelNumber) {
+    public OWPathElement(SwitchContainer container, int channel) {
         this.container = container;
-        channel = channelNumber;
+        this.channel = channel;
     }
 }

@@ -42,7 +42,7 @@ import java.util.List;
 /**
  * 1-Wire&#174 Network path.  Large 1-Wire networks can be sub-divided into branches
  * for load, location, or organizational reasons.  Once 1-Wire devices are placed
- * on this branches there needs to be a mechanism to reach these devices.  The
+ * on these branches there needs to be a mechanism to reach these devices.  The
  * OWPath class was designed to provide a convenient method to open and close
  * 1-Wire paths to reach remote devices.
  *
@@ -85,8 +85,7 @@ public class OWPath implements Comparable<OWPath> {
     private final DSPortAdapter adapter;
 
     /**
-     * Create a new 1-Wire path with no elements.  Elements
-     * can be added by using {@link #copy(OWPath)} and/or {@link #add(OneWireContainer, int)}.
+     * Create a new 1-Wire path with no elements.
      *
      * @param adapter where the path is based.
      */
@@ -95,8 +94,7 @@ public class OWPath implements Comparable<OWPath> {
     }
 
     /**
-     * Create a new path with a starting path.  New elements
-     * can be added with {@link #add(OneWireContainer, int)}.
+     * Create a new path with a starting path.
      *
      * @param  adapter where the 1-Wire path is based
      * @param  currentOWPath starting value of this 1-Wire path
@@ -128,13 +126,13 @@ public class OWPath implements Comparable<OWPath> {
     /**
      * Add a 1-Wire path element to this 1-Wire path.
      *
-     * @param owc 1-Wire device switch
+     * @param container 1-Wire device switch
      * @param channel of device that represents this 1-Wire path element
      *
      * @see #copy(OWPath) copy
      */
-    public void add(OneWireContainer owc, int channel) {
-        elements.add(new OWPathElement(owc, channel));
+    public void add(SwitchContainer container, int channel) {
+        elements.add(new OWPathElement(container, channel));
     }
 
     /**
@@ -187,7 +185,7 @@ public class OWPath implements Comparable<OWPath> {
 
             // append 'directory' name
 
-            sb.append(owc.getAddressAsString()).append("_").append(owPathElement.channel).append("/");
+            sb.append(((OneWireContainer) owc).getAddressAsString()).append("_").append(owPathElement.channel).append("/");
         }
 
         return sb.toString();
@@ -205,24 +203,15 @@ public class OWPath implements Comparable<OWPath> {
      */
     public void open() throws OneWireException {
 
-        OWPathElement path_element;
-        SwitchContainer sw;
-        byte[] sw_state;
-
         for (var element : elements) {
 
-            // cast the enum as a OWPathElement
-            path_element = element;
-
-            // get the switch
-            sw = (SwitchContainer) path_element.container;
+            var sw = element.container;
 
             // turn on the elements channel
-            sw_state = sw.readDevice();
+            var swState = sw.readDevice();
 
-            sw.setLatchState(path_element.channel, true, sw.hasSmartOn(),
-                    sw_state);
-            sw.writeDevice(sw_state);
+            sw.setLatchState(element.channel, true, sw.hasSmartOn(), swState);
+            sw.writeDevice(swState);
         }
 
         // check if not depth in path, do a reset so a resetless search will work
@@ -242,23 +231,17 @@ public class OWPath implements Comparable<OWPath> {
      *         adapter.
      */
     public void close() throws OneWireException {
-        OWPathElement path_element;
-        SwitchContainer sw;
-        byte[] sw_state;
 
         // loop through elements in path in reverse order
         for (int i = elements.size() - 1; i >= 0; i--) {
 
-            // cast the element as a OWPathElement
-            path_element = elements.get(i);
-
-            // get the switch
-            sw = (SwitchContainer) path_element.container;
+            var pathElement = elements.get(i);
+            var sw = pathElement.container;
 
             // turn off the elements channel
-            sw_state = sw.readDevice();
-            sw.setLatchState(path_element.channel, false, false, sw_state);
-            sw.writeDevice(sw_state);
+            var swState = sw.readDevice();
+            sw.setLatchState(pathElement.channel, false, false, swState);
+            sw.writeDevice(swState);
         }
     }
 
