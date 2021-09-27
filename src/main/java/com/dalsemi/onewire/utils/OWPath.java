@@ -183,11 +183,11 @@ public class OWPath implements Comparable<OWPath> {
 
         for (var owPathElement : elements) {
 
-            OneWireContainer owc = owPathElement.getContainer();
+            var owc = owPathElement.container;
 
             // append 'directory' name
 
-            sb.append(owc.getAddressAsString()).append("_").append((owPathElement).getChannel()).append("/");
+            sb.append(owc.getAddressAsString()).append("_").append(owPathElement.channel).append("/");
         }
 
         return sb.toString();
@@ -215,12 +215,12 @@ public class OWPath implements Comparable<OWPath> {
             path_element = element;
 
             // get the switch
-            sw = (SwitchContainer) path_element.getContainer();
+            sw = (SwitchContainer) path_element.container;
 
             // turn on the elements channel
             sw_state = sw.readDevice();
 
-            sw.setLatchState(path_element.getChannel(), true, sw.hasSmartOn(),
+            sw.setLatchState(path_element.channel, true, sw.hasSmartOn(),
                     sw_state);
             sw.writeDevice(sw_state);
         }
@@ -253,11 +253,11 @@ public class OWPath implements Comparable<OWPath> {
             path_element = elements.get(i);
 
             // get the switch
-            sw = (SwitchContainer) path_element.getContainer();
+            sw = (SwitchContainer) path_element.container;
 
             // turn off the elements channel
             sw_state = sw.readDevice();
-            sw.setLatchState(path_element.getChannel(), false, false, sw_state);
+            sw.setLatchState(path_element.channel, false, false, sw_state);
             sw.writeDevice(sw_state);
         }
     }

@@ -67,37 +67,19 @@ import com.dalsemi.onewire.container.OneWireContainer;
 public class OWPathElement {
 
     /** OneWireContainer of the path element */
-    private OneWireContainer owc;
+    public final OneWireContainer container;
 
     /** Channel the path is on */
-    private int channel;
+    public final int channel;
 
     /**
      * Create a new 1-Wire path element.
      *
-     * @param owcInstance device that is the path element. Must implement SwitchContainer.
+     * @param container device that is the path element. Must implement SwitchContainer.
      * @param channelNumber channel number of the 1-Wire path.
      */
-    public OWPathElement(OneWireContainer owcInstance, int channelNumber) {
-        owc = owcInstance;
+    public OWPathElement(OneWireContainer container, int channelNumber) {
+        this.container = container;
         channel = channelNumber;
-    }
-
-    /**
-     * Get the 1-Wire container for this 1-Wire path element.
-     *
-     * @return OneWireContainer of this 1-Wire path element.
-     */
-    public OneWireContainer getContainer() {
-        return owc;
-    }
-
-    /**
-     * Get the channel number of this 1-Wire path element.
-     *
-     * @return channel number of this element
-     */
-    public int getChannel() {
-        return channel;
     }
 }
