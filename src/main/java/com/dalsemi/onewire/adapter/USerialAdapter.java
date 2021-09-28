@@ -521,8 +521,9 @@ public class USerialAdapter extends DSPortAdapter {
             }
 
             // check for 'first' and only 1 target
-            if ((owState.searchLastDiscrepancy == 0) && (!owState.searchLastDevice)
-                    && (owState.searchIncludeFamilies.length == 1)) {
+            if (owState.searchLastDiscrepancy == 0
+                    && !owState.searchLastDevice
+                    && owState.searchIncludeFamilies.length == 1) {
 
                 // set the search to find the 1 target first
                 owState.searchLastDiscrepancy = 64;

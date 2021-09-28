@@ -547,7 +547,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
         if (flagValue) {
             data [0] = ( byte ) (data [0] | flagToSet);
         } else {
-            data [0] = ( byte ) (data [0] & ~(flagToSet));
+            data [0] = ( byte ) (data [0] & ~flagToSet);
         }
 
         writePage(0, data, 0);
@@ -644,8 +644,8 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
         // change the sign of the current register value and store it as the offset
         data     = readPage(1);
-        data [5] = ( byte ) (~(currentLSB) + 1);
-        data [6] = ( byte ) (~(currentMSB));
+        data [5] = ( byte ) (~currentLSB + 1);
+        data [6] = ( byte ) (~currentMSB);
 
         writePage(1, data, 0);
 

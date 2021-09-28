@@ -703,8 +703,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
                 raw_buf [3] = ( byte ) 0xFF;
 
                 // check if get a 1 byte crc in a normal read.
-                int num_bytes = (normalReadCRC) ? 4
-                        : 3;
+                int num_bytes = normalReadCRC ? 4 : 3;
 
                 // do the first block for command, address
                 ib.adapter.dataBlock(raw_buf, 0, num_bytes);
@@ -1126,9 +1125,6 @@ class MemoryBankEPROM implements OTPMemoryBank {
      *
      * @param  page      number of page to redirect
      * @param  newPage   new page number to redirect to
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public void redirectPage(int page, int newPage) throws OneWireException {
@@ -1359,7 +1355,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
             lastcrc = CRC8.compute(raw_buf, 0, len, 0);
         }
 
-        if ((extraInfoLength > 0) || (crcAfterAddress)) {
+        if (extraInfoLength > 0 || crcAfterAddress) {
 
             // check CRC
             if (numCRCBytes == 2) {

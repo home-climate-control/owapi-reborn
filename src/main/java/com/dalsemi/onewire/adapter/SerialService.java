@@ -18,6 +18,8 @@ import java.time.Duration;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * Wrapper for the {@link SerialPort}.
+ *
  * @author Original implementation &copy; Dallas Semiconductor
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -450,8 +452,8 @@ public class SerialService {
                 // drain IOExceptions that are 'Interrrupted' on Linux
                 // convert the rest to IOExceptions
 
-                if (!((System.getProperty("os.name").contains("Linux"))
-                        && (e.toString().contains("Interrupted")))) {
+                if (!(System.getProperty("os.name").contains("Linux")
+                        && e.toString().contains("Interrupted"))) {
                     throw new IOException("write(char): " + e);
                 }
             }

@@ -1440,8 +1440,9 @@ public abstract class DSPortAdapter {
             }
 
             int familyCode = address[0] & 0x7F;
-            String familyString = ((familyCode) < 16) ? ("0" + Integer.toHexString(familyCode)).toUpperCase() : (Integer
-                    .toHexString(familyCode)).toUpperCase();
+            String familyString = (familyCode < 16)
+                    ? ("0" + Integer.toHexString(familyCode)).toUpperCase()
+                    : (Integer.toHexString(familyCode)).toUpperCase();
             Class<?> deviceClass = null;
             OneWireContainer newDevice;
 

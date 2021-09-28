@@ -177,7 +177,7 @@ class UPacketBuilder {
         restart();
 
         // Default on SunOS to bit-banging
-        bitsOnly = (System.getProperty("os.name").contains("SunOS"));
+        bitsOnly = System.getProperty("os.name").contains("SunOS");
 
         // check for a bits only property
         String bits = OneWireAccessProvider.getProperty("onewire.serial.forcebitsonly");
@@ -428,8 +428,8 @@ class UPacketBuilder {
 
         // append the bit with polarity and strong5V options
         packet.buffer.append(( char ) (FUNCTION_BIT | uState.uSpeedMode
-                | ((dataBit) ? BIT_ONE
-                        : BIT_ZERO) | ((strong5V)
+                | (dataBit ? BIT_ONE
+                        : BIT_ZERO) | (strong5V
                                 ? PRIME5V_TRUE
                                         : PRIME5V_FALSE)));
 
@@ -633,11 +633,9 @@ class UPacketBuilder {
      * Append a send command to the packet.  This command does not
      * elicit a response byte.
      *
-     * @param  command       command to send
-     * @param expectResponse
+     * @param command command to send.
      *
-     * @return the number offset in the return packet to get the
-     *          result of this operation (if there is one)
+     * @return the number offset in the return packet to get the result of this operation (if there is one)
      */
     public int sendCommand (char command, boolean expectResponse) {
 

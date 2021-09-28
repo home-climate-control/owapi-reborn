@@ -391,7 +391,7 @@ public class OneWireContainer1F extends OneWireContainer implements SwitchContai
         }
 
         // check if there are events to clear and not about to do clear anyway
-        if ((clearActivityOnWrite) && (command != OWC1FCommand.ALL_LINES_OFF.code)) {
+        if (clearActivityOnWrite && (command != OWC1FCommand.ALL_LINES_OFF.code)) {
             if ((Bit.arrayReadBit(4, STATUS_OFFSET, state) == 1)
                     || (Bit.arrayReadBit(5, STATUS_OFFSET, state) == 1)) {
 
@@ -590,7 +590,7 @@ public class OneWireContainer1F extends OneWireContainer implements SwitchContai
 
         // set the state flag
         if (latchState) {
-            state[channel + 1] = (byte) ((doSmart) ? SWITCH_SMART : SWITCH_ON);
+            state[channel + 1] = (byte) (doSmart ? SWITCH_SMART : SWITCH_ON);
         } else {
             state[channel + 1] = (byte) SWITCH_OFF;
         }

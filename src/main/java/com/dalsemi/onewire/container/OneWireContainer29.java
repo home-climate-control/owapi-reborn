@@ -400,7 +400,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
 
         if (set && ((register[2] & 0x04) == 0x04)) {
             register[2] = (byte) (register[2] & (byte) 0xFB);
-        } else if ((!set) && ((register[2] & (byte) 0x04) == (byte) 0x00)) {
+        } else if (!set && ((register[2] & (byte) 0x04) == (byte) 0x00)) {
             register[2] = (byte) (register[2] | (byte) 0x04);
         }
     }

@@ -256,13 +256,13 @@ public class OneWireContainer3A extends OneWireContainer implements SwitchContai
       if(getLatchState(0,state))
       {
          temp = (byte) 0x01;
-         state[0] = (byte) ((state[0]) | temp);
+         state[0] = (byte) (state[0] | temp);
       }
 
       if(getLatchState(1,state))
       {
          temp = (byte) 0x02;
-         state[0] = (byte) ((state[0]) | temp);
+         state[0] = (byte) (state[0] | temp);
       }
 
       if (latchState)
