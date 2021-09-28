@@ -28,6 +28,7 @@
 package com.dalsemi.onewire.adapter;
 
 import com.dalsemi.onewire.OneWireException;
+import com.dalsemi.onewire.container.Command;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.utils.Address;
 import gnu.io.CommPortIdentifier;
@@ -847,7 +848,7 @@ public abstract class DSPortAdapter {
         // 9 bytes
         byte[] buffer = { (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00 };
 
-        buffer[0] = 0x55; // MATCH ROM command
+        buffer[0] = Command.MATCH_ROM.code;
 
         System.arraycopy(address, 0, buffer, 1, 8);
         dataBlock(buffer, 0, 9);
