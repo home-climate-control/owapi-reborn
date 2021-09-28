@@ -82,8 +82,28 @@ import com.dalsemi.onewire.utils.Bit;
  * @author DSS
  * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class OneWireContainer1F extends OneWireContainer implements
-        SwitchContainer {
+public class OneWireContainer1F extends OneWireContainer implements SwitchContainer {
+
+    /**
+     * Commands.
+     *
+     * Note that this set is different from the one in {@link Command}, hence inner enum.
+     */
+    enum OWC1FCommand {
+
+        READ_WRITE_STATUS(0x5A),
+        ALL_LINES_OFF(0x66),
+        DISCHARGE(0x99),
+        DIRECT_ON_MAIN(0xA5),
+        SMART_ON_MAIN(0xCC),
+        SMART_ON_AUX(0x33);
+
+        public final byte code;
+
+        OWC1FCommand(int code) {
+            this.code = (byte) code;
+        }
+    }
 
     /** Offset of BITMAP in array returned from read state. */
     protected static final int BITMAP_OFFSET = 3;
@@ -105,24 +125,6 @@ public class OneWireContainer1F extends OneWireContainer implements
 
     /** Channel flag to indicate smart on. */
     protected static final int SWITCH_SMART = 2;
-
-    /** Read Write Status register commmand. */
-    protected static final byte READ_WRITE_STATUS_COMMAND = (byte) 0x5A;
-
-    /** All lines off command. */
-    protected static final byte ALL_LINES_OFF_COMMAND = (byte) 0x66;
-
-    /** Discharge command. */
-    protected static final byte DISCHARGE_COMMAND = (byte) 0x99;
-
-    /** Direct on main command. */
-    protected static final byte DIRECT_ON_MAIN_COMMAND = (byte) 0xA5;
-
-    /** Smart on main command. */
-    protected static final byte SMART_ON_MAIN_COMMAND = (byte) 0xCC;
-
-    /** Smart on aux command. */
-    protected static final byte SMART_ON_AUX_COMMAND = (byte) 0x33;
 
     /** Main Channel number. */
     public static final int CHANNEL_MAIN = 0;
@@ -297,7 +299,7 @@ public class OneWireContainer1F extends OneWireContainer implements
         }
 
         // read the status byte
-        byte[] tmp_buf = deviceOperation(READ_WRITE_STATUS_COMMAND,
+        byte[] tmp_buf = deviceOperation(OWC1FCommand.READ_WRITE_STATUS.code,
                 (byte) 0x00FF, 2);
 
         // extract the status byte
@@ -356,7 +358,7 @@ public class OneWireContainer1F extends OneWireContainer implements
             if (Bit.arrayReadBit(6, STATUS_OFFSET, state) == 1)
                 first_byte |= (byte) 0xC0;
 
-            tmp_buf = deviceOperation(READ_WRITE_STATUS_COMMAND, first_byte, 2);
+            tmp_buf = deviceOperation(OWC1FCommand.READ_WRITE_STATUS.code, first_byte, 2);
             state[0] = tmp_buf[2];
         }
 
@@ -366,10 +368,10 @@ public class OneWireContainer1F extends OneWireContainer implements
         if (Bit.arrayReadBit(AUX_OFFSET, BITMAP_OFFSET, state) == 1) {
             if ((state[AUX_OFFSET] == SWITCH_ON)
                     || (state[AUX_OFFSET] == SWITCH_SMART)) {
-                command = SMART_ON_AUX_COMMAND;
+                command = OWC1FCommand.SMART_ON_AUX.code;
                 extra = 2;
             } else {
-                command = ALL_LINES_OFF_COMMAND;
+                command = OWC1FCommand.ALL_LINES_OFF.code;
                 extra = 0;
             }
         }
@@ -377,31 +379,31 @@ public class OneWireContainer1F extends OneWireContainer implements
         // check for MAIN state change
         if (Bit.arrayReadBit(MAIN_OFFSET, BITMAP_OFFSET, state) == 1) {
             if (state[MAIN_OFFSET] == SWITCH_ON) {
-                command = DIRECT_ON_MAIN_COMMAND;
+                command = OWC1FCommand.DIRECT_ON_MAIN.code;
                 extra = 0;
             } else if (state[MAIN_OFFSET] == SWITCH_SMART) {
-                command = SMART_ON_MAIN_COMMAND;
+                command = OWC1FCommand.SMART_ON_MAIN.code;
                 extra = 2;
             } else {
-                command = ALL_LINES_OFF_COMMAND;
+                command = OWC1FCommand.ALL_LINES_OFF.code;
                 extra = 0;
             }
         }
 
         // check if there are events to clear and not about to do clear anyway
-        if ((clearActivityOnWrite) && (command != ALL_LINES_OFF_COMMAND)) {
+        if ((clearActivityOnWrite) && (command != OWC1FCommand.ALL_LINES_OFF.code)) {
             if ((Bit.arrayReadBit(4, STATUS_OFFSET, state) == 1)
                     || (Bit.arrayReadBit(5, STATUS_OFFSET, state) == 1)) {
 
                 // clear the events
-                deviceOperation(ALL_LINES_OFF_COMMAND, (byte) 0xFF, 0);
+                deviceOperation(OWC1FCommand.ALL_LINES_OFF.code, (byte) 0xFF, 0);
 
                 // set the channels back to the correct state
                 if (command == 0) {
                     if (Bit.arrayReadBit(0, STATUS_OFFSET, state) == 0) {
-                        command = SMART_ON_MAIN_COMMAND;
+                        command = OWC1FCommand.SMART_ON_MAIN.code;
                     } else if (Bit.arrayReadBit(2, STATUS_OFFSET, state) == 0) {
-                        command = SMART_ON_AUX_COMMAND;
+                        command = OWC1FCommand.SMART_ON_AUX.code;
                     }
 
                     extra = 2;
@@ -415,8 +417,8 @@ public class OneWireContainer1F extends OneWireContainer implements
         }
 
         // if doing a SMART_ON, then look at result data for presence
-        if ((command == SMART_ON_MAIN_COMMAND)
-                || (command == SMART_ON_AUX_COMMAND)) {
+        if ((command == OWC1FCommand.SMART_ON_MAIN.code)
+                || (command == OWC1FCommand.SMART_ON_AUX.code)) {
             // devices on branch indicated if 3rd byte is 0
             devicesOnBranch = (tmp_buf[2] == 0);
         } else {
@@ -465,19 +467,20 @@ public class OneWireContainer1F extends OneWireContainer implements
         }
 
         // discharge the lines
-        deviceOperation(DISCHARGE_COMMAND, (byte) 0xFF, 0);
+        deviceOperation(OWC1FCommand.DISCHARGE.code, (byte) 0xFF, 0);
 
         // wait for desired time and return.
         try {
             Thread.sleep(time);
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
 
             // DRAIN
             logger.debug("Interrupted", ex);
         }
 
         // clear the discharge
-        deviceOperation(READ_WRITE_STATUS_COMMAND, (byte) 0x00FF, 2);
+        deviceOperation(OWC1FCommand.READ_WRITE_STATUS.code, (byte) 0x00FF, 2);
     }
 
     @Override
@@ -729,7 +732,7 @@ public class OneWireContainer1F extends OneWireContainer implements
                 adapter.dataBlock(raw_buf, 0, raw_buf.length);
 
                 // verify
-                if (command == READ_WRITE_STATUS_COMMAND) {
+                if (command == OWC1FCommand.READ_WRITE_STATUS.code) {
 
                     if (raw_buf[raw_buf.length - 1] != raw_buf[raw_buf.length - 2]) {
 
