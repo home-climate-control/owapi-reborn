@@ -301,12 +301,12 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
             temp = ( short ) (temp >> 1);   //lop off the last bit
 
             //also takes care of the / 2.0
-            double tmp = ( double ) temp;
+            double tmp = temp;
             double cr  = (state [6] & 0x0ff);
             double cpc = (state [7] & 0x0ff);
 
             //just let the thing throw a divide by zero exception
-            tmp = tmp - ( double ) 0.25 + (cpc - cr) / cpc;
+            tmp = tmp - 0.25 + (cpc - cr) / cpc;
 
             return tmp;
 
@@ -320,7 +320,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
     @Override
     public double getTemperatureAlarm(int alarmType, byte[] state) {
 
-        return ( double ) state [alarmType == ALARM_LOW ? 3 : 2];
+        return state [alarmType == ALARM_LOW ? 3 : 2];
     }
 
     @Override
@@ -349,11 +349,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
 
     @Override
     public synchronized void setTemperatureResolution (double resolution, byte[] state) {
-        if (resolution == RESOLUTION_NORMAL) {
-            normalResolution = true;
-        } else {
-            normalResolution = false;
-        }
+        normalResolution = resolution == RESOLUTION_NORMAL;
 
         state [4] = ( byte ) (normalResolution ? 0 : 1);
     }
@@ -419,7 +415,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
                     };
 
             // read scratchpad command
-            buffer [0] = ( byte ) READ_SCRATCHPAD_COMMAND;
+            buffer [0] = READ_SCRATCHPAD_COMMAND;
 
             // now add the read bytes for data bytes and crc8
             for (int i = 1; i < 10; i++) {
@@ -483,7 +479,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
             var buffer = new byte [10];
 
             // read scratchpad command
-            buffer [0] = ( byte ) READ_SCRATCHPAD_COMMAND;
+            buffer [0] = READ_SCRATCHPAD_COMMAND;
 
             // now add the read bytes for data bytes and crc8
             for (int i = 1; i < 10; i++)
@@ -524,7 +520,6 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
 
         // Variables.
         var write_block = new byte [3];
-        var buffer      = new byte [8];
 
         // First do some error checking.
         if (data.length != 2)
@@ -544,7 +539,7 @@ public class OneWireContainer10 extends OneWireContainer implements TemperatureC
         }
 
         // Check data to ensure correctly recived.
-        buffer = new byte [8];
+        var buffer = new byte [8];
 
         readScratch(buffer);
 
