@@ -81,46 +81,58 @@ public class OWPath implements Comparable<OWPath> {
 
     protected final Logger logger = LogManager.getLogger(getClass());
 
-    private final List<OWPathElement> elements;
+    private final List<OWPathElement> elements = new ArrayList<>();
     private final DSPortAdapter adapter;
 
     /**
      * Create a new 1-Wire path with no elements.
      *
-     * @param adapter where the path is based.
+     * @param adapter The adapter this 1-Wire path belongs to.
      */
     public OWPath(DSPortAdapter adapter) {
-        this(adapter, null);
+        this(adapter, List.of());
     }
 
     /**
-     * Create a new path with a starting path.
+     * Clone an instance.
      *
-     * @param  adapter where the 1-Wire path is based
-     * @param  currentOWPath starting value of this 1-Wire path
+     * @param adapter The adapter this 1-Wire path belongs to.
+     * @param template The path to use as a template.
+     * @deprecated This constructor doesn't make much sense when OWPath becomes immutable, use {@link #OWPath(DSPortAdapter, List)} instead.
      */
-    public OWPath(DSPortAdapter adapter, OWPath currentOWPath) {
+    @Deprecated(since = "2.0.0", forRemoval = true)
+    public OWPath(DSPortAdapter adapter, OWPath template) {
+        this(adapter, template.asList());
+    }
 
+    /**
+     * Create an instance.
+     *
+     * @param  adapter The adapter this 1-Wire path belongs to.
+     * @param  template The path to use as a template.
+     */
+    public OWPath(DSPortAdapter adapter, List<OWPathElement> template) {
         this.adapter = adapter;
-        elements     = new ArrayList<>();
-
-        copy(currentOWPath);
+        elements.addAll(template);
     }
 
     /**
      * Copy the elements from the provided 1-Wire path into this 1-Wire path.
      *
-     * @param  currentOWPath path to copy from.
+     * @param  template path to copy from.
+     * @deprecated The method promotes mutability, this is discouraged.
+     * Also, it has a silent side effect - wiping out the current path with {@code null} argument.
      */
-    public void copy(OWPath currentOWPath) {
+    @Deprecated (since = "2.0.0", forRemoval = true)
+    public void copy(OWPath template) {
 
         elements.clear();
 
-        if (currentOWPath == null) {
+        if (template == null) {
             return;
         }
 
-        elements.addAll(currentOWPath.asList());
+        elements.addAll(template.asList());
     }
 
     /**
@@ -129,10 +141,27 @@ public class OWPath implements Comparable<OWPath> {
      * @param container 1-Wire device switch
      * @param channel of device that represents this 1-Wire path element
      *
-     * @see #copy(OWPath) copy
+     * @see #copy(OWPath)
+     * @deprecated Use {@link #extend(SwitchContainer, int)} instead, it promotes immutability. This method will be removed
+     * in next major revision.
      */
+    @Deprecated(forRemoval = true)
     public void add(SwitchContainer container, int channel) {
         elements.add(new OWPathElement(container, channel));
+    }
+
+    /**
+     * Produce a new 1-Wire path from the original, the switch, container, and the switch container channe.
+     *
+     * @param container 1-Wire device switch
+     * @param channel of device that represents this 1-Wire path element
+     */
+    public OWPath extend(SwitchContainer container, int channel) {
+
+        var path = new ArrayList<>(asList());
+        path.add(new OWPathElement(container, channel));
+
+        return new OWPath(adapter, path);
     }
 
     /**
