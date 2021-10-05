@@ -89,7 +89,7 @@ public class OneWireContainer1F extends OneWireContainer implements SwitchContai
      *
      * Note that this set is different from the one in {@link Command}, hence inner enum.
      */
-    enum OWC1FCommand {
+    public enum OWC1FCommand {
 
         READ_WRITE_STATUS(0x5A),
         ALL_LINES_OFF(0x66),

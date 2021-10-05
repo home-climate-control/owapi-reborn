@@ -30,6 +30,7 @@ package com.dalsemi.onewire.adapter;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.container.Command;
 import com.dalsemi.onewire.container.OneWireContainer;
+import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.utils.Address;
 import gnu.io.CommPortIdentifier;
 import org.apache.logging.log4j.LogManager;
@@ -1719,5 +1720,15 @@ public abstract class DSPortAdapter {
         } catch (OneWireException owe) {
             return this.getAdapterName() + " Unknown Port";
         }
+    }
+
+    public void closeAllPaths() throws OneWireException {
+
+        // DS2409 specific
+
+        reset();
+        putByte(OneWireContainer1F.OWC1FCommand.SMART_ON_MAIN.code);
+        putByte(OneWireContainer1F.OWC1FCommand.ALL_LINES_OFF.code);
+        getByte();
     }
 }
