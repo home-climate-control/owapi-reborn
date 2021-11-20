@@ -48,7 +48,7 @@ class UAdapterState
    //--------
    //-------- Finals
    //--------
-   //------- DS9097U brick baud rates expressed for the DS2480 ichip  
+   //------- DS9097U brick baud rates expressed for the DS2480 ichip
 
    /** DS9097U brick baud rate expressed for the DS2480 ichip, 9600 baud   */
    public static final char BAUD_9600 = 0x00;
@@ -110,6 +110,8 @@ class UAdapterState
 
    /**
     * Parameter settings for the three logical modes
+    *
+    * VT: FIXME: Consider making this a map
     */
    public UParameterSettings uParameters [];
 
@@ -200,8 +202,7 @@ class UAdapterState
    /**
     * Construct the state of the U brick with the defaults
     */
-   public UAdapterState (OneWireState newOneWireState)
-   {
+   public UAdapterState (OneWireState newOneWireState) {
 
       // get a pointer to the OneWire state object
       oneWireState = newOneWireState;
@@ -226,12 +227,9 @@ class UAdapterState
       uParameters [2] = new UParameterSettings();
       uParameters [3] = new UParameterSettings();
 
-      // adjust flex time 
-      uParameters [DSPortAdapter.SPEED_FLEX].pullDownSlewRate =
-         UParameterSettings.SLEWRATE_0p83Vus;
-      uParameters [DSPortAdapter.SPEED_FLEX].write1LowTime    =
-         UParameterSettings.WRITE1TIME_12us;
-      uParameters [DSPortAdapter.SPEED_FLEX].sampleOffsetTime =
-         UParameterSettings.SAMPLEOFFSET_TIME_10us;
+      // adjust flex time
+      uParameters [DSPortAdapter.Speed.FLEX.code].pullDownSlewRate = UParameterSettings.SLEWRATE_0p83Vus;
+      uParameters [DSPortAdapter.Speed.FLEX.code].write1LowTime = UParameterSettings.WRITE1TIME_12us;
+      uParameters [DSPortAdapter.Speed.FLEX.code].sampleOffsetTime = UParameterSettings.SAMPLEOFFSET_TIME_10us;
    }
 }

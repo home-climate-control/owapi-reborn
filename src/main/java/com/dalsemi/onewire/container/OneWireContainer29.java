@@ -27,12 +27,11 @@
 
 package com.dalsemi.onewire.container;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
+
+import java.util.List;
 
 /**
  * <P> 1-Wire&#174 container for a Single Addressable Switch, DS2408.  This container
@@ -53,19 +52,14 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  * <H3> Usage </H3>
  *
  *
- * @see com.dalsemi.onewire.container.OneWireSensor
- * @see com.dalsemi.onewire.container.SwitchContainer
- * @see com.dalsemi.onewire.container.OneWireContainer
+ * @see OneWireSensor
+ * @see SwitchContainer
+ * @see OneWireContainer
  *
- *  @version    1.00, 01 Jun 2002
- *  @author     JPE
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author     JPE
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireContainer29 extends OneWireContainer implements SwitchContainer {
-
-    //--------
-    //-------- Variables
-    //--------
 
     /**
      * Status memory bank of the DS2408 for memory map registers
@@ -86,10 +80,6 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      * Used for 0xFF array
      */
     private byte[] FF = new byte[8];
-
-    //--------
-    //-------- Constructors
-    //--------
 
     /**
      * Creates a new <code>OneWireContainer</code> for communication with a DS2408.
@@ -172,68 +162,33 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
         }
     }
 
-    //--------
-    //-------- Methods
-    //--------
-
-    /**
-     * Gets the Dallas Semiconductor part number of the iButton
-     * or 1-Wire Device as a <code>java.lang.String</code>.
-     * For example "DS1992".
-     *
-     * @return iButton or 1-Wire device name
-     */
     @Override
     public String getName() {
         return "DS2408";
     }
 
     /**
-     * Gets an enumeration of memory bank instances that implement one or more
+     * Gets a list of memory bank instances that implement one or more
      * of the following interfaces:
      * {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
      * {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank},
      * and {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank}.
-     * @return <CODE>Enumeration</CODE> of memory banks
+     * @return List of memory banks.
      */
     @Override
-    public Enumeration<MemoryBank> getMemoryBanks() {
-
-        Vector<MemoryBank> bank_vector = new Vector<MemoryBank>(5);
-
-        bank_vector.addElement(map);
-        bank_vector.addElement(search);
-
-        return bank_vector.elements();
+    public List<MemoryBank> getMemoryBanks() {
+        return List.of(map, search);
     }
 
-    /**
-     * Retrieves the alternate Dallas Semiconductor part numbers or names.
-     * A 'family' of MicroLAN devices may have more than one part number
-     * depending on packaging.  There can also be nicknames such as
-     * "Crypto iButton".
-     *
-     * @return  the alternate names for this iButton or 1-Wire device
-     */
     @Override
     public String getAlternateNames() {
         return "8-Channel Addressable Switch";
     }
 
-    /**
-     * Gets a short description of the function of this iButton
-     * or 1-Wire Device type.
-     *
-     * @return device description
-     */
     @Override
     public String getDescription() {
         return "1-Wire 8-Channel Addressable Switch";
     }
-
-    //--------
-    //-------- Switch Feature methods
-    //--------
 
     /**
      * Gets the number of channels supported by this switch.
@@ -258,167 +213,49 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
         return 8;
     }
 
-    /**
-     * Checks if the channels of this switch are 'high side'
-     * switches.  This indicates that when 'on' or <code>true</code>, the switch output is
-     * connect to the 1-Wire data.  If this method returns  <code>false</code>
-     * then when the switch is 'on' or <code>true</code>, the switch is connected
-     * to ground.
-     *
-     * @return <code>true</code> if the switch is a 'high side' switch,
-     *         <code>false</code> if the switch is a 'low side' switch
-     *
-     * @see #getLatchState(int,byte[])
-     */
     @Override
     public boolean isHighSideSwitch() {
         return false;
     }
 
-    /**
-     * Checks if the channels of this switch support
-     * activity sensing.  If this method returns <code>true</code> then the
-     * method <code>getSensedActivity(int,byte[])</code> can be used.
-     *
-     * @return <code>true</code> if channels support activity sensing
-     *
-     * @see #getSensedActivity(int,byte[])
-     * @see #clearActivity()
-     */
     @Override
     public boolean hasActivitySensing() {
         return true;
     }
 
-    /**
-     * Checks if the channels of this switch support
-     * level sensing.  If this method returns <code>true</code> then the
-     * method <code>getLevel(int,byte[])</code> can be used.
-     *
-     * @return <code>true</code> if channels support level sensing
-     *
-     * @see #getLevel(int,byte[])
-     */
     @Override
     public boolean hasLevelSensing() {
         return true;
     }
 
-    /**
-     * Checks if the channels of this switch support
-     * 'smart on'. Smart on is the ability to turn on a channel
-     * such that only 1-Wire device on this channel are awake
-     * and ready to do an operation.  This greatly reduces
-     * the time to discover the device down a branch.
-     * If this method returns <code>true</code> then the
-     * method <code>setLatchState(int,boolean,boolean,byte[])</code>
-     * can be used with the <code>doSmart</code> parameter <code>true</code>.
-     *
-     * @return <code>true</code> if channels support 'smart on'
-     *
-     * @see #setLatchState(int,boolean,boolean,byte[])
-     */
     @Override
     public boolean hasSmartOn() {
         return false;
     }
 
-    /**
-     * Checks if the channels of this switch require that only one
-     * channel is on at any one time.  If this method returns <code>true</code> then the
-     * method <code>setLatchState(int,boolean,boolean,byte[])</code>
-     * will not only affect the state of the given
-     * channel but may affect the state of the other channels as well
-     * to insure that only one channel is on at a time.
-     *
-     * @return <code>true</code> if only one channel can be on at a time.
-     *
-     * @see #setLatchState(int,boolean,boolean,byte[])
-     */
     @Override
     public boolean onlySingleChannelOn() {
         return false;
     }
 
-    //--------
-    //-------- Switch 'get' Methods
-    //--------
-
-    /**
-     * Checks the sensed level on the indicated channel.
-     * To avoid an exception, verify that this switch
-     * has level sensing with the  <code>hasLevelSensing()</code>.
-     * Level sensing means that the device can sense the logic
-     * level on its PIO pin.
-     *
-     * @param channel channel to execute this operation, in the range [0 to (<code>getNumberChannels(byte[])</code> - 1)]
-     * @param state current state of the device returned from <code>readDevice()</code>
-     *
-     * @return <code>true</code> if level sensed is 'high' and <code>false</code> if level sensed is 'low'
-     *
-     * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
-     * @see #hasLevelSensing()
-     */
     @Override
     public boolean getLevel(int channel, byte[] state) {
         byte  level = (byte) (0x01 << channel);
         return ((state[0] & level) == level);
     }
 
-    /**
-     * Checks the latch state of the indicated channel.
-     *
-     * @param channel channel to execute this operation, in the range [0 to (<code>getNumberChannels(byte[])</code> - 1)]
-     * @param state current state of the device returned from <code>readDevice()</code>
-     *
-     * @return <code>true</code> if channel latch is 'on'
-     * or conducting and <code>false</code> if channel latch is 'off' and not
-     * conducting.  Note that the actual output when the latch is 'on'
-     * is returned from the <code>isHighSideSwitch()</code> method.
-     *
-     * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
-     * @see #isHighSideSwitch()
-     * @see #setLatchState(int,boolean,boolean,byte[])
-     */
     @Override
     public boolean getLatchState(int channel, byte[] state) {
         byte latch = (byte) (0x01 << channel);
         return ((state [1] & latch) == latch);
     }
 
-    /**
-     * Checks if the indicated channel has experienced activity.
-     * This occurs when the level on the PIO pins changes.  To clear
-     * the activity that is reported, call <code>clearActivity()</code>.
-     * To avoid an exception, verify that this device supports activity
-     * sensing by calling the method <code>hasActivitySensing()</code>.
-     *
-     * @param channel channel to execute this operation, in the range [0 to (<code>getNumberChannels(byte[])</code> - 1)]
-     * @param state current state of the device returned from <code>readDevice()</code>
-     *
-     * @return <code>true</code> if activity was detected and <code>false</code> if no activity was detected
-     *
-     * @throws OneWireException if this device does not have activity sensing
-     *
-     * @see #hasActivitySensing()
-     * @see #clearActivity()
-     */
     @Override
     public boolean getSensedActivity(int channel, byte[] state) throws OneWireException {
         byte activity = (byte) (0x01 << channel);
         return ((state[2] & activity) == activity);
     }
 
-    /**
-     * Clears the activity latches the next time possible.  For
-     * example, on a DS2406/07, this happens the next time the
-     * status is read with <code>readDevice()</code>.
-     *
-     * @throws OneWireException if this device does not support activity sensing
-     *
-     * @see com.dalsemi.onewire.container.OneWireSensor#readDevice()
-     * @see #getSensedActivity(int,byte[])
-     */
     @Override
     public void clearActivity() throws OneWireException {
 
@@ -434,10 +271,6 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
             throw new OneWireException(address, "Sense Activity was not cleared.");
         }
     }
-
-    //--------
-    //-------- Switch 'set' Methods
-    //--------
 
     /**
      * Sets the latch state of the indicated channel.
@@ -488,25 +321,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
         state[1] = (byte) set;
     }
 
-    /**
-     * Retrieves the 1-Wire device sensor state.  This state is
-     * returned as a byte array.  Pass this byte array to the 'get'
-     * and 'set' methods.  If the device state needs to be changed then call
-     * the 'writeDevice' to finalize the changes.
-     *
-     * @return 1-Wire device sensor state
-     *
-     * @throws OneWireIOException on a 1-Wire communication error such as
-     *         reading an incorrect CRC from a 1-Wire device.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to
-     *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire
-     *         adapter
-     *
-     * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
-     */
     @Override
-    @Deprecated(forRemoval = false)
     public byte[] readDevice() throws OneWireException {
 
         byte[] state = new byte [3];
@@ -547,21 +362,6 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
         return register;
     }
 
-    /**
-     * Writes the 1-Wire device sensor state that
-     * have been changed by 'set' methods.  Only the state registers that
-     * changed are updated.  This is done by referencing a field information
-     * appended to the state data.
-     *
-     * @param  state 1-Wire device sensor state
-     *
-     * @throws OneWireIOException on a 1-Wire communication error such as
-     *         reading an incorrect CRC from a 1-Wire device.  This could be
-     *         caused by a physical interruption in the 1-Wire Network due to
-     *         shorts or a newly arriving 1-Wire device issuing a 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the 1-Wire
-     *         adapter
-     */
     @Override
     public void writeDevice(byte[] state) throws OneWireException {
         map.write(1,state,1,1);
@@ -600,7 +400,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
 
         if (set && ((register[2] & 0x04) == 0x04)) {
             register[2] = (byte) (register[2] & (byte) 0xFB);
-        } else if ((!set) && ((register[2] & (byte) 0x04) == (byte) 0x00)) {
+        } else if (!set && ((register[2] & (byte) 0x04) == (byte) 0x00)) {
             register[2] = (byte) (register[2] | (byte) 0x04);
         }
     }
@@ -636,7 +436,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      */
     public void clearPowerOnReset(byte[] register) {
         if ((register[2] & (byte) 0x08) == (byte) 0x08) {
-            register[2] = (byte) ((byte) register[2] & (byte) 0xF7);
+            register[2] = (byte) (register[2] & (byte) 0xF7);
         }
     }
 
@@ -648,7 +448,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      */
     public void orConditionalSearch(byte[] register) {
         if ((register[2] & (byte) 0x02) == (byte) 0x02) {
-            register[2] = (byte) ((byte) register[2] & (byte) 0xFD);
+            register[2] = (byte) (register[2] & (byte) 0xFD);
         }
     }
 
@@ -660,7 +460,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      */
     public void andConditionalSearch(byte[] register) {
         if ((register[2] & (byte) 0x02) != (byte) 0x02) {
-            register[2] = (byte) ((byte) register[2] | (byte) 0x02);
+            register[2] = (byte) (register[2] | (byte) 0x02);
         }
     }
 
@@ -672,7 +472,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      */
     public void pioConditionalSearch(byte[] register) {
         if ((register[2] & (byte) 0x01) == (byte) 0x01) {
-            register[2] = (byte) ((byte) register[2] & (byte) 0xFE);
+            register[2] = (byte) (register[2] & (byte) 0xFE);
         }
     }
 
@@ -684,7 +484,7 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
      */
     public void activityConditionalSearch(byte[] register) {
         if ((register[2] & (byte) 0x01) != (byte) 0x01) {
-            register[2] = (byte) ((byte) register[2] | (byte) 0x01);
+            register[2] = (byte) (register[2] | (byte) 0x01);
         }
     }
 
@@ -701,9 +501,9 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
         byte mask = (byte) (0x01 << channel);
 
         if (set) {
-            register[0] = (byte) ((byte) register[0] | (byte) mask);
+            register[0] = (byte) (register[0] | mask);
         } else {
-            register[0] = (byte) ((byte) register[0] & (byte) ~mask);
+            register[0] = (byte) (register[0] & (byte) ~mask);
         }
     }
 
@@ -722,9 +522,9 @@ public class OneWireContainer29 extends OneWireContainer implements SwitchContai
         byte polarity = (byte) (0x01 << channel);
 
         if(set) {
-            register[1] = (byte) ((byte) register[1] | (byte) polarity);
+            register[1] = (byte) (register[1] | polarity);
         } else {
-            register[1] = (byte) ((byte) register[1] & (byte) ~polarity);
+            register[1] = (byte) (register[1] & (byte) ~polarity);
         }
     }
 

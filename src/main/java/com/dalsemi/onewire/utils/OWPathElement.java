@@ -28,87 +28,62 @@
 
 package com.dalsemi.onewire.utils;
 
-import com.dalsemi.onewire.container.OneWireContainer;
+import com.dalsemi.onewire.container.SwitchContainer;
 
 
 /**
  * 1-Wire&#174 Network path element.  Instances of this class are
  * used to represent a single branch of a complex 1-Wire network.
  *
- * <H3> Usage </H3> 
- * 
- * <DL> 
- * <DD> <H4> Example</H4> 
- * Enumerate through the 1-wire path elements in the 1-Wire path 'path' and print information:
+ * <H3> Usage </H3>
+ *
+ * <DL>
+ * <DD> <H4> Example</H4>
+ * Iterate through the 1-wire path elements in the 1-Wire path 'path' and print information:
  * <PRE> <CODE>
  *   OWPathElement path_element;
  *
- *   // enumerature through the path elements
- *   for (Enumeration path_enum = path.getAllOWPathElements(); 
- *           path_enum.hasMoreElements(); )
+ *   // Iterate through the path elements
+ *   for (Iterator path_enum = path.getAllOWPathElements().iterator();
+ *           path_enum.hasNext(); )
  *   {
  *
  *      // cast the enum as a OWPathElement
- *      path_element = (OWPathElement)path_enum.nextElement();
- *   
+ *      path_element = (OWPathElement)path_enum.next();
+ *
  *      // print info
  *      System.out.println("Address: " + path_element.getContainer().getAddressAsString());
- *      System.out.println("Channel number: " + path_element.getChannel()); 
+ *      System.out.println("Channel number: " + path_element.getChannel());
  *   }
  * </CODE> </PRE>
  * </DL>
  *
- * @see com.dalsemi.onewire.utils.OWPath
+ * @see OWPath
  * @see com.dalsemi.onewire.container.OneWireContainer
  *
- * @version    0.00, 18 September 2000
- * @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author DS
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OWPathElement {
 
-    //--------
-    //-------- Variables 
-    //--------
+    /**
+     * Path element switch.
+     */
+    public final SwitchContainer container;
 
-    /** OneWireContainer of the path element */
-    private OneWireContainer owc;
-
-    /** Channel the path is on */
-    private int channel;
-
-    //--------
-    //-------- Constructors
-    //--------
+    /**
+     * Switch channel the path is on.
+     */
+    public final int channel;
 
     /**
      * Create a new 1-Wire path element.
-     * 
-     * @param owcInstance device that is the path element. Must implement SwitchContainer.
-     * @param channelNumber channel number of the 1-Wire path.
-     */
-    public OWPathElement(OneWireContainer owcInstance, int channelNumber) {
-        owc = owcInstance;
-        channel = channelNumber;
-    }
-
-    /**
-     * Get the 1-Wire container for this 1-Wire path element.
      *
-     * @return OneWireContainer of this 1-Wire path element.
-     *
-     * @see com.dalsemi.onewire.container.OneWireContainer.
+     * @param container Switch that is the path element.
+     * @param channel Channel number of the 1-Wire path.
      */
-    public OneWireContainer getContainer() {
-        return owc;
-    }
-
-    /**
-     * Get the channel number of this 1-Wire path element.
-     *
-     * @return channel number of this element
-     */
-    public int getChannel() {
-        return channel;
+    public OWPathElement(SwitchContainer container, int channel) {
+        this.container = container;
+        this.channel = channel;
     }
 }

@@ -206,12 +206,8 @@ public class Address
    }
 
    /**
-    * Convert an iButton or 1-Wire device address as a long
-    * (little endian) into an array of bytes.
-    *
-    * @deprecated Use {@link #toByteArray(long, byte[])} wherever possible, it doesn't use heap allocation.
+    * Convert an iButton or 1-Wire device address as a long (little endian) into an array of bytes.
     */
-   @Deprecated(forRemoval = false)
    public static byte[] toByteArray (long address) {
 
       /* This looks funny, but it should actually take

@@ -28,22 +28,28 @@
 package com.dalsemi.onewire.adapter;
 
 import com.dalsemi.onewire.OneWireException;
+import com.dalsemi.onewire.container.Command;
 import com.dalsemi.onewire.container.OneWireContainer;
+import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.utils.Address;
+import gnu.io.CommPortIdentifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
-import java.util.Vector;
+import java.util.TreeSet;
 
 /**
- * The abstract base class for all 1-Wire port adapter objects. An
- * implementation class of this type is therefore independent of the adapter
- * type. Instances of valid DSPortAdapter's are retrieved from methods in
- * {@link com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider}.
+ * The abstract base class for all 1-Wire port adapter objects. An implementation class of this type is therefore
+ * independent of the adapter type. Instances of valid DSPortAdapter's can be retrieved from methods in
+ * {@link com.dalsemi.onewire.OneWireAccessProvider OneWireAccessProvider}, but you probably want to instantiate them
+ * directly (that is most likely going to be {@link USerialAdapter}).
  * <P>
  * The DSPortAdapter methods can be organized into the following categories:
  * </P>
@@ -52,7 +58,6 @@ import java.util.Vector;
  * <UL>
  * <LI> {@link #getAdapterName() getAdapterName}
  * <LI> {@link #getPortTypeDescription() getPortTypeDescription}
- * <LI> {@link #getClassVersion() getClassVersion}
  * <LI> {@link #adapterDetected() adapterDetected}
  * <LI> {@link #getAdapterVersion() getAdapterVersion}
  * <LI> {@link #getAdapterAddress() getAdapterAddress}
@@ -76,7 +81,7 @@ import java.util.Vector;
  * </UL>
  * <LI> <B> 1-Wire Network Semaphore </B>
  * <UL>
- * <LI> {@link #beginExclusive(boolean) beginExclusive}
+ * <LI> {@link #beginExclusive()}
  * <LI> {@link #endExclusive() endExclusive}
  * </UL>
  * <LI> <B> 1-Wire Device Discovery </B>
@@ -142,13 +147,13 @@ import java.util.Vector;
  * </UL>
  * <LI> 1-Wire Speed and Power Selection
  * <UL>
- * <LI> {@link #setPowerDuration(int) setPowerDuration}
- * <LI> {@link #startPowerDelivery(int) startPowerDelivery}
- * <LI> {@link #setProgramPulseDuration(int) setProgramPulseDuration}
- * <LI> {@link #startProgramPulse(int) startProgramPulse}
+ * <LI> {@link #setPowerDuration(PowerDeliveryDuration)}
+ * <LI> {@link #startPowerDelivery(PowerChangeCondition)}
+ * <LI> {@link #setProgramPulseDuration(PowerDeliveryDuration)}
+ * <LI> {@link #startProgramPulse(PowerChangeCondition)}
  * <LI> {@link #startBreak() startBreak}
  * <LI> {@link #setPowerNormal() setPowerNormal}
- * <LI> {@link #setSpeed(int) setSpeed}
+ * <LI> {@link #setSpeed(Speed)}  setSpeed}
  * <LI> {@link #getSpeed() getSpeed}
  * </UL>
  * </UL>
@@ -159,100 +164,127 @@ import java.util.Vector;
  * </UL>
  * </UL>
  *
- * @see com.dalsemi.onewire.OneWireAccessProvider
  * @see com.dalsemi.onewire.container.OneWireContainer
- * @version 0.00, 28 Aug 2000
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public abstract class DSPortAdapter {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger();
 
-    // --------
-    // -------- Finals
-    // --------
+    /**
+     * Adapter speed.
+     *
+     * {@link #FLEX} is used for long lines, for others see application notes.
+     */
+    public enum Speed {
 
-    public static final String CLASS_NAME_ONEWIRECONTAINER = "com.dalsemi.onewire.container.OneWireContainer";
+        REGULAR(0),
+        FLEX(1),
+        OVERDRIVE(2),
+        HYPERDRIVE(3);
 
-    /** Speed modes for 1-Wire Network, regular */
-    public static final int SPEED_REGULAR = 0;
+        public final int code;
 
-    /** Speed modes for 1-Wire Network, flexible for long lines */
-    public static final int SPEED_FLEX = 1;
+        Speed(int code) {
+            this.code = code;
+        }
+    }
 
-    /** Speed modes for 1-Wire Network, overdrive */
-    public static final int SPEED_OVERDRIVE = 2;
+    public static final String CLASS_NAME_ONEWIRECONTAINER = OneWireContainer.class.getName();
 
-    /** Speed modes for 1-Wire Network, hyperdrive */
-    public static final int SPEED_HYPERDRIVE = 3;
+    /**
+     * Power level.
+     */
+    public enum Level {
 
-    /** 1-Wire Network level, normal (weak 5Volt pullup) */
-    public static final char LEVEL_NORMAL = 0;
+        /**
+         * Weak 5V pullup.
+         */
+        NORMAL(0),
 
-    /** 1-Wire Network level, (strong 5Volt pullup, used for power delivery) */
-    public static final char LEVEL_POWER_DELIVERY = 1;
+        /**
+         * Strong 5V pullup, used for power delivery.
+         */
+        POWER_DELIVERY(1),
 
-    /** 1-Wire Network level, (strong pulldown to 0Volts, reset 1-Wire) */
-    public static final char LEVEL_BREAK = 2;
+        /**
+         * Strong 0V pulldown, reset 1-Wire bus.
+         */
+        BREAK(2),
 
-    /** 1-Wire Network level, (strong 12Volt pullup, used to program eprom ) */
-    public static final char LEVEL_PROGRAM = 3;
+        /**
+         * Strong 12V pullup, used to program EPROM.
+         */
+        PROGRAM(3);
 
-    /** 1-Wire Network reset result = no presence */
-    public static final int RESET_NOPRESENCE = 0x00;
+        public final int code;
 
-    /** 1-Wire Network reset result = presence */
-    public static final int RESET_PRESENCE = 0x01;
+        Level(int code) {
+            this.code = code;
+        }
+    }
 
-    /** 1-Wire Network reset result = alarm */
-    public static final int RESET_ALARM = 0x02;
+    /**
+     * 1-Wire bus reeset result.
+     */
+    public enum ResetResult {
 
-    /** 1-Wire Network reset result = shorted */
-    public static final int RESET_SHORT = 0x03;
+        NOPRESENCE(0x00),
+        PRESENCE(0x01),
+        ALARM(0x02),
+        SHORT(0x03);
 
-    /** Condition for power state change, immediate */
-    public static final int CONDITION_NOW = 0;
+        public final int code;
 
-    /** Condition for power state change, after next bit communication */
-    public static final int CONDITION_AFTER_BIT = 1;
+        ResetResult(int code) {
+            this.code = code;
+        }
+    }
 
-    /** Condition for power state change, after next byte communication */
-    public static final int CONDITION_AFTER_BYTE = 2;
+    /**
+     * Condition for power change.
+     */
+    public enum PowerChangeCondition {
 
-    /** Duration used in delivering power to the 1-Wire, 1/2 second */
-    public static final int DELIVERY_HALF_SECOND = 0;
+        NOW(0),
+        AFTER_NEXT_BIT(1),
+        AFTER_NEXT_BYTE(2);
 
-    /** Duration used in delivering power to the 1-Wire, 1 second */
-    public static final int DELIVERY_ONE_SECOND = 1;
+        public final int code;
 
-    /** Duration used in delivering power to the 1-Wire, 2 seconds */
-    public static final int DELIVERY_TWO_SECONDS = 2;
+        PowerChangeCondition(int code) {
+            this.code = code;
+        }
+    }
 
-    /** Duration used in delivering power to the 1-Wire, 4 second */
-    public static final int DELIVERY_FOUR_SECONDS = 3;
+    public enum PowerDeliveryDuration {
 
-    /** Duration used in delivering power to the 1-Wire, smart complete */
-    public static final int DELIVERY_SMART_DONE = 4;
+        HALF_SECOND(0),
+        ONE_SECOND(1),
+        TWO_SECONDS(2),
+        FOUR_SECONDS(3),
+        SMART_COMPLETE(4),
+        INFINITE(5),
+        CURRENT_DETECT(6),
 
-    /** Duration used in delivering power to the 1-Wire, infinite */
-    public static final int DELIVERY_INFINITE = 5;
+        /**
+         * 480 μs.
+         */
+        EPROM(7);
 
-    /** Duration used in delivering power to the 1-Wire, current detect */
-    public static final int DELIVERY_CURRENT_DETECT = 6;
+        public final int code;
 
-    /** Duration used in delivering power to the 1-Wire, 480 us */
-    public static final int DELIVERY_EPROM = 7;
-
-    // --------
-    // -------- Variables
-    // --------
+        PowerDeliveryDuration(int code) {
+            this.code = code;
+        }
+    }
 
     /**
      * Hashtable to contain the user replaced OneWireContainers. The key is the
      * family, the value is the container class.
      */
-    private final Map<Integer, Class<?>> registeredOneWireContainerClasses = new TreeMap<Integer, Class<?>>();
+    private final Map<Integer, Class<?>> registeredOneWireContainerClasses = new TreeMap<>();
 
     /**
      * Byte array of families to include in search
@@ -263,10 +295,6 @@ public abstract class DSPortAdapter {
      * Byte array of families to exclude from search
      */
     private byte[] exclude;
-
-    // --------
-    // -------- Methods
-    // --------
 
     /**
      * Retrieves the name of the port adapter as a string. The 'Adapter' is a
@@ -286,26 +314,28 @@ public abstract class DSPortAdapter {
     public abstract String getPortTypeDescription();
 
     /**
-     * Retrieves a version string for this class.
-     *
-     * @return version string
-     */
-    public abstract String getClassVersion();
-
-    // --------
-    // -------- Port Selection
-    // --------
-
-    /**
-     * Retrieves a list of the platform appropriate port names for this adapter.
+     * Retrieves a set of the platform appropriate port names for this adapter.
      * A port must be selected with the method 'selectPort' before any other
      * communication methods can be used. Using a communication method before
      * 'selectPort' will result in a {@code OneWireException} exception.
      *
-     * @return {@code Enumeration} of type {@code String} that contains the port
-     * names
+     * @return Set of port names.
      */
-    public abstract Enumeration<String> getPortNames();
+    public static Set<String> getPortNames() {
+
+        var result = new TreeSet<String>();
+
+        for (var e = (Enumeration<CommPortIdentifier>) CommPortIdentifier.getPortIdentifiers(); e.hasMoreElements(); ) { // NOSONAR Nothing we can do here
+
+            CommPortIdentifier portID = e.nextElement();
+
+            if (portID.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+                result.add(portID.getName());
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Address to device container map.
@@ -316,7 +346,7 @@ public abstract class DSPortAdapter {
      * will have to stay because creating new device containers along with the whole
      * Louisiana purchase on EVERY browse is... I leave the word choice to you.
      */
-    private Map<String, OneWireContainer> address2container = new TreeMap<>();
+    private final Map<String, OneWireContainer> address2container = new TreeMap<>();
 
     /**
      * Registers a user provided {@code OneWireContainer} class. Using this
@@ -331,19 +361,17 @@ public abstract class DSPortAdapter {
      * removal of any entry associated with the family.
      *
      * @param family the code of the family type to associate with this class.
-     * @param OneWireContainerClass User provided class
+     * @param containerClass User provided class
      * @throws OneWireException If {@code OneWireContainerClass} is not found.
      * @throws ClassCastException If user supplied {@code OneWireContainer} does
      * not extend {@code com.dalsemi.onewire.container.OneWireContainer}.
      */
-    public synchronized void registerOneWireContainerClass(int family, Class<?> OneWireContainerClass) throws OneWireException {
+    public synchronized void registerOneWireContainerClass(int family, Class<?> containerClass) throws OneWireException {
 
-        Integer familyInt = new Integer(family);
-
-        if (OneWireContainerClass == null) {
+        if (containerClass == null) {
 
             // If a null is passed, remove the old container class.
-            registeredOneWireContainerClasses.remove(familyInt);
+            registeredOneWireContainerClasses.remove(family);
             return;
         }
 
@@ -351,18 +379,18 @@ public abstract class DSPortAdapter {
 
             Class<?> defaultibc = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
 
-            if (defaultibc.isAssignableFrom(OneWireContainerClass)) {
+            if (defaultibc.isAssignableFrom(containerClass)) {
 
                 // Put the new container class in the hashtable, replacing any
                 // old one.
-                registeredOneWireContainerClasses.put(familyInt, OneWireContainerClass);
+                registeredOneWireContainerClasses.put(family, containerClass);
 
             } else {
-                throw new ClassCastException(OneWireContainerClass.getName() + "does not extend " + CLASS_NAME_ONEWIRECONTAINER);
+                throw new ClassCastException(containerClass.getName() + "does not extend " + CLASS_NAME_ONEWIRECONTAINER);
             }
 
-        } catch (ClassNotFoundException e) {
-            throw new OneWireException("Could not find OneWireContainer class " + CLASS_NAME_ONEWIRECONTAINER);
+        } catch (ClassNotFoundException ex) {
+            throw new OneWireException("Could not find OneWireContainer class " + CLASS_NAME_ONEWIRECONTAINER, ex);
         }
     }
 
@@ -400,10 +428,6 @@ public abstract class DSPortAdapter {
      */
     public abstract String getPortName() throws OneWireException;
 
-    // --------
-    // -------- Adapter detection
-    // --------
-
     /**
      * Detects adapter presence on the selected port.
      *
@@ -425,7 +449,6 @@ public abstract class DSPortAdapter {
      * 1-Wire adapter
      */
     public String getAdapterVersion() throws OneWireException {
-
         return "<na>";
     }
 
@@ -444,72 +467,50 @@ public abstract class DSPortAdapter {
      * @see Address
      */
     public String getAdapterAddress() throws OneWireException {
-
         return "<na>";
     }
-
-    // --------
-    // -------- Adapter features
-    // --------
-
-    /*
-     * The following interogative methods are provided so that client code can
-     * react selectively to underlying states without generating an exception.
-     */
 
     /**
      * Returns whether adapter can physically support overdrive mode.
      *
-     * @return {@code true} if this port adapter can do OverDrive, {@code false}
-     * otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do OverDrive, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canOverdrive() throws OneWireException {
-
         return false;
     }
 
     /**
      * Returns whether the adapter can physically support hyperdrive mode.
      *
-     * @return {@code true} if this port adapter can do HyperDrive,
-     * {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do HyperDrive, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canHyperdrive() throws OneWireException {
-
         return false;
     }
 
     /**
      * Returns whether the adapter can physically support flex speed mode.
      *
-     * @return {@code true} if this port adapter can do flex speed,
-     * {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do flex speed, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canFlex() throws OneWireException {
-
         return false;
     }
 
     /**
      * Returns whether adapter can physically support 12 volt power mode.
      *
-     * @return {@code true} if this port adapter can do Program voltage,
-     * {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do Program voltage, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canProgram() throws OneWireException {
-
         return false;
     }
 
@@ -517,14 +518,11 @@ public abstract class DSPortAdapter {
      * Returns whether the adapter can physically support strong 5 volt power
      * mode.
      *
-     * @return {@code true} if this port adapter can do strong 5 volt mode,
-     * {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do strong 5 volt mode, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canDeliverPower() throws OneWireException {
-
         return false;
     }
 
@@ -534,67 +532,50 @@ public abstract class DSPortAdapter {
      * it is no longer needed. The current drop it detected and power delivery
      * is stopped.
      *
-     * @return {@code true} if this port adapter can do "smart" strong 5 volt
-     * mode, {@code false} otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do "smart" strong 5 volt mode, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canDeliverSmartPower() throws OneWireException {
-
         return false;
     }
 
     /**
      * Returns whether adapter can physically support 0 volt 'break' mode.
      *
-     * @return {@code true} if this port adapter can do break, {@code false}
-     * otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return {@code true} if this port adapter can do break, {@code false} otherwise.
+     * @throws OneWireIOException on a 1-Wire communication error with the adapter.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
     public boolean canBreak() throws OneWireException {
-
         return false;
     }
 
-    // --------
-    // -------- Finding iButtons and 1-Wire devices
-    // --------
-
     /**
-     * Returns an enumeration of {@code OneWireContainer} objects corresponding
+     * Returns an iterator of {@code OneWireContainer} objects corresponding
      * to all of the iButtons or 1-Wire devices found on the 1-Wire Network. If
-     * no devices are found, then an empty enumeration will be returned. In most
+     * no devices are found, then an empty collection will be returned. In most
      * cases, all further communication with the device is done through the
-     * OneWireContainer.
+     * {@link OneWireContainer}.
      *
-     * @return {@code Enumeration} of {@code OneWireContainer} objects found on
-     * the 1-Wire Network.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
+     * @return List of {@code OneWireContainer} objects found on the 1-Wire Network.
+     * @throws OneWireIOException on a 1-Wire communication error.
+     * @throws OneWireException on a setup error with the 1-Wire adapter.
      */
-    public Enumeration<OneWireContainer> getAllDeviceContainers() throws OneWireException {
+    public List<OneWireContainer> getAllDeviceContainers() throws OneWireException {
 
-        Vector<OneWireContainer> ibutton_vector = new Vector<>();
-        OneWireContainer temp_ibutton;
+        var result = new ArrayList<OneWireContainer>();
+        var device = getFirstDeviceContainer();
 
-        temp_ibutton = getFirstDeviceContainer();
+        while (true) {
 
-        if (temp_ibutton != null) {
-            ibutton_vector.addElement(temp_ibutton);
+            if (device == null) {
+                return result;
+            }
 
-            // loop to get all of the ibuttons
-            do {
-                temp_ibutton = getNextDeviceContainer();
-
-                if (temp_ibutton != null)
-                    ibutton_vector.addElement(temp_ibutton);
-            } while (temp_ibutton != null);
+            result.add(device);
+            device = getNextDeviceContainer();
         }
-
-        return ibutton_vector.elements();
     }
 
     /**
@@ -861,20 +842,20 @@ public abstract class DSPortAdapter {
     public boolean select(byte[] address) throws OneWireException {
 
         // send 1-Wire Reset
-        int rslt = reset();
+        var rslt = reset();
 
         // broadcast the MATCH ROM command and address
 
         // 9 bytes
         byte[] buffer = { (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00 };
 
-        buffer[0] = 0x55; // MATCH ROM command
+        buffer[0] = Command.MATCH_ROM.code;
 
         System.arraycopy(address, 0, buffer, 1, 8);
         dataBlock(buffer, 0, 9);
 
         // success if any device present on 1-Wire Network
-        return ((rslt == RESET_PRESENCE) || (rslt == RESET_ALARM));
+        return ((rslt == ResetResult.PRESENCE) || (rslt == ResetResult.ALARM));
     }
 
     /**
@@ -1274,7 +1255,7 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public abstract int reset() throws OneWireException;
+    public abstract ResetResult reset() throws OneWireException;
 
     // --------
     // -------- 1-Wire Network power methods
@@ -1303,8 +1284,8 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public void setPowerDuration(int timeFactor) throws OneWireException {
-
+    public void setPowerDuration(PowerDeliveryDuration timeFactor) throws OneWireException {
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Power delivery not supported by this adapter type");
     }
 
@@ -1330,8 +1311,8 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public boolean startPowerDelivery(int changeCondition) throws OneWireException {
-
+    public boolean startPowerDelivery(PowerChangeCondition changeCondition) throws OneWireException {
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Power delivery not supported by this adapter type");
     }
 
@@ -1353,8 +1334,8 @@ public abstract class DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    public void setProgramPulseDuration(int timeFactor) throws OneWireException {
-
+    public void setProgramPulseDuration(PowerDeliveryDuration timeFactor) throws OneWireException {
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Program pulse delivery not supported by this adapter type");
     }
 
@@ -1381,8 +1362,8 @@ public abstract class DSPortAdapter {
      * @throws OneWireException on a setup error with the 1-Wire adapter or the
      * adapter does not support this operation
      */
-    public boolean startProgramPulse(int changeCondition) throws OneWireException {
-
+    public boolean startProgramPulse(PowerChangeCondition changeCondition) throws OneWireException {
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Program pulse delivery not supported by this adapter type");
     }
 
@@ -1396,7 +1377,7 @@ public abstract class DSPortAdapter {
      * adapter does not support this operation
      */
     public void startBreak() throws OneWireException {
-
+        // VT: FIXME: Replace with UnsupportedOperationException?
         throw new OneWireException("Break delivery not supported by this adapter type");
     }
 
@@ -1412,59 +1393,26 @@ public abstract class DSPortAdapter {
      * adapter does not support this operation
      */
     public void setPowerNormal() throws OneWireException {
-
-        return;
+        // Do nothing
     }
-
-    // --------
-    // -------- 1-Wire Network speed methods
-    // --------
 
     /**
      * Sets the new speed of data transfer on the 1-Wire Network.
-     * <p>
      *
-     * @param speed
-     * <ul>
-     * <li> 0 (SPEED_REGULAR) set to normal communciation speed
-     * <li> 1 (SPEED_FLEX) set to flexible communciation speed used for long
-     * lines
-     * <li> 2 (SPEED_OVERDRIVE) set to normal communciation speed to overdrive
-     * <li> 3 (SPEED_HYPERDRIVE) set to normal communciation speed to hyperdrive
-     * <li> >3 future speeds
-     * </ul>
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter or the
-     * adapter does not support this operation
+     * @throws OneWireIOException on a 1-Wire communication error.
+     * @throws OneWireException on a setup error with the 1-Wire adapter or the adapter does not support this operation.
      */
-    public void setSpeed(int speed) throws OneWireException {
+    public void setSpeed(Speed speed) throws OneWireException {
 
-        if (speed != SPEED_REGULAR)
-            throw new OneWireException("Non-regular 1-Wire speed not supported by this adapter type");
+        if (speed != Speed.REGULAR) {
+            // VT: FIXME: Replace with UnsupportedOperationException?
+            throw new OneWireException("Speed " + speed + " not supported by this adapter type");
+        }
     }
 
-    /**
-     * Returns the current data transfer speed on the 1-Wire Network.
-     * <p>
-     *
-     * @return {@code int} representing the current 1-Wire speed
-     * <ul>
-     * <li> 0 (SPEED_REGULAR) set to normal communication speed
-     * <li> 1 (SPEED_FLEX) set to flexible communication speed used for long
-     * lines
-     * <li> 2 (SPEED_OVERDRIVE) set to normal communication speed to overdrive
-     * <li> 3 (SPEED_HYPERDRIVE) set to normal communication speed to hyperdrive
-     * <li> >3 future speeds
-     * </ul>
-     */
-    public int getSpeed() {
-
-        return SPEED_REGULAR;
+    public Speed getSpeed() {
+        return Speed.REGULAR;
     }
-
-    // --------
-    // -------- Misc
-    // --------
 
     /**
      * Constructs a {@code OneWireContainer} object with a user supplied 1-Wire
@@ -1492,41 +1440,39 @@ public abstract class DSPortAdapter {
                 }
             }
 
-            int family_code = address[0] & 0x7F;
-            String family_string = ((family_code) < 16) ? ("0" + Integer.toHexString(family_code)).toUpperCase() : (Integer
-                    .toHexString(family_code)).toUpperCase();
-            Class<?> ibutton_class = null;
-            OneWireContainer new_ibutton;
+            int familyCode = address[0] & 0x7F;
+            String familyString = (familyCode < 16)
+                    ? ("0" + Integer.toHexString(familyCode)).toUpperCase()
+                    : (Integer.toHexString(familyCode)).toUpperCase();
+            Class<?> deviceClass = null;
+            OneWireContainer newDevice;
 
             // If any user registered button exist, check the hashtable.
             if (!registeredOneWireContainerClasses.isEmpty()) {
-                Integer familyInt = new Integer(family_code);
-
                 // Try and get a user provided container class first.
-                ibutton_class = registeredOneWireContainerClasses.get(familyInt);
+                deviceClass = registeredOneWireContainerClasses.get(familyCode);
             }
 
             // If we don't get one, do the normal lookup method.
-            if (ibutton_class == null) {
+            if (deviceClass == null) {
 
                 // try to load the ibutton container class
                 try {
 
-                    String className = CLASS_NAME_ONEWIRECONTAINER + family_string;
-                    logger.debug("Trying to instantiate " + className);
-                    ibutton_class = Class.forName(className);
+                    String className = CLASS_NAME_ONEWIRECONTAINER + familyString;
+                    logger.debug("Trying to instantiate {}", className);
+                    deviceClass = Class.forName(className);
                 } catch (Exception e) {
                     logger.warn("Failed, moving on", e);
-                    ibutton_class = null;
                 }
 
                 // if did not get specific container try the general one
-                if (ibutton_class == null) {
+                if (deviceClass == null) {
 
                     // try to load the ibutton container class
                     try {
-                        logger.debug("Falling back to " + CLASS_NAME_ONEWIRECONTAINER);
-                        ibutton_class = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
+                        logger.debug("Falling back to {}", CLASS_NAME_ONEWIRECONTAINER);
+                        deviceClass = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
                     } catch (Exception ex) {
                         logger.error("Unable to load OneWireContainer", ex);
 
@@ -1540,22 +1486,22 @@ public abstract class DSPortAdapter {
             try {
 
                 // create the iButton container with a reference to this adapter
-                logger.debug("Instantiating " + ibutton_class.getName());
-                new_ibutton = (OneWireContainer) ibutton_class.newInstance();
+                logger.debug("Instantiating {}", deviceClass.getName());
+                newDevice = (OneWireContainer) deviceClass.newInstance();
 
-                new_ibutton.setupContainer(this, address);
+                newDevice.setupContainer(this, address);
             } catch (Exception ex) {
-                logger.error("Unable to instantiate OneWireContainer " + ibutton_class + ": ", ex);
+                logger.error("Unable to instantiate OneWireContainer {}",deviceClass , ex);
 
                 // VT: FIXME: Maybe throw an exception, eh?
                 return null;
             }
 
             // Remember this container
-            address2container.put(stringAddress, new_ibutton);
+            address2container.put(stringAddress, newDevice);
 
             // return this new container
-            return new_ibutton;
+            return newDevice;
 
         } finally {
             ThreadContext.pop();
@@ -1610,7 +1556,7 @@ public abstract class DSPortAdapter {
      *
      * @return the {@code OneWireContainer} object
      */
-    public synchronized final OneWireContainer getDeviceContainer() {
+    public final synchronized OneWireContainer getDeviceContainer() {
 
         // Mask off the upper bit.
         // 8 bytes
@@ -1632,16 +1578,16 @@ public abstract class DSPortAdapter {
         byte familyCode = address[0];
 
         if (exclude != null) {
-            for (int i = 0; i < exclude.length; i++) {
-                if (familyCode == exclude[i]) {
+            for (byte b : exclude) {
+                if (familyCode == b) {
                     return false;
                 }
             }
         }
 
         if (include != null) {
-            for (int i = 0; i < include.length; i++) {
-                if (familyCode == include[i]) {
+            for (byte b : include) {
+                if (familyCode == b) {
                     return true;
                 }
             }
@@ -1665,7 +1611,7 @@ public abstract class DSPortAdapter {
 
         // 24 bytes
         // All bits must be set
-        byte[] send_packet = {
+        byte[] sendPacket = {
                 (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
                 (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
                 (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF,
@@ -1674,23 +1620,23 @@ public abstract class DSPortAdapter {
 
         // now set or clear appropriate bits for search
         for (i = 0; i < 64; i++) {
-            arrayWriteBit(arrayReadBit(i, address), (i + 1) * 3 - 1, send_packet);
+            arrayWriteBit(arrayReadBit(i, address), (i + 1) * 3 - 1, sendPacket);
         }
 
         // send to 1-Wire Net
-        dataBlock(send_packet, 0, 24);
+        dataBlock(sendPacket, 0, 24);
 
         // check the results of last 8 triplets (should be no conflicts)
-        int cnt = 56, goodbits = 0, tst, s;
+        int cnt = 56;
+        int goodbits = 0;
 
         for (i = 168; i < 192; i += 3) {
-            tst = (arrayReadBit(i, send_packet) << 1) | arrayReadBit(i + 1, send_packet);
-            s = arrayReadBit(cnt++, address);
+            var tst = (arrayReadBit(i, sendPacket) << 1) | arrayReadBit(i + 1, sendPacket);
+            var s = arrayReadBit(cnt++, address);
 
             if (tst == 0x03) // no device on line
             {
                 goodbits = 0; // number of good bits set to zero
-
                 break; // quit
             }
 
@@ -1699,7 +1645,7 @@ public abstract class DSPortAdapter {
                 goodbits++; // count as a good bit
         }
 
-        // check too see if there were enough good bits to be successful
+        // check to see if there were enough good bits to be successful
         return (goodbits >= 8);
     }
 
@@ -1737,19 +1683,6 @@ public abstract class DSPortAdapter {
         return ((buf[nbyt] >>> nbit) & 0x01);
     }
 
-    // --------
-    // -------- java.lang.Object methods
-    // --------
-
-    /**
-     * Returns a hashcode for this object
-     *
-     * @return a hascode for this object
-     */
-    /*
-     * public int hashCode() { return this.toString().hashCode(); }
-     */
-
     /**
      * Returns true if the given object is the same or equivalent to this
      * DSPortAdapter.
@@ -1761,10 +1694,8 @@ public abstract class DSPortAdapter {
     @Override
     public boolean equals(Object o) {
 
-        if (o != null && o instanceof DSPortAdapter) {
-            if (o == this || o.toString().equals(this.toString())) {
-                return true;
-            }
+        if (o instanceof DSPortAdapter) {
+            return o == this || o.toString().equals(this.toString());
         }
 
         return false;
@@ -1789,5 +1720,15 @@ public abstract class DSPortAdapter {
         } catch (OneWireException owe) {
             return this.getAdapterName() + " Unknown Port";
         }
+    }
+
+    public void closeAllPaths() throws OneWireException {
+
+        // DS2409 specific
+
+        reset();
+        putByte(OneWireContainer1F.OWC1FCommand.SMART_ON_MAIN.code);
+        putByte(OneWireContainer1F.OWC1FCommand.ALL_LINES_OFF.code);
+        getByte();
     }
 }

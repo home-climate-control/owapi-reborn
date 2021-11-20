@@ -27,51 +27,21 @@
 
 package com.dalsemi.onewire.container;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.utils.CRC8;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Memory bank class for the DS2438.
  *
- *  @version    0.00, 30 Oct 2001
- *  @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author DS
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 class MemoryBankSBM implements MemoryBank {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
-
-   //--------
-   //--------Static Final Variables
-   //--------
-
-   /**
-    * Read scratchpad command
-    */
-   private static final byte READ_SCRATCHPAD_COMMAND  = ( byte ) 0xBE;
-
-   /**
-    * Recall memory command
-    */
-   private static final byte RECALL_MEMORY_COMMAND    = ( byte ) 0xB8;
-
-   /**
-    * Copy scratchpad command
-    */
-   private static final byte COPY_SCRATCHPAD_COMMAND  = ( byte ) 0x48;
-
-   /**
-    * Write scratchpad command
-    */
-   private static final byte WRITE_SCRATCHPAD_COMMAND = ( byte ) 0x4E;
-
-   //--------
-   //-------- Protected Variables for MemoryBank implementation
-   //--------
+    protected final Logger logger = LogManager.getLogger();
 
    /**
     * Starting physical address in memory bank.  Needed for different
@@ -122,10 +92,6 @@ class MemoryBankSBM implements MemoryBank {
     */
    protected boolean powerDelivery;
 
-   //--------
-   //-------- Variables
-   //--------
-
    /**
     * Reference to the OneWireContainer this bank resides on.
     */
@@ -145,10 +111,6 @@ class MemoryBankSBM implements MemoryBank {
     * Flag to indicate that speed needs to be set
     */
    protected boolean doSetSpeed;
-
-   //--------
-   //-------- Constructor
-   //--------
 
    /**
     * Memory bank contstuctor.  Requires reference to the OneWireContainer
@@ -180,158 +142,61 @@ class MemoryBankSBM implements MemoryBank {
       doSetSpeed = true;
    }
 
-   //--------
-   //-------- Memory Bank methods
-   //--------
-
-   /**
-    * Query to see get a string description of the current memory bank.
-    *
-    * @return  String containing the memory bank description
-    */
    @Override
    public String getBankDescription() {
       return bankDescription;
    }
 
-   /**
-    * Query to see if the current memory bank is general purpose
-    * user memory.  If it is NOT then it is Memory-Mapped and writing
-    * values to this memory will affect the behavior of the 1-Wire
-    * device.
-    *
-    * @return  'true' if current memory bank is general purpose
-    */
    @Override
    public boolean isGeneralPurposeMemory() {
       return generalPurposeMemory;
    }
 
-   /**
-    * Query to see if current memory bank is read/write.
-    *
-    * @return  'true' if current memory bank is read/write
-    */
    @Override
    public boolean isReadWrite() {
       return readWrite;
    }
 
-   /**
-    * Query to see if current memory bank is write write once such
-    * as with EPROM technology.
-    *
-    * @return  'true' if current memory bank can only be written once
-    */
    @Override
    public boolean isWriteOnce() {
       return false;
    }
 
-   /**
-    * Query to see if current memory bank is read only.
-    *
-    * @return  'true' if current memory bank can only be read
-    */
    @Override
    public boolean isReadOnly () {
       return readOnly;
    }
 
-   /**
-    * Query to see if current memory bank non-volatile.  Memory is
-    * non-volatile if it retains its contents even when removed from
-    * the 1-Wire network.
-    *
-    * @return  'true' if current memory bank non volatile.
-    */
    @Override
    public boolean isNonVolatile() {
       return nonVolatile;
    }
 
-   /**
-    * Query to see if current memory bank pages need the adapter to
-    * have a 'ProgramPulse' in order to write to the memory.
-    *
-    * @return  'true' if writing to the current memory bank pages
-    *                 requires a 'ProgramPulse'.
-    */
    @Override
    public boolean needsProgramPulse() {
       return false;
    }
 
-   /**
-    * Query to see if current memory bank pages need the adapter to
-    * have a 'PowerDelivery' feature in order to write to the memory.
-    *
-    * @return  'true' if writing to the current memory bank pages
-    *                 requires 'PowerDelivery'.
-    */
    @Override
    public boolean needsPowerDelivery() {
       return powerDelivery;
    }
 
-   /**
-    * Query to get the starting physical address of this bank.  Physical
-    * banks are sometimes sub-divided into logical banks due to changes
-    * in attributes.
-    *
-    * @return  physical starting address of this logical bank.
-    */
    @Override
    public int getStartPhysicalAddress() {
       return startPhysicalAddress;
    }
 
-   /**
-    * Query to get the memory bank size in bytes.
-    *
-    * @return  memory bank size in bytes.
-    */
    @Override
    public int getSize() {
       return size;
    }
 
-   /**
-    * Set the write verification for the 'write()' method.
-    *
-    * @param  doReadVerf   true (default) verify write in 'write'
-    *                      false, don't verify write (used on
-    *                      Write-Once bit manipulation)
-    */
    @Override
    public void setWriteVerification(boolean doReadVerf) {
       writeVerification = doReadVerf;
    }
 
-   //--------
-   //-------- MemoryBank I/O methods
-   //--------
-
-   /**
-    * Read  memory in the current bank with no CRC checking (device or
-    * data). The resulting data from this API may or may not be what is on
-    * the 1-Wire device.  It is recommends that the data contain some kind
-    * of checking (CRC) like in the readPagePacket() method or have
-    * the 1-Wire device provide the CRC as in readPageCRC().  readPageCRC()
-    * however is not supported on all memory types, see 'hasPageAutoCRC()'.
-    * If neither is an option then this method could be called more
-    * then once to at least verify that the same thing is read consistantly.
-    *
-    * @param  startAddr     starting physical address
-    * @param  readContinue  if 'true' then device read is continued without
-    *                       re-selecting.  This can only be used if the new
-    *                       read() continious where the last one led off
-    *                       and it is inside a 'beginExclusive/endExclusive'
-    *                       block.
-    * @param  readBuf       byte array to place read data into
-    * @param  offset        offset into readBuf to place data
-    * @param  len           length in bytes to read
-    */
    @Override
    public void read(int startAddr, boolean readContinue, byte[] readBuf, int offset, int len) throws OneWireException {
 
@@ -378,24 +243,6 @@ class MemoryBankSBM implements MemoryBank {
       }
    }
 
-   /**
-    * Write  memory in the current bank.  It is recommended that
-    * when writing  data that some structure in the data is created
-    * to provide error free reading back with read().  Or the
-    * method 'writePagePacket()' could be used which automatically
-    * wraps the data in a length and CRC.
-    *
-    * When using on Write-Once devices care must be taken to write into
-    * into empty space.  If write() is used to write over an unlocked
-    * page on a Write-Once device it will fail.  If write verification
-    * is turned off with the method 'setWriteVerification(false)' then
-    * the result will be an 'AND' of the existing data and the new data.
-    *
-    * @param  startAddr     starting address
-    * @param  writeBuf      byte array containing data to write
-    * @param  offset        offset into writeBuf to get data
-    * @param  len           length in bytes to write
-    */
    @Override
    public void write(int startAddr, byte[] writeBuf, int offset, int len) throws OneWireException {
 
@@ -451,11 +298,6 @@ class MemoryBankSBM implements MemoryBank {
       }
    }
 
-   //--------
-   //-------- Bank specific methods
-   //--------
-
-
    /**
     * Reads the specified 8 byte page and returns the data in an array.
     *
@@ -475,7 +317,7 @@ class MemoryBankSBM implements MemoryBank {
 
       if (ib.adapter.select(ib.address)) {
          /* recall memory to the scratchpad */
-         buffer [0] = RECALL_MEMORY_COMMAND;
+         buffer [0] = Command.RECALL_E2MEMORY.code;
          buffer [1] = ( byte ) page;
 
          ib.adapter.dataBlock(buffer, 0, 2);
@@ -483,7 +325,7 @@ class MemoryBankSBM implements MemoryBank {
          /* perform the read scratchpad */
          ib.adapter.select(ib.address);
 
-         buffer [0] = READ_SCRATCHPAD_COMMAND;
+         buffer [0] = Command.READ_SCRATCHPAD.code;
          buffer [1] = ( byte ) page;
 
          for (int i = 2; i < 11; i++) {
@@ -529,7 +371,7 @@ class MemoryBankSBM implements MemoryBank {
 
       if (ib.adapter.select(ib.address)) {
          // write the page to the scratchpad first
-         buffer [0] = WRITE_SCRATCHPAD_COMMAND;
+         buffer [0] = Command.WRITE_SCRATCHPAD.code;
          buffer [1] = ( byte ) page;
 
          System.arraycopy(source, offset, buffer, 2, 8);
@@ -538,7 +380,7 @@ class MemoryBankSBM implements MemoryBank {
          // read back the scrathpad
          if (ib.adapter.select(ib.address)) {
             // write the page to the scratchpad first
-            buffer [0] = READ_SCRATCHPAD_COMMAND;
+            buffer [0] = Command.READ_SCRATCHPAD.code;
             buffer [1] = ( byte ) page;
 
             System.arraycopy(ffBlock, 0, buffer, 2, 9);
@@ -554,7 +396,7 @@ class MemoryBankSBM implements MemoryBank {
             // now copy that part of the scratchpad to memory
             if (ib.adapter.select(ib.address)) {
 
-               buffer [0] = COPY_SCRATCHPAD_COMMAND;
+               buffer [0] = Command.COPY_SCRATCHPAD.code;
                buffer [1] = ( byte ) page;
 
                ib.adapter.dataBlock(buffer, 0, 2);
@@ -578,10 +420,6 @@ class MemoryBankSBM implements MemoryBank {
 
       throw new OneWireIOException("Device not found during write page.");
    }
-
-   //--------
-   //-------- checkSpeed methods
-   //--------
 
    /**
     * Check the device speed if has not been done before or if

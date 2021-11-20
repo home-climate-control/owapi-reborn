@@ -1,0 +1,41 @@
+package com.dalsemi.onewire;
+
+public enum Family {
+
+    F01(0x01),
+    F02(0x02),
+    F04(0x04),
+    F05(0x05),
+    F06(0x06),
+    F08(0x08),
+    F09(0x09),
+    F0A(0x0a),
+    F0B(0x0b),
+    F0C(0x0c),
+    F0F(0x0f),
+    F10(0x10),
+    F14(0x14),
+    F1A(0x1a),
+    F1C(0x1c),
+    F1D(0x1d),
+    F1F(0x1f),
+    F20(0x20),
+    F21(0x21),
+    F23(0x23),
+    F24(0x24),
+    F27(0x27),
+    F29(0x29),
+    F2C(0x2c),
+    F2D(0x2d),
+    F37(0x37),
+    F3A(0x3a),
+    F41(0x41),
+    F42(0x42),
+    F43(0x43);
+
+    public final int code;
+
+    private Family(int code) {
+        this.code = code;
+    }
+}

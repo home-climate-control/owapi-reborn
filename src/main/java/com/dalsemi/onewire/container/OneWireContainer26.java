@@ -28,14 +28,13 @@
 
 package com.dalsemi.onewire.container;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.utils.Address;
 import com.dalsemi.onewire.utils.CRC8;
+
+import java.util.List;
 
 /**
  *  <P>1-Wire&#174 container that encapsulates the functionality of the 1-Wire
@@ -210,106 +209,106 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
     }
 
     /**
-     * Gets an enumeration of memory bank instances that implement one or more
+     * Gets a list of memory bank instances that implement one or more
      * of the following interfaces:
-     * {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
-     * {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank},
-     * and {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank}.
-     * @return <CODE>Enumeration</CODE> of memory banks
+     * {@link MemoryBank}, {@link PagedMemoryBank}, and {@link OTPMemoryBank}.
+     * @return List of memory banks.
      */
     @Override
-    public Enumeration<MemoryBank> getMemoryBanks() {
+    public List<MemoryBank> getMemoryBanks() {
 
-        Vector<MemoryBank> bank_vector = new Vector<>(8);
+        // VT: FIXME: Shouldn't this be done once and not on every call?
 
         // Status
-        bank_vector.addElement(new MemoryBankSBM(this));
+        var status = new MemoryBankSBM(this);
 
         // Temp/Volt/Current
-        var temp = new MemoryBankSBM(this);
-        temp.bankDescription      = "Temperature/Voltage/Current";
-        temp.generalPurposeMemory = false;
-        temp.startPhysicalAddress = 1;
-        temp.size                 = 6;
-        temp.readWrite            = false;
-        temp.readOnly             = true;
-        temp.nonVolatile          = false;
-        temp.powerDelivery        = false;
-        bank_vector.addElement(temp);
+        var measurement = new MemoryBankSBM(this);
+        measurement.bankDescription      = "Temperature/Voltage/Current";
+        measurement.generalPurposeMemory = false;
+        measurement.startPhysicalAddress = 1;
+        measurement.size                 = 6;
+        measurement.readWrite            = false;
+        measurement.readOnly             = true;
+        measurement.nonVolatile          = false;
+        measurement.powerDelivery        = false;
 
         // Threshold
-        temp = new MemoryBankSBM(this);
-        temp.bankDescription      = "Threshold";
-        temp.generalPurposeMemory = false;
-        temp.startPhysicalAddress = 7;
-        temp.size                 = 1;
-        temp.readWrite            = true;
-        temp.readOnly             = false;
-        temp.nonVolatile          = true;
-        temp.powerDelivery        = true;
-        bank_vector.addElement(temp);
+        var threshold = new MemoryBankSBM(this);
+        threshold.bankDescription      = "Threshold";
+        threshold.generalPurposeMemory = false;
+        threshold.startPhysicalAddress = 7;
+        threshold.size                 = 1;
+        threshold.readWrite            = true;
+        threshold.readOnly             = false;
+        threshold.nonVolatile          = true;
+        threshold.powerDelivery        = true;
 
         // Elapsed Timer Meter
-        temp = new MemoryBankSBM(this);
-        temp.bankDescription      = "Elapsed Timer Meter";
-        temp.generalPurposeMemory = false;
-        temp.startPhysicalAddress = 8;
-        temp.size                 = 5;
-        temp.readWrite            = true;
-        temp.readOnly             = false;
-        temp.nonVolatile          = false;
-        temp.powerDelivery        = true;
-        bank_vector.addElement(temp);
+        var elapsedTimerMeter = new MemoryBankSBM(this);
+        elapsedTimerMeter.bankDescription      = "Elapsed Timer Meter";
+        elapsedTimerMeter.generalPurposeMemory = false;
+        elapsedTimerMeter.startPhysicalAddress = 8;
+        elapsedTimerMeter.size                 = 5;
+        elapsedTimerMeter.readWrite            = true;
+        elapsedTimerMeter.readOnly             = false;
+        elapsedTimerMeter.nonVolatile          = false;
+        elapsedTimerMeter.powerDelivery        = true;
 
         // Current Offset
-        temp = new MemoryBankSBM(this);
-        temp.bankDescription      = "Current Offset";
-        temp.generalPurposeMemory = false;
-        temp.startPhysicalAddress = 13;
-        temp.size                 = 2;
-        temp.readWrite            = true;
-        temp.readOnly             = false;
-        temp.nonVolatile          = true;
-        temp.powerDelivery        = true;
-        bank_vector.addElement(temp);
+        var currentOffset = new MemoryBankSBM(this);
+        currentOffset.bankDescription      = "Current Offset";
+        currentOffset.generalPurposeMemory = false;
+        currentOffset.startPhysicalAddress = 13;
+        currentOffset.size                 = 2;
+        currentOffset.readWrite            = true;
+        currentOffset.readOnly             = false;
+        currentOffset.nonVolatile          = true;
+        currentOffset.powerDelivery        = true;
 
         // Disconnect / End of Charge
-        temp = new MemoryBankSBM(this);
-        temp.bankDescription      = "Disconnect / End of Charge";
-        temp.generalPurposeMemory = false;
-        temp.startPhysicalAddress = 16;
-        temp.size                 = 8;
-        temp.readWrite            = true;
-        temp.readOnly             = false;
-        temp.nonVolatile          = false;
-        temp.powerDelivery        = true;
-        bank_vector.addElement(temp);
+        var disconnectEndOfCharge = new MemoryBankSBM(this);
+        disconnectEndOfCharge.bankDescription      = "Disconnect / End of Charge";
+        disconnectEndOfCharge.generalPurposeMemory = false;
+        disconnectEndOfCharge.startPhysicalAddress = 16;
+        disconnectEndOfCharge.size                 = 8;
+        disconnectEndOfCharge.readWrite            = true;
+        disconnectEndOfCharge.readOnly             = false;
+        disconnectEndOfCharge.nonVolatile          = false;
+        disconnectEndOfCharge.powerDelivery        = true;
 
         // User Main Memory
-        temp = new MemoryBankSBM(this);
-        temp.bankDescription      = "User Main Memory";
-        temp.generalPurposeMemory = true;
-        temp.startPhysicalAddress = 24;
-        temp.size                 = 32;
-        temp.readWrite            = true;
-        temp.readOnly             = false;
-        temp.nonVolatile          = true;
-        temp.powerDelivery        = true;
-        bank_vector.addElement(temp);
+        var userMainMemory = new MemoryBankSBM(this);
+        userMainMemory.bankDescription      = "User Main Memory";
+        userMainMemory.generalPurposeMemory = true;
+        userMainMemory.startPhysicalAddress = 24;
+        userMainMemory.size                 = 32;
+        userMainMemory.readWrite            = true;
+        userMainMemory.readOnly             = false;
+        userMainMemory.nonVolatile          = true;
+        userMainMemory.powerDelivery        = true;
 
         // User Memory / CCA / DCA
-        temp = new MemoryBankSBM(this);
-        temp.bankDescription      = "User Memory / CCA / DCA";
-        temp.generalPurposeMemory = false;
-        temp.startPhysicalAddress = 56;
-        temp.size                 = 8;
-        temp.readWrite            = true;
-        temp.readOnly             = false;
-        temp.nonVolatile          = true;
-        temp.powerDelivery        = true;
-        bank_vector.addElement(temp);
+        var userMemory = new MemoryBankSBM(this);
+        userMemory.bankDescription      = "User Memory / CCA / DCA";
+        userMemory.generalPurposeMemory = false;
+        userMemory.startPhysicalAddress = 56;
+        userMemory.size                 = 8;
+        userMemory.readWrite            = true;
+        userMemory.readOnly             = false;
+        userMemory.nonVolatile          = true;
+        userMemory.powerDelivery        = true;
 
-        return bank_vector.elements();
+        return List.of(
+                status,
+                measurement,
+                threshold,
+                elapsedTimerMeter,
+                currentOffset,
+                disconnectEndOfCharge,
+                userMainMemory,
+                userMemory
+                );
     }
 
     /**
@@ -548,7 +547,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
         if (flagValue) {
             data [0] = ( byte ) (data [0] | flagToSet);
         } else {
-            data [0] = ( byte ) (data [0] & ~(flagToSet));
+            data [0] = ( byte ) (data [0] & ~flagToSet);
         }
 
         writePage(0, data, 0);
@@ -645,8 +644,8 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
 
         // change the sign of the current register value and store it as the offset
         data     = readPage(1);
-        data [5] = ( byte ) (~(currentLSB) + 1);
-        data [6] = ( byte ) (~(currentMSB));
+        data [5] = ( byte ) (~currentLSB + 1);
+        data [6] = ( byte ) (~currentMSB);
 
         writePage(1, data, 0);
 
@@ -1997,6 +1996,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #getHumidityResolution
      * @see    #getHumidityResolutions
      */
+    @Override
     public void setHumidityResolution(double resolution, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have selectable humidity resolution!");
     }

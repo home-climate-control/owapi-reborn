@@ -28,39 +28,23 @@
 
 package com.dalsemi.onewire.adapter;
 
-/** Raw Send Packet that contains a StingBuffer of bytes to send and
- *  an expected return length.
+/**
+ * Raw Send Packet that contains a StingBuffer of bytes to send and an expected return length.
  *
- *  @version    0.00, 28 Aug 2000
  *  @author     DS
  */
-class RawSendPacket
-{
-
-   //--------
-   //-------- Variables
-   //--------
+class RawSendPacket {
 
    /**
     * StringBuffer of bytes to send
     */
-   public StringBuffer buffer;
+   public StringBuffer buffer = new StringBuffer();
 
    /**
     * Expected length of return packet
     */
-   public int returnLength;
+   public int returnLength = 0;
 
-   //--------
-   //-------- Constructors
-   //--------
-
-   /**
-    * Construct and initiailize the raw send packet
-    */
-   public RawSendPacket ()
-   {
-      buffer       = new StringBuffer();
-      returnLength = 0;
+   public RawSendPacket () {
    }
 }

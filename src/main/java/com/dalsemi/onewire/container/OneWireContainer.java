@@ -29,15 +29,15 @@
 package com.dalsemi.onewire.container;
 
 // imports
-import com.dalsemi.onewire.utils.Address;
-import java.util.Enumeration;
-import java.util.Vector;
 
+import com.dalsemi.onewire.OneWireException;
+import com.dalsemi.onewire.adapter.DSPortAdapter;
+import com.dalsemi.onewire.adapter.OneWireIOException;
+import com.dalsemi.onewire.utils.Address;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.dalsemi.onewire.adapter.*;
-import com.dalsemi.onewire.OneWireException;
+import java.util.List;
 
 
 /**
@@ -58,23 +58,20 @@ import com.dalsemi.onewire.OneWireException;
  *
  * <DL>
  * <DD> <H4> Example 1</H4>
- * Enumerate memory banks retrieved from the OneWireContainer
+ * Iterate through memory banks retrieved from the OneWireContainer
  * instance 'owd' and cast to the highest interface.  See the
  * interface descriptions
- * {@link com.dalsemi.onewire.container.MemoryBank MemoryBank},
- * {@link com.dalsemi.onewire.container.PagedMemoryBank PagedMemoryBank}, and
- * {@link com.dalsemi.onewire.container.PagedMemoryBank OTPMemoryBank}
- * for specific examples.
+ * {@link MemoryBank}, {@link PagedMemoryBank}, and {@link OTPMemoryBank} for specific examples.
  * <PRE> <CODE>
  *  MemoryBank      mb;
  *  PagedMemoryBank pg_mb;
  *  OTPMemoryBank   otp_mb;
  *
- *  for(Enumeration bank_enum = owd.getMemoryBanks();
+ *  for(var bank_enum = owd.getMemoryBanks().iterator();
  *                      bank_enum.hasMoreElements(); )
  *  {
  *     // get the next memory bank, cast to MemoryBank
- *     mb = (MemoryBank)bank_enum.nextElement();
+ *     mb = (MemoryBank)bank_enum.next();
  *
  *     // check if has paged services
  *     if (mb instanceof PagedMemoryBank)
@@ -91,17 +88,12 @@ import com.dalsemi.onewire.OneWireException;
  * @see com.dalsemi.onewire.container.PagedMemoryBank
  * @see com.dalsemi.onewire.container.OTPMemoryBank
  *
- *  @version    0.00, 28 Aug 2000
- *  @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author DS
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireContainer {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
-
-    //--------
-    //-------- Variables
-    //--------
+    protected final Logger logger = LogManager.getLogger();
 
     /**
      * Reference to the adapter that is needed to communicate with this
@@ -119,17 +111,10 @@ public class OneWireContainer {
 
     /**
      * Communication speed requested.
-     * <ul>
-     * <li>     0 (SPEED_REGULAR)
-     * <li>     1 (SPEED_FLEX)
-     * <li>     2 (SPEED_OVERDRIVE)
-     * <li>     3 (SPEED_HYPERDRIVE)
-     * <li>    >3 future speeds
-     * </ul>
      *
      * @see DSPortAdapter#setSpeed
      */
-    protected int speed;
+    protected DSPortAdapter.Speed speed;
 
     /**
      * Flag to indicate that falling back to a slower speed then requested
@@ -137,16 +122,12 @@ public class OneWireContainer {
      */
     protected boolean speedFallBackOK;
 
-    //--------
-    //-------- Constructors
-    //--------
-
     /**
-     * Create an empty container.  Must call <code>setupContainer</code> before
-     * using this new container.<p>
+     * Create an empty container.  Must call {@code setupContainer} before
+     * using this new container.
      *
-     * This is one of the methods to construct a container.  The others are
-     * through creating a OneWireContainer with parameters.
+     * This is one of the methods to construct a container. The others are
+     * through creating a OneWireContainer with parameters, they are preferred.
      *
      * @see #OneWireContainer(DSPortAdapter,byte[])
      * @see #OneWireContainer(DSPortAdapter,long)
@@ -162,7 +143,7 @@ public class OneWireContainer {
      * Create a container with a provided adapter object
      * and the address of the iButton or 1-Wire device.<p>
      *
-     * This is one of the methods to construct a container.  The other is
+     * This is one of the methods to construct a container.  The other (discouraged) is
      * through creating a OneWireContainer with NO parameters.
      *
      * @param  sourceAdapter     adapter object required to communicate with
@@ -177,9 +158,9 @@ public class OneWireContainer {
 
     /**
      * Create a container with a provided adapter object
-     * and the address of the iButton or 1-Wire device.<p>
+     * and the address of the iButton or 1-Wire device.
      *
-     * This is one of the methods to construct a container.  The other is
+     * This is one of the methods to construct a container.  The other (discouraged) is
      * through creating a OneWireContainer with NO parameters.
      *
      * @param  sourceAdapter     adapter object required to communicate with
@@ -194,9 +175,9 @@ public class OneWireContainer {
 
     /**
      * Create a container with a provided adapter object
-     * and the address of the iButton or 1-Wire device.<p>
+     * and the address of the iButton or 1-Wire device.
      *
-     * This is one of the methods to construct a container.  The other is
+     * This is one of the methods to construct a container.  The other (discouraged) is
      * through creating a OneWireContainer with NO parameters.
      *
      * @param  sourceAdapter     adapter object required to communicate with
@@ -209,10 +190,6 @@ public class OneWireContainer {
         this.setupContainer(sourceAdapter, newAddress);
     }
 
-    //--------
-    //-------- Setup and adapter methods
-    //--------
-
     /**
      * Provides this container with the adapter object used to access this device and
      * the address of the iButton or 1-Wire device.
@@ -222,18 +199,16 @@ public class OneWireContainer {
      * @param  newAddress        address of this 1-Wire device
      * @see com.dalsemi.onewire.utils.Address
      */
-    @SuppressWarnings("static-access")
     public synchronized void setupContainer(DSPortAdapter sourceAdapter, byte[] newAddress) {
 
         // get a reference to the source adapter (will need this to communicate)
         adapter = sourceAdapter;
 
         // set the Address
-
         System.arraycopy(newAddress, 0, address, 0, 8);
 
         // set desired speed to be SPEED_REGULAR by default with no fallback
-        speed           = adapter.SPEED_REGULAR;
+        speed           = DSPortAdapter.Speed.REGULAR;
         speedFallBackOK = false;
     }
 
@@ -246,7 +221,6 @@ public class OneWireContainer {
      * @param  newAddress        address of this 1-Wire device
      * @see com.dalsemi.onewire.utils.Address
      */
-    @SuppressWarnings("static-access")
     public synchronized void setupContainer(DSPortAdapter sourceAdapter, long newAddress) {
 
         // get a reference to the source adapter (will need this to communicate)
@@ -256,7 +230,7 @@ public class OneWireContainer {
         Address.toByteArray(newAddress, address);
 
         // set desired speed to be SPEED_REGULAR by default with no fallback
-        speed           = adapter.SPEED_REGULAR;
+        speed           = DSPortAdapter.Speed.REGULAR;
         speedFallBackOK = false;
     }
 
@@ -269,7 +243,6 @@ public class OneWireContainer {
      * @param  newAddress        address of this 1-Wire device
      * @see com.dalsemi.onewire.utils.Address
      */
-    @SuppressWarnings("static-access")
     public synchronized void setupContainer(DSPortAdapter sourceAdapter, String newAddress) {
 
         // get a reference to the source adapter (will need this to communicate)
@@ -279,7 +252,7 @@ public class OneWireContainer {
         Address.toByteArray(newAddress, address);
 
         // set desired speed to be SPEED_REGULAR by default with no fallback
-        speed           = adapter.SPEED_REGULAR;
+        speed           = DSPortAdapter.Speed.REGULAR;
         speedFallBackOK = false;
     }
 
@@ -291,10 +264,6 @@ public class OneWireContainer {
     public DSPortAdapter getAdapter() {
         return adapter;
     }
-
-    //--------
-    //-------- Device information methods
-    //--------
 
     /**
      * Retrieves the Dallas Semiconductor part number of the 1-Wire device
@@ -336,23 +305,11 @@ public class OneWireContainer {
      * devices maximum speed.  This method can be used by an application
      * to restrict the communication rate due 1-Wire line conditions. <p>
      *
-     * @param newSpeed
-     * <ul>
-     * <li>     0 (SPEED_REGULAR) set to normal communciation speed
-     * <li>     1 (SPEED_FLEX) set to flexible communciation speed used
-     *            for long lines
-     * <li>     2 (SPEED_OVERDRIVE) set to normal communciation speed to
-     *            overdrive
-     * <li>     3 (SPEED_HYPERDRIVE) set to normal communciation speed to
-     *            hyperdrive
-     * <li>    >3 future speeds
-     * </ul>
-     *
-     * @param fallBack boolean indicating it is OK to fall back to a slower
-     *                 speed if true
+     * @param newSpeed Adapter speed requested.
+     * @param fallBack boolean indicating it is OK to fall back to a slower speed if {@code true}.
      *
      */
-    public void setSpeed(int newSpeed, boolean fallBack) {
+    public void setSpeed(DSPortAdapter.Speed newSpeed, boolean fallBack) {
         speed           = newSpeed;
         speedFallBackOK = fallBack;
     }
@@ -366,9 +323,8 @@ public class OneWireContainer {
      * @return maximum speed
      * @see DSPortAdapter#setSpeed
      */
-    @SuppressWarnings("static-access")
-    public int getMaxSpeed() {
-        return adapter.SPEED_REGULAR;
+    public DSPortAdapter.Speed getMaxSpeed() {
+        return DSPortAdapter.Speed.REGULAR;
     }
 
     /**
@@ -402,19 +358,13 @@ public class OneWireContainer {
     }
 
     /**
-     * Returns an <code>Enumeration</code> of <code>MemoryBank</code>.  Default is no memory banks.
+     * Returns a list of memory banks, default is none.
      *
-     * @return enumeration of memory banks to read and write memory
-     *   on this iButton or 1-Wire device
-     * @see MemoryBank
+     * @return List of memory banks to read and write memory on this iButton or 1-Wire device.
      */
-    public Enumeration<MemoryBank> getMemoryBanks() {
-        return new Vector<MemoryBank>(0).elements();
+    public List<MemoryBank> getMemoryBanks() {
+        return List.of();
     }
-
-    //--------
-    //-------- I/O Methods
-    //--------
 
     /**
      * Verifies that the iButton or 1-Wire device is present on
@@ -427,7 +377,6 @@ public class OneWireContainer {
      * @throws OneWireException if adapter is not open
      */
     public synchronized boolean isPresent() throws OneWireException {
-
         return adapter.isPresent(address);
     }
 
@@ -456,9 +405,8 @@ public class OneWireContainer {
      * @throws OneWireIOException WHEN selected speed fails and fallback
      *                                 is false
      * @throws OneWireException WHEN hypterdrive is selected speed
-     * @see #setSpeed(int,boolean)
+     * @see #setSpeed(com.dalsemi.onewire.adapter.DSPortAdapter.Speed,boolean)
      */
-    @SuppressWarnings("static-access")
     public void doSpeed() throws OneWireException {
 
         boolean is_present = false;
@@ -473,14 +421,14 @@ public class OneWireContainer {
         }
 
         // speed Overdrive
-        if (speed == adapter.SPEED_OVERDRIVE) {
+        if (speed == DSPortAdapter.Speed.OVERDRIVE) {
 
             try {
                 // get this device and adapter to overdrive
-                adapter.setSpeed(adapter.SPEED_REGULAR);
+                adapter.setSpeed(DSPortAdapter.Speed.REGULAR);
                 adapter.reset();
                 adapter.putByte(( byte ) 0x69);
-                adapter.setSpeed(adapter.SPEED_OVERDRIVE);
+                adapter.setSpeed(DSPortAdapter.Speed.OVERDRIVE);
 
             } catch (OneWireIOException ex) {
                 // VOID
@@ -512,15 +460,15 @@ public class OneWireContainer {
 
                 // check if allow fallback
                 if (speedFallBackOK) {
-                    adapter.setSpeed(adapter.SPEED_REGULAR);
+                    adapter.setSpeed(DSPortAdapter.Speed.REGULAR);
                 } else {
                     throw new OneWireIOException(address, "Failed to get device to selected speed (overdrive)");
                 }
             }
         }
         // speed regular or flex
-        else if ((speed == adapter.SPEED_REGULAR)
-                || (speed == adapter.SPEED_FLEX)) {
+        else if ((speed == DSPortAdapter.Speed.REGULAR)
+                || (speed == DSPortAdapter.Speed.FLEX)) {
             adapter.setSpeed(speed);
         // speed hyperdrive, don't know how to do this
         } else {
@@ -528,34 +476,11 @@ public class OneWireContainer {
         }
     }
 
-    //--------
-    //-------- Object Methods
-    //--------
-
-    /**
-     * Returns a hash code value for the object. This method is
-     * supported for the benefit of hashtables such as those provided by
-     * <code>java.util.Hashtable</code>.
-     *
-     * @return  a hash code value for this object.
-     * @see     java.util.Hashtable
-     */
     @Override
     public int hashCode() {
-
-        if(this.address==null) {
-            return 0;
-        } else {
-            return (new Long(Address.toLong(this.address))).hashCode();
-        }
+        return Long.valueOf(Address.toLong(this.address)).hashCode();
     }
 
-    /**
-     * Indicates whether some other object is "equal to" this one.
-     * @param   o   the reference object with which to compare.
-     * @return  <code>true</code> if this object is the same as the obj
-     *          argument; <code>false</code> otherwise.
-     */
     @Override
     public boolean equals(Object o) {
 
@@ -576,11 +501,6 @@ public class OneWireContainer {
         return false;
     }
 
-    /**
-     * Returns a string representation of the object.
-     *
-     * @return  a string representation of the object.
-     */
     @Override
     public String toString() {
         return Address.toString(this.address) + " " + this.getName();

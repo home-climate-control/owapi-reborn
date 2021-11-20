@@ -27,26 +27,19 @@
 
 package com.dalsemi.onewire.adapter;
 
-import java.io.IOException;
-import java.util.Enumeration;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.ThreadContext;
-
-import com.dalsemi.onewire.OneWireAccessProvider;
+import com.dalsemi.onewire.Family;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.utils.Bit;
 import com.dalsemi.onewire.utils.CRC8;
-import com.dalsemi.onewire.utils.Address;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.IOException;
 
 /**
- * The USerialAdapter class implememts the DSPortAdapter interface for a DS2480
+ * The USerialAdapter class implements the DSPortAdapter interface for a DS2480
  * based serial adapter such as the DS9097U-009 or DS9097U-S09.
  * <p>
- * Instances of valid USerialAdapter's are retrieved from methods in
- * {@link OneWireAccessProvider OneWireAccessProvider}.
- * <P>
  * The DSPortAdapter methods can be organized into the following categories:
  * </P>
  * <UL>
@@ -54,7 +47,6 @@ import com.dalsemi.onewire.utils.Address;
  * <UL>
  * <LI> {@link #getAdapterName() getAdapterName}
  * <LI> {@link #getPortTypeDescription() getPortTypeDescription}
- * <LI> {@link #getClassVersion() getClassVersion}
  * <LI> {@link #adapterDetected() adapterDetected}
  * <LI> {@link #getAdapterVersion() getAdapterVersion}
  * <LI> {@link #getAdapterAddress() getAdapterAddress}
@@ -78,7 +70,7 @@ import com.dalsemi.onewire.utils.Address;
  * </UL>
  * <LI> <B> 1-Wire Network Semaphore </B>
  * <UL>
- * <LI> {@link #beginExclusive(boolean) beginExclusive}
+ * <LI> {@link #beginExclusive()}
  * <LI> {@link #endExclusive() endExclusive}
  * </UL>
  * <LI> <B> 1-Wire Device Discovery </B>
@@ -144,13 +136,13 @@ import com.dalsemi.onewire.utils.Address;
  * </UL>
  * <LI> 1-Wire Speed and Power Selection
  * <UL>
- * <LI> {@link #setPowerDuration(int) setPowerDuration}
- * <LI> {@link #startPowerDelivery(int) startPowerDelivery}
- * <LI> {@link #setProgramPulseDuration(int) setProgramPulseDuration}
- * <LI> {@link #startProgramPulse(int) startProgramPulse}
+ * <LI> {@link #setPowerDuration(PowerDeliveryDuration)}
+ * <LI> {@link #startPowerDelivery(PowerChangeCondition)}
+ * <LI> {@link #setProgramPulseDuration(PowerDeliveryDuration)}
+ * <LI> {@link #startProgramPulse(PowerChangeCondition)}
  * <LI> {@link #startBreak() startBreak}
  * <LI> {@link #setPowerNormal() setPowerNormal}
- * <LI> {@link #setSpeed(int) setSpeed}
+ * <LI> {@link #setSpeed(Speed)}
  * <LI> {@link #getSpeed() getSpeed}
  * </UL>
  * </UL>
@@ -161,20 +153,14 @@ import com.dalsemi.onewire.utils.Address;
  * </UL>
  * </UL>
  *
- * @see OneWireAccessProvider
  * @see OneWireContainer
- * @version 0.10, 24 Aug 2001
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class USerialAdapter extends DSPortAdapter {
 
-    // --------
-    // -------- Finals
-    // --------
-
     /** Family code for the EPROM iButton DS1982 */
-    private static final int ADAPTER_ID_FAMILY = 0x09;
+    private static final Family ADAPTER_ID_FAMILY = Family.F09;
 
     /** Extended read page command for DS1982 */
     private static final int EXTENDED_READ_PAGE = 0xC3;
@@ -185,30 +171,14 @@ public class USerialAdapter extends DSPortAdapter {
     /** Conditional Search, only 'alarming' devices participate */
     private static final char ALARM_SEARCH_CMD = 0xEC;
 
-    // --------
-    // -------- Static Variables
-    // --------
-
-    /** Version string for this adapter class */
-    private static String classVersion = "0.10";
-
-    /** Hashtable to contain SerialService instances */
-    // private static Hashtable serailServiceHash = new Hashtable(4);
     /** Max baud rate supported by DS9097U */
-    private static int maxBaud;
-
-    // --------
-    // -------- Variables
-    // --------
+    private static final int maxBaud = 115200;
 
     /** Reference to the current SerialService */
     private SerialService serial;
 
     /** String name of the current opened port */
     private boolean adapterPresent;
-
-    /** Flag to indicate more than expected byte received in a transaction */
-    //private boolean extraBytesReceived;
 
     /** U Adapter packet builder */
     UPacketBuilder uBuild;
@@ -236,107 +206,19 @@ public class USerialAdapter extends DSPortAdapter {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-
-        freePort();
-
-        super.finalize();
-    }
-
-    /**
-     * Cleans up the resources used by the thread argument. If another thread
-     * starts communicating with this port, and then goes away, there is no way
-     * to relinquish the port without stopping the process. This method allows
-     * other threads to clean up.
-     *
-     * @param thread that may have used a {@link USerialAdapter}.
-     *
-     * @deprecated Apparently, never used.
-     */
-    @Deprecated
-    public static void cleanUpByThread(Thread thread) {
-
-        LogManager.getLogger(USerialAdapter.class).debug("CleanUpByThread called: Thread=" + thread);
-        SerialService.cleanUpByThread(thread);
-    }
-
-    /**
-     * Retrieve the name of the port adapter as a string. The 'Adapter' is a
-     * device that connects to a 'port' that allows one to communicate with an
-     * iButton or other 1-Wire device. As example of this is 'DS9097U'.
-     *
-     * @return <code>String</code> representation of the port adapter.
-     */
     public String getAdapterName() {
-
         return "DS9097U";
     }
 
-    /**
-     * Retrieve a description of the port required by this port adapter. An
-     * example of a 'Port' would 'serial communication port'.
-     *
-     * @return <code>String</code> description of the port type required.
-     */
-    public String getPortTypeDescription() {
-
-        return "serial communication port";
-    }
-
-    /**
-     * Retrieve a version string for this class.
-     *
-     * @return version string
-     */
-    public String getClassVersion() {
-
-        return classVersion;
-    }
-
-    // --------
-    // -------- Port Selection
-
-    // --------
-
-    /**
-     * Retrieve a list of the platform appropriate port names for this adapter.
-     * A port must be selected with the method 'selectPort' before any other
-     * communication methods can be used. Using a communcation method before
-     * 'selectPort' will result in a <code>OneWireException</code> exception.
-     *
-     * @return enumeration of type <code>String</code> that contains the port
-     * names
-     */
-    @SuppressWarnings("static-access")
-    public Enumeration<String> getPortNames() {
-
-        return serial.getSerialPortIdentifiers();
-    }
-
-    /**
-     * Specify a platform appropriate port name for this adapter. Note that even
-     * though the port has been selected, it's ownership may be relinquished if
-     * it is not currently held in a 'exclusive' block. This class will then try
-     * to re-aquire the port when needed. If the port cannot be re-aquired ehen
-     * the exception <code>PortInUseException</code> will be thrown.
-     *
-     * @param newPortName name of the target port, retrieved from getPortNames()
-     * @return <code>true</code> if the port was aquired, <code>false</code>
-     * if the port is not available.
-     * @throws OneWireIOException If port does not exist, or unable to
-     * communicate with port.
-     * @throws OneWireException If port does not exist
-     */
     @Override
-    public boolean selectPort(String newPortName) throws OneWireIOException, OneWireException {
+    public String getPortTypeDescription() {
+        return "Serial communication port";
+    }
 
-        // find the port reference
-        serial = SerialService.getSerialService(newPortName);
+    @Override
+    public boolean selectPort(String newPortName) throws OneWireException {
 
-        // check if there is no such port
-        if (serial == null) {
-            throw new OneWireException("no such port: " + newPortName);
-        }
+        serial = new SerialService(newPortName);
 
         try {
 
@@ -345,8 +227,8 @@ public class USerialAdapter extends DSPortAdapter {
 
             // attempt to open the port
             serial.openPort();
-
             return true;
+
         } catch (IOException ex) {
             throw new OneWireIOException("Oops", ex);
         } finally {
@@ -372,13 +254,7 @@ public class USerialAdapter extends DSPortAdapter {
         return serial.getPortName();
     }
 
-    /**
-     * Free ownership of the selected port if it is currently owned back to the
-     * system. This should only be called if the recently selected port does not
-     * have an adapter or at the end of your application's use of the port.
-     *
-     * @throws OneWireException If port does not exist
-     */
+    @Override
     public void freePort() throws OneWireException {
 
         try {
@@ -395,75 +271,53 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    // --------
-    // -------- Adapter detection
-    // --------
+    @Override
+    public boolean adapterDetected() {
 
-    /**
-     * Detect adapter presence on the selected port.
-     *
-     * @return <code>true</code> if the adapter is confirmed to be connected
-     * to the selected port, <code>false</code> if the adapter is not
-     * connected.
-     * @throws OneWireIOException
-     * @throws OneWireException
-     */
-    public boolean adapterDetected() throws OneWireIOException, OneWireException {
-
-        boolean rt;
-
+        ThreadContext.push("adapterDetected");
         try {
 
             // acquire exclusive use of the port
             beginLocalExclusive();
             uAdapterPresent();
 
-            rt = uVerify();
+            return uVerify();
+
         } catch (OneWireException ex) {
-            logger.debug("rt=false", ex);
-            rt = false;
+            logger.error("Error trying to detect the adapter", ex);
+            return false;
         } finally {
 
             // release local exclusive use of port
             endLocalExclusive();
+            ThreadContext.pop();
         }
-
-        return rt;
     }
 
-    /**
-     * Retrieve the version of the adapter.
-     *
-     * @return <code>String</code> of the adapter version. It will return "<na>"
-     * if the adapter version is not or cannot be known.
-     * @throws OneWireIOException on a 1-Wire communication error such as no
-     * device present. This could be caused by a physical interruption in the
-     * 1-Wire Network due to shorts or a newly arriving 1-Wire device issuing a
-     * 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the
-     * 1-Wire adapter
-     */
-    public String getAdapterVersion() throws OneWireIOException, OneWireException {
+    @Override
+    public String getAdapterVersion() throws OneWireException {
 
-        String version_string = "DS2480 based adapter";
+        String versionString = "DS2480 based adapter";
 
         try {
 
             // acquire exclusive use of the port
             beginLocalExclusive();
 
-            // only check if the port is aquired
+            // only check if the port is acquired
             if (uAdapterPresent()) {
 
                 // perform a reset to read the version
-                if (uState.revision == 0)
+                if (uState.revision == 0) {
                     reset();
+                }
 
-                version_string = version_string.concat(", version " + (uState.revision >> 2));
+                versionString = versionString.concat(", version " + (uState.revision >> 2));
 
-                return version_string;
-            } else
+                return versionString;
+            } else {
                 throw new OneWireIOException("USerialAdapter-getAdapterVersion, adapter not present");
+            }
         } finally {
 
             // release local exclusive use of port
@@ -471,24 +325,11 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Retrieve the address of the adapter if it has one.
-     *
-     * @return <code>String</code> of the adapter address. It will return "<na>"
-     * if the adapter does not have an address. The address is a string
-     * representation of an 1-Wire address.
-     * @throws OneWireIOException on a 1-Wire communication error such as no
-     * device present. This could be caused by a physical interruption in the
-     * 1-Wire Network due to shorts or a newly arriving 1-Wire device issuing a
-     * 'presence pulse'.
-     * @throws OneWireException on a communication or setup error with the
-     * 1-Wire adapter
-     * @see Address
-     */
-    public String getAdapterAddress() throws OneWireIOException, OneWireException {
+    @Override
+    public String getAdapterAddress() {
 
         // get a reference to the current oneWire State
-        OneWireState preserved_mstate = owState;
+        OneWireState preservedMstate = owState;
 
         owState = new OneWireState();
 
@@ -503,9 +344,7 @@ public class USerialAdapter extends DSPortAdapter {
                 // set the search to find all of the available DS1982's
                 this.setSearchAllDevices();
                 this.targetAllFamilies();
-                this.targetFamily(ADAPTER_ID_FAMILY);
-
-                Enumeration<OneWireContainer> e = this.getAllDeviceContainers();
+                this.targetFamily(ADAPTER_ID_FAMILY.code);
 
                 // 8 bytes
                 byte[] address = {
@@ -514,62 +353,60 @@ public class USerialAdapter extends DSPortAdapter {
                         };
 
                 // loop through each of the DS1982's to find an adapter ID
-                for (; e.hasMoreElements();) {
-                    OneWireContainer ibutton = e.nextElement();
-
-                    System.arraycopy(ibutton.getAddress(), 0, address, 0, 8);
+                for (var device : getAllDeviceContainers()) {
+                    System.arraycopy(device.getAddress(), 0, address, 0, 8);
 
                     // select this device
                     if (select(address)) {
 
                         // create a buffer to read the first page
                         // 37 bytes
-                        byte[] read_buffer = {
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
-                                (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
+                        byte[] readBuffer = {
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+                                (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
                                 (byte) 0x00
-                                };
+                        };
                         int cnt = 0;
                         int i;
 
                         // extended read memory command
-                        read_buffer[cnt++] = (byte) EXTENDED_READ_PAGE;
+                        readBuffer[cnt++] = (byte) EXTENDED_READ_PAGE;
 
                         // address of first page
-                        read_buffer[cnt++] = 0;
-                        read_buffer[cnt++] = 0;
+                        readBuffer[cnt++] = 0;
+                        readBuffer[cnt++] = 0;
 
                         // CRC, data of page and CRC from device
                         for (i = 0; i < 34; i++)
-                            read_buffer[cnt++] = (byte) 0xFF;
+                            readBuffer[cnt++] = (byte) 0xFF;
 
                         // perform CRC8 of the first chunk of known data
-                        int crc8 = CRC8.compute(read_buffer, 0, 3, 0);
+                        int crc8 = CRC8.compute(readBuffer, 0, 3, 0);
 
                         // send/receive data to 1-Wire
-                        dataBlock(read_buffer, 0, cnt);
+                        dataBlock(readBuffer, 0, cnt);
 
                         // check the first CRC
-                        if (CRC8.compute(read_buffer, 3, 1, crc8) == 0) {
+                        if (CRC8.compute(readBuffer, 3, 1, crc8) == 0) {
 
                             // compute the next CRC8 with data from device
-                            if (CRC8.compute(read_buffer, 4, 33, 0) == 0) {
+                            if (CRC8.compute(readBuffer, 4, 33, 0) == 0) {
 
                                 // now loop to see if all data is 0xFF
                                 for (i = 4; i < 36; i++)
-                                    if ((byte) read_buffer[i] != (byte) 0xFF)
+                                    if (readBuffer[i] != (byte) 0xFF)
                                         continue;
 
                                 // must be the one!
                                 if (i == 36)
-                                    return ibutton.getAddressAsString();
+                                    return device.getAddressAsString();
                             }
                         }
                     }
@@ -581,11 +418,11 @@ public class USerialAdapter extends DSPortAdapter {
 
             // Drain.
             logger.fatal("DalSemi ignored this exception", ex);
-            
+
         } finally {
 
             // restore the old state
-            owState = preserved_mstate;
+            owState = preservedMstate;
 
             // release local exclusive use of port
             endLocalExclusive();
@@ -595,67 +432,23 @@ public class USerialAdapter extends DSPortAdapter {
         return "<not available>";
     }
 
-    // --------
-    // -------- Adapter features
-    // --------
-
-    /*
-     * The following interogative methods are provided so that client code can
-     * react selectively to underlying states without generating an exception.
-     */
-
-    /**
-     * Returns whether adapter can physically support overdrive mode.
-     *
-     * @return <code>true</code> if this port adapter can do OverDrive,
-     * <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean canOverdrive() throws OneWireIOException, OneWireException {
-
+    @Override
+    public boolean canOverdrive() throws OneWireException {
         return true;
     }
 
-    /**
-     * Returns whether the adapter can physically support hyperdrive mode.
-     *
-     * @return <code>true</code> if this port adapter can do HyperDrive,
-     * <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean canHyperdrive() throws OneWireIOException, OneWireException {
-
+    @Override
+    public boolean canHyperdrive() throws OneWireException {
         return false;
     }
 
-    /**
-     * Returns whether the adapter can physically support flex speed mode.
-     *
-     * @return <code>true</code> if this port adapter can do flex speed,
-     * <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean canFlex() throws OneWireIOException, OneWireException {
-
+    @Override
+    public boolean canFlex() throws OneWireException {
         return true;
     }
 
-    /**
-     * Returns whether adapter can physically support 12 volt power mode.
-     *
-     * @return <code>true</code> if this port adapter can do Program voltage,
-     * <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean canProgram() throws OneWireIOException, OneWireException {
+    @Override
+    public boolean canProgram() throws OneWireException {
 
         try {
 
@@ -680,67 +473,24 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Returns whether the adapter can physically support strong 5 volt power
-     * mode.
-     *
-     * @return <code>true</code> if this port adapter can do strong 5 volt
-     * mode, <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean canDeliverPower() throws OneWireIOException, OneWireException {
-
+    @Override
+    public boolean canDeliverPower() throws OneWireException {
         return true;
     }
 
-    /**
-     * Returns whether the adapter can physically support "smart" strong 5 volt
-     * power mode. "smart" power delivery is the ability to deliver power until
-     * it is no longer needed. The current drop it detected and power delivery
-     * is stopped.
-     *
-     * @return <code>true</code> if this port adapter can do "smart" strong 5
-     * volt mode, <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean canDeliverSmartPower() throws OneWireIOException, OneWireException {
-
+    @Override
+    public boolean canDeliverSmartPower() throws OneWireException {
         // regardless of adapter, the class does not support it
         return false;
     }
 
-    /**
-     * Returns whether adapter can physically support 0 volt 'break' mode.
-     *
-     * @return <code>true</code> if this port adapter can do break,
-     * <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error with the
-     * adapter
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean canBreak() throws OneWireIOException, OneWireException {
-
+    @Override
+    public boolean canBreak() throws OneWireException {
         return true;
     }
 
-    // --------
-    // -------- Finding iButtons
-    // --------
-
-    /**
-     * Returns <code>true</code> if the first iButton or 1-Wire device is
-     * found on the 1-Wire Network. If no devices are found, then
-     * <code>false</code> will be returned.
-     *
-     * @return <code>true</code> if an iButton or 1-Wire device is found.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean findFirstDevice() throws OneWireIOException, OneWireException {
+    @Override
+    public boolean findFirstDevice() throws OneWireException {
 
         // reset the current search
         owState.searchLastDiscrepancy = 0;
@@ -751,19 +501,10 @@ public class USerialAdapter extends DSPortAdapter {
         return findNextDevice();
     }
 
-    /**
-     * Returns <code>true</code> if the next iButton or 1-Wire device is
-     * found. The previous 1-Wire device found is used as a starting point in
-     * the search. If no more devices are found then <code>false</code> will
-     * be returned.
-     *
-     * @return <code>true</code> if an iButton or 1-Wire device is found.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean findNextDevice() throws OneWireIOException, OneWireException {
+    @Override
+    public boolean findNextDevice() throws OneWireException {
 
-        boolean search_result;
+        boolean searchResult;
 
         try {
 
@@ -780,8 +521,9 @@ public class USerialAdapter extends DSPortAdapter {
             }
 
             // check for 'first' and only 1 target
-            if ((owState.searchLastDiscrepancy == 0) && (owState.searchLastDevice == false)
-                    && (owState.searchIncludeFamilies.length == 1)) {
+            if (owState.searchLastDiscrepancy == 0
+                    && !owState.searchLastDevice
+                    && owState.searchIncludeFamilies.length == 1) {
 
                 // set the search to find the 1 target first
                 owState.searchLastDiscrepancy = 64;
@@ -804,9 +546,9 @@ public class USerialAdapter extends DSPortAdapter {
             do {
 
                 // perform a search and keep the result
-                search_result = search(owState);
+                searchResult = search(owState);
 
-                if (search_result) {
+                if (searchResult) {
 
                     // check if not in exclude list
                     boolean is_excluded = false;
@@ -851,9 +593,9 @@ public class USerialAdapter extends DSPortAdapter {
                     owState.searchLastDiscrepancy = 0;
                     owState.searchFamilyLastDiscrepancy = 0;
                     owState.searchLastDevice = false;
-                    search_result = false;
+                    searchResult = false;
                 }
-            } while (search_result);
+            } while (searchResult);
 
             // device not found
             return false;
@@ -864,44 +606,17 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Copies the 'current' iButton address being used by the adapter into the
-     * array. This address is the last iButton or 1-Wire device found in a
-     * search (findNextDevice()...).
-     *
-     * @param address An array to be filled with the current iButton address.
-     * @see Address
-     */
+    @Override
     public void getAddress(byte[] address) {
-
         System.arraycopy(owState.ID, 0, address, 0, 8);
     }
 
-    /**
-     * Copies the provided 1-Wire device address into the 'current' array. This
-     * address will then be used in the getDeviceContainer() method. Permits the
-     * adapter instance to create containers of devices it did not find in a
-     * search.
-     *
-     * @param address An array to be copied into the current iButton address.
-     */
     public void setAddress(byte[] address) {
-
         System.arraycopy(address, 0, owState.ID, 0, 8);
     }
 
-    /**
-     * Verifies that the iButton or 1-Wire device specified is present on the
-     * 1-Wire Network. This does not affect the 'current' device state
-     * information used in searches (findNextDevice...).
-     *
-     * @param address device address to verify is present
-     * @return <code>true</code> if device is present else <code>false</code>.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     * @see Address
-     */
-    public boolean isPresent(byte[] address) throws OneWireIOException, OneWireException {
+    @Override
+    public boolean isPresent(byte[] address) throws OneWireException {
 
         try {
 
@@ -912,31 +627,31 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // if in overdrive, then use the block method in super
-                if (owState.oneWireSpeed == SPEED_OVERDRIVE)
+                if (owState.oneWireSpeed == Speed.OVERDRIVE)
                     return blockIsPresent(address, false);
 
                 // create a private OneWireState
-                OneWireState onewire_state = new OneWireState();
+                OneWireState onewireState = new OneWireState();
 
                 // set the ID to the ID of the iButton passes to this method
-                System.arraycopy(address, 0, onewire_state.ID, 0, 8);
+                System.arraycopy(address, 0, onewireState.ID, 0, 8);
 
                 // set the state to find the specified device
-                onewire_state.searchLastDiscrepancy = 64;
-                onewire_state.searchFamilyLastDiscrepancy = 0;
-                onewire_state.searchLastDevice = false;
-                onewire_state.searchOnlyAlarmingButtons = false;
+                onewireState.searchLastDiscrepancy = 64;
+                onewireState.searchFamilyLastDiscrepancy = 0;
+                onewireState.searchLastDevice = false;
+                onewireState.searchOnlyAlarmingButtons = false;
 
                 // perform a search
-                if (search(onewire_state)) {
+                if (search(onewireState)) {
 
                     // compare the found device with the desired device
                     for (int i = 0; i < 8; i++)
-                        if (address[i] != onewire_state.ID[i])
+                        if (address[i] != onewireState.ID[i])
                             return false;
 
                     // must be the correct device
@@ -954,19 +669,8 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Verifies that the iButton or 1-Wire device specified is present on the
-     * 1-Wire Network and in an alarm state. This does not affect the 'current'
-     * device state information used in searches (findNextDevice...).
-     *
-     * @param address device address to verify is present and alarming
-     * @return <code>true</code> if device is present and alarming else
-     * <code>false</code>.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     * @see Address
-     */
-    public boolean isAlarming(byte[] address) throws OneWireIOException, OneWireException {
+    @Override
+    public boolean isAlarming(byte[] address) throws OneWireException {
 
         try {
 
@@ -977,31 +681,31 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // if in overdrive, then use the block method in super
-                if (owState.oneWireSpeed == SPEED_OVERDRIVE)
+                if (owState.oneWireSpeed == Speed.OVERDRIVE)
                     return blockIsPresent(address, true);
 
                 // create a private OneWireState
-                OneWireState onewire_state = new OneWireState();
+                OneWireState onewireState = new OneWireState();
 
                 // set the ID to the ID of the iButton passes to this method
-                System.arraycopy(address, 0, onewire_state.ID, 0, 8);
+                System.arraycopy(address, 0, onewireState.ID, 0, 8);
 
                 // set the state to find the specified device (alarming)
-                onewire_state.searchLastDiscrepancy = 64;
-                onewire_state.searchFamilyLastDiscrepancy = 0;
-                onewire_state.searchLastDevice = false;
-                onewire_state.searchOnlyAlarmingButtons = true;
+                onewireState.searchLastDiscrepancy = 64;
+                onewireState.searchFamilyLastDiscrepancy = 0;
+                onewireState.searchLastDevice = false;
+                onewireState.searchOnlyAlarmingButtons = true;
 
                 // perform a search
-                if (search(onewire_state)) {
+                if (search(onewireState)) {
 
                     // compare the found device with the desired device
                     for (int i = 0; i < 8; i++)
-                        if (address[i] != onewire_state.ID[i])
+                        if (address[i] != onewireState.ID[i])
                             return false;
 
                     // must be the correct device
@@ -1019,60 +723,26 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    // --------
-    // -------- Finding iButton options
-    // --------
-
-    /**
-     * Set the 1-Wire Network search to find only iButtons and 1-Wire devices
-     * that are in an 'Alarm' state that signals a need for attention. Not all
-     * iButton types have this feature. Some that do: DS1994, DS1920, DS2407.
-     * This selective searching can be canceled with the 'setSearchAllDevices()'
-     * method.
-     *
-     * @see #setNoResetSearch
-     */
+    @Override
     public void setSearchOnlyAlarmingDevices() {
 
         owState.searchOnlyAlarmingButtons = true;
     }
 
-    /**
-     * Set the 1-Wire Network search to not perform a 1-Wire reset before a
-     * search. This feature is chiefly used with the DS2409 1-Wire coupler. The
-     * normal reset before each search can be restored with the
-     * 'setSearchAllDevices()' method.
-     */
+    @Override
     public void setNoResetSearch() {
 
         owState.skipResetOnSearch = true;
     }
 
-    /**
-     * Set the 1-Wire Network search to find all iButtons and 1-Wire devices
-     * whether they are in an 'Alarm' state or not and restores the default
-     * setting of providing a 1-Wire reset command before each search. (see
-     * setNoResetSearch() method).
-     *
-     * @see #setNoResetSearch
-     */
+    @Override
     public void setSearchAllDevices() {
 
         owState.searchOnlyAlarmingButtons = false;
         owState.skipResetOnSearch = false;
     }
 
-    /**
-     * Removes any selectivity during a search for iButtons or 1-Wire devices by
-     * family type. The unique address for each iButton and 1-Wire device
-     * contains a family descriptor that indicates the capabilities of the
-     * device.
-     *
-     * @see #targetFamily
-     * @see #targetFamily(byte[])
-     * @see #excludeFamily
-     * @see #excludeFamily(byte[])
-     */
+    @Override
     public void targetAllFamilies() {
 
         // clear the include and exclude family search lists
@@ -1080,15 +750,7 @@ public class USerialAdapter extends DSPortAdapter {
         owState.searchExcludeFamilies = new byte[0];
     }
 
-    /**
-     * Takes an integer to selectively search for this desired family type. If
-     * this method is used, then no devices of other families will be found by
-     * getFirstButton() & getNextButton().
-     *
-     * @param familyID the code of the family type to target for searches
-     * @see Address
-     * @see #targetAllFamilies
-     */
+    @Override
     public void targetFamily(int familyID) {
 
         // replace include family array with 1 element array
@@ -1096,15 +758,7 @@ public class USerialAdapter extends DSPortAdapter {
         owState.searchIncludeFamilies[0] = (byte) familyID;
     }
 
-    /**
-     * Takes an array of bytes to use for selectively searching for acceptable
-     * family codes. If used, only devices with family codes in this array will
-     * be found by any of the search methods.
-     *
-     * @param familyID array of the family types to target for searches
-     * @see Address
-     * @see #targetAllFamilies
-     */
+    @Override
     public void targetFamily(byte familyID[]) {
 
         // replace include family array with new array
@@ -1113,15 +767,7 @@ public class USerialAdapter extends DSPortAdapter {
         System.arraycopy(familyID, 0, owState.searchIncludeFamilies, 0, familyID.length);
     }
 
-    /**
-     * Takes an integer family code to avoid when searching for iButtons. or
-     * 1-Wire devices. If this method is used, then no devices of this family
-     * will be found by any of the search methods.
-     *
-     * @param familyID the code of the family type NOT to target in searches
-     * @see Address
-     * @see #targetAllFamilies
-     */
+    @Override
     public void excludeFamily(int familyID) {
 
         // replace exclude family array with 1 element array
@@ -1129,15 +775,7 @@ public class USerialAdapter extends DSPortAdapter {
         owState.searchExcludeFamilies[0] = (byte) familyID;
     }
 
-    /**
-     * Takes an array of bytes containing family codes to avoid when finding
-     * iButtons or 1-Wire devices. If used, then no devices with family codes in
-     * this array will be found by any of the search methods.
-     *
-     * @param familyID array of family cods NOT to target for searches
-     * @see Address
-     * @see #targetAllFamilies
-     */
+    @Override
     public void excludeFamily(byte familyID[]) {
 
         // replace exclude family array with new array
@@ -1146,32 +784,12 @@ public class USerialAdapter extends DSPortAdapter {
         System.arraycopy(familyID, 0, owState.searchExcludeFamilies, 0, familyID.length);
     }
 
-    // --------
-    // -------- 1-Wire Network Semaphore methods
-
-    // --------
-
-    /**
-     * Gets exclusive use of the 1-Wire to communicate with an iButton or 1-Wire
-     * Device. This method should be used for critical sections of code where a
-     * sequence of commands must not be interrupted by communication of threads
-     * with other iButtons, and it is permissible to sustain a delay in the
-     * special case that another thread has already been granted exclusive
-     * access and this access has not yet been relinquished.
-     * <p>
-     *
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
+    @Override
     public void beginExclusive() throws OneWireException {
-
         serial.beginExclusive();
     }
 
-    /**
-     * Relinquishes exclusive control of the 1-Wire Network. This command
-     * dynamically marks the end of a critical section and should be used when
-     * exclusive control is no longer needed.
-     */
+    @Override
     public void endExclusive() {
 
         serial.endExclusive();
@@ -1198,22 +816,11 @@ public class USerialAdapter extends DSPortAdapter {
      * checks if we did our own 'beginExclusive' block and frees it.
      */
     private void endLocalExclusive() {
-
         serial.endExclusive();
     }
 
-    // --------
-    // -------- Primitive 1-Wire Network data methods
-    // --------
-
-    /**
-     * Sends a bit to the 1-Wire Network.
-     *
-     * @param bitValue the bit value to send to the 1-Wire Network.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public void putBit(boolean bitValue) throws OneWireIOException, OneWireException {
+    @Override
+    public void putBit(boolean bitValue) throws OneWireException {
 
         try {
 
@@ -1224,7 +831,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -1242,7 +849,7 @@ public class USerialAdapter extends DSPortAdapter {
                     owState.levelChangeOnNextBit = false;
 
                     // set new level state
-                    owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                    owState.oneWireLevel = Level.POWER_DELIVERY;
                 }
 
                 // send and receive
@@ -1262,14 +869,8 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Gets a bit from the 1-Wire Network.
-     *
-     * @return the bit value recieved from the the 1-Wire Network.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean getBit() throws OneWireIOException, OneWireException {
+    @Override
+    public boolean getBit() throws OneWireException {
 
         try {
 
@@ -1280,7 +881,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -1298,7 +899,7 @@ public class USerialAdapter extends DSPortAdapter {
                     owState.levelChangeOnNextBit = false;
 
                     // set new level state
-                    owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                    owState.oneWireLevel = Level.POWER_DELIVERY;
                 }
 
                 // send and receive
@@ -1320,14 +921,8 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Sends a byte to the 1-Wire Network.
-     *
-     * @param byteValue the byte value to send to the 1-Wire Network.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public void putByte(int byteValue) throws OneWireIOException, OneWireException {
+    @Override
+    public void putByte(int byteValue) throws OneWireException {
 
         byte[] temp_block = new byte[1];
 
@@ -1340,14 +935,8 @@ public class USerialAdapter extends DSPortAdapter {
             throw new OneWireIOException("Error short on 1-Wire during putByte");
     }
 
-    /**
-     * Gets a byte from the 1-Wire Network.
-     *
-     * @return the byte value received from the the 1-Wire Network.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public int getByte() throws OneWireIOException, OneWireException {
+    @Override
+    public int getByte() throws OneWireException {
 
         byte[] temp_block = new byte[1];
 
@@ -1361,15 +950,8 @@ public class USerialAdapter extends DSPortAdapter {
             throw new OneWireIOException("Error communicating with adapter");
     }
 
-    /**
-     * Get a block of data from the 1-Wire Network.
-     *
-     * @param len length of data bytes to receive
-     * @return the data received from the 1-Wire Network.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public byte[] getBlock(int len) throws OneWireIOException, OneWireException {
+    @Override
+    public byte[] getBlock(int len) throws OneWireException {
 
         byte[] temp_block = new byte[len];
 
@@ -1382,31 +964,14 @@ public class USerialAdapter extends DSPortAdapter {
         return temp_block;
     }
 
-    /**
-     * Get a block of data from the 1-Wire Network and write it into the
-     * provided array.
-     *
-     * @param arr array in which to write the received bytes
-     * @param len length of data bytes to receive
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public void getBlock(byte[] arr, int len) throws OneWireIOException, OneWireException {
+    @Override
+    public void getBlock(byte[] arr, int len) throws OneWireException {
 
         getBlock(arr, 0, len);
     }
 
-    /**
-     * Get a block of data from the 1-Wire Network and write it into the
-     * provided array.
-     *
-     * @param arr array in which to write the received bytes
-     * @param off offset into the array to start
-     * @param len length of data bytes to receive
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public void getBlock(byte[] arr, int off, int len) throws OneWireIOException, OneWireException {
+    @Override
+    public void getBlock(byte[] arr, int off, int len) throws OneWireException {
 
         // set block to read 0xFF
         for (int i = off; i < len; i++)
@@ -1415,21 +980,8 @@ public class USerialAdapter extends DSPortAdapter {
         dataBlock(arr, off, len);
     }
 
-    /**
-     * Sends a block of data and returns the data received in the same array.
-     * This method is used when sending a block that contains reads and writes.
-     * The 'read' portions of the data block need to be pre-loaded with 0xFF's.
-     * It starts sending data from the index at offset 'off' for length 'len'.
-     *
-     * @param dataBlock array of data to transfer to and from the 1-Wire
-     * Network.
-     * @param off offset into the array of data to start
-     * @param len length of data to send / receive starting at 'off'
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    @SuppressWarnings("static-access")
-    public void dataBlock(byte dataBlock[], int off, int len) throws OneWireIOException, OneWireException {
+    @Override
+    public void dataBlock(byte[] dataBlock, int off, int len) throws OneWireException {
 
         int data_offset;
         char[] ret_data;
@@ -1443,7 +995,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // set the correct baud rate to stream this operation
@@ -1464,7 +1016,7 @@ public class USerialAdapter extends DSPortAdapter {
                     ret_data = uTransaction(uBuild);
 
                     // set new level state
-                    owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                    owState.oneWireLevel = Level.POWER_DELIVERY;
 
                     // extract the result byte
                     dataBlock[off] = uBuild.interpretPrimedByte(ret_data, data_offset);
@@ -1488,25 +1040,8 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Sends a Reset to the 1-Wire Network.
-     *
-     * @return the result of the reset. Potential results are:
-     * <ul>
-     * <li> 0 (RESET_NOPRESENCE) no devices present on the 1-Wire Network.
-     * <li> 1 (RESET_PRESENCE) normal presence pulse detected on the 1-Wire
-     * Network indicating there is a device present.
-     * <li> 2 (RESET_ALARM) alarming presence pulse detected on the 1-Wire
-     * Network indicating there is a device present and it is in the alarm
-     * condition. This is only provided by the DS1994/DS2404 devices.
-     * <li> 3 (RESET_SHORT) inticates 1-Wire appears shorted. This can be
-     * transient conditions in a 1-Wire Network. Not all adapter types can
-     * detect this condition.
-     * </ul>
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public int reset() throws OneWireIOException, OneWireException {
+    @Override
+    public ResetResult reset() throws OneWireException {
 
         try {
 
@@ -1517,7 +1052,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != LEVEL_NORMAL)
+                if (owState.oneWireLevel != Level.NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -1547,84 +1082,37 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    // --------
-    // -------- OneWire power methods
-    // --------
+    @Override
+    public void setPowerDuration(PowerDeliveryDuration timeFactor) throws OneWireException {
 
-    /**
-     * Sets the duration to supply power to the 1-Wire Network. This method
-     * takes a time parameter that indicates the program pulse length when the
-     * method startPowerDelivery().
-     * <p>
-     * Note: to avoid getting an exception, use the canDeliverPower() and
-     * canDeliverSmartPower() method to check it's availability.
-     * <p>
-     *
-     * @param timeFactor
-     * <ul>
-     * <li> 0 (DELIVERY_HALF_SECOND) provide power for 1/2 second.
-     * <li> 1 (DELIVERY_ONE_SECOND) provide power for 1 second.
-     * <li> 2 (DELIVERY_TWO_SECONDS) provide power for 2 seconds.
-     * <li> 3 (DELIVERY_FOUR_SECONDS) provide power for 4 seconds.
-     * <li> 4 (DELIVERY_SMART_DONE) provide power until the the device is no
-     * longer drawing significant power.
-     * <li> 5 (DELIVERY_INFINITE) provide power until the setBusNormal() method
-     * is called.
-     * </ul>
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public void setPowerDuration(int timeFactor) throws OneWireIOException, OneWireException {
-
-        if (timeFactor != DELIVERY_INFINITE)
+        if (timeFactor != PowerDeliveryDuration.INFINITE)
+            // VT: FIXME: Replace with UnsupportedOperationException?
             throw new OneWireException("USerialAdapter-setPowerDuration, does not support this duration, infinite only");
         else
-            owState.levelTimeFactor = DELIVERY_INFINITE;
+            owState.levelTimeFactor = PowerDeliveryDuration.INFINITE;
     }
 
-    /**
-     * Sets the 1-Wire Network voltage to supply power to an iButton device.
-     * This method takes a time parameter that indicates whether the power
-     * delivery should be done immediately, or after certain conditions have
-     * been met.
-     * <p>
-     * Note: to avoid getting an exception, use the canDeliverPower() and
-     * canDeliverSmartPower() method to check it's availability.
-     * <p>
-     *
-     * @param changeCondition
-     * <ul>
-     * <li> 0 (CONDITION_NOW) operation should occur immediately.
-     * <li> 1 (CONDITION_AFTER_BIT) operation should be pending execution
-     * immediately after the next bit is sent.
-     * <li> 2 (CONDITION_AFTER_BYTE) operation should be pending execution
-     * immediately after next byte is sent.
-     * </ul>
-     * @return <code>true</code> if the voltage change was successful,
-     * <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public boolean startPowerDelivery(int changeCondition) throws OneWireIOException, OneWireException {
+    @Override
+    public boolean startPowerDelivery(PowerChangeCondition changeCondition) throws OneWireException {
 
         try {
 
             // acquire exclusive use of the port
             beginLocalExclusive();
 
-            if (changeCondition == CONDITION_AFTER_BIT) {
+            if (changeCondition == PowerChangeCondition.AFTER_NEXT_BIT) {
                 owState.levelChangeOnNextBit = true;
-                owState.primedLevelValue = LEVEL_POWER_DELIVERY;
-            } else if (changeCondition == CONDITION_AFTER_BYTE) {
+                owState.primedLevelValue = Level.POWER_DELIVERY;
+            } else if (changeCondition == PowerChangeCondition.AFTER_NEXT_BYTE) {
                 owState.levelChangeOnNextByte = true;
-                owState.primedLevelValue = LEVEL_POWER_DELIVERY;
-            } else if (changeCondition == CONDITION_NOW) {
+                owState.primedLevelValue = Level.POWER_DELIVERY;
+            } else if (changeCondition == PowerChangeCondition.NOW) {
 
                 // make sure adapter is present
                 if (uAdapterPresent()) {
 
                     // check for pending power conditions
-                    if (owState.oneWireLevel != LEVEL_NORMAL)
+                    if (owState.oneWireLevel != Level.NORMAL)
                         setPowerNormal();
 
                     // flush out the com buffer
@@ -1645,7 +1133,7 @@ public class USerialAdapter extends DSPortAdapter {
 
                     // check the result
                     if (result_array.length == (set_SPUD_offset + 1)) {
-                        owState.oneWireLevel = LEVEL_POWER_DELIVERY;
+                        owState.oneWireLevel = Level.POWER_DELIVERY;
 
                         return true;
                     }
@@ -1664,61 +1152,24 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Sets the duration for providing a program pulse on the 1-Wire Network.
-     * This method takes a time parameter that indicates the program pulse
-     * length when the method startProgramPulse().
-     * <p>
-     * Note: to avoid getting an exception, use the canDeliverPower() method to
-     * check it's availability.
-     * <p>
-     *
-     * @param timeFactor
-     * <ul>
-     * <li> 6 (DELIVERY_EPROM) provide program pulse for 480 microseconds
-     * <li> 5 (DELIVERY_INFINITE) provide power until the setBusNormal() method
-     * is called.
-     * </ul>
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter
-     */
-    public void setProgramPulseDuration(int timeFactor) throws OneWireIOException, OneWireException {
+    @Override
+    public void setProgramPulseDuration(PowerDeliveryDuration timeFactor) throws OneWireException {
 
-        if (timeFactor != DELIVERY_EPROM)
+        if (timeFactor != PowerDeliveryDuration.EPROM) {
+            // VT: FIXME: Replace with UnsupportedOperationException?
             throw new OneWireException("Only support EPROM length program pulse duration");
+        }
     }
 
-    /**
-     * Sets the 1-Wire Network voltage to eprom programming level. This method
-     * takes a time parameter that indicates whether the power delivery should
-     * be done immediately, or after certain conditions have been met.
-     * <p>
-     * Note: to avoid getting an exception, use the canProgram() method to check
-     * it's availability.
-     * <p>
-     *
-     * @param changeCondition
-     * <ul>
-     * <li> 0 (CONDITION_NOW) operation should occur immediately.
-     * <li> 1 (CONDITION_AFTER_BIT) operation should be pending execution
-     * immediately after the next bit is sent.
-     * <li> 2 (CONDITION_AFTER_BYTE) operation should be pending execution
-     * immediately after next byte is sent.
-     * </ul>
-     * @return <code>true</code> if the voltage change was successful,
-     * <code>false</code> otherwise.
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter or the
-     * adapter does not support this operation
-     */
-    public boolean startProgramPulse(int changeCondition) throws OneWireIOException, OneWireException {
+    @Override
+    public boolean startProgramPulse(PowerChangeCondition changeCondition) throws OneWireException {
 
         // check if adapter supports program
         if (!uState.programVoltageAvailable)
             throw new OneWireException("USerialAdapter: startProgramPulse, program voltage not available");
 
         // check if correct change condition
-        if (changeCondition != CONDITION_NOW)
+        if (changeCondition != PowerChangeCondition.NOW)
             throw new OneWireException("USerialAdapter: startProgramPulse, CONDITION_NOW only currently supported");
 
         try {
@@ -1749,16 +1200,8 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Sets the 1-Wire Network voltage to 0 volts. This method is used rob all
-     * 1-Wire Network devices of parasite power delivery to force them into a
-     * hard reset.
-     *
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter or the
-     * adapter does not support this operation
-     */
-    public void startBreak() throws OneWireIOException, OneWireException {
+    @Override
+    public void startBreak() throws OneWireException {
 
         try {
 
@@ -1773,7 +1216,7 @@ public class USerialAdapter extends DSPortAdapter {
             sleep(200);
 
             // set the level state
-            owState.oneWireLevel = LEVEL_BREAK;
+            owState.oneWireLevel = Level.BREAK;
         } finally {
 
             // release local exclusive use of port
@@ -1781,25 +1224,15 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * Sets the 1-Wire Network voltage to normal level. This method is used to
-     * disable 1-Wire conditions created by startPowerDelivery and
-     * startProgramPulse. This method will automatically be called if a
-     * communication method is called while an outstanding power command is
-     * taking place.
-     *
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter or the
-     * adapter does not support this operation
-     */
-    public void setPowerNormal() throws OneWireIOException, OneWireException {
+    @Override
+    public void setPowerNormal() throws OneWireException {
 
         try {
 
             // acquire exclusive use of the port
             beginLocalExclusive();
 
-            if (owState.oneWireLevel == LEVEL_POWER_DELIVERY) {
+            if (owState.oneWireLevel == Level.POWER_DELIVERY) {
 
                 // make sure adapter is present
                 if (uAdapterPresent()) {
@@ -1830,7 +1263,7 @@ public class USerialAdapter extends DSPortAdapter {
 
                     // check the result
                     if (result_array.length == (pulse_response_offset + 1)) {
-                        owState.oneWireLevel = LEVEL_NORMAL;
+                        owState.oneWireLevel = Level.NORMAL;
 
                         // \\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                         // shughes - 8-28-2003
@@ -1844,7 +1277,7 @@ public class USerialAdapter extends DSPortAdapter {
                     } else
                         throw new OneWireIOException("Did not get a response back from stop power delivery");
                 }
-            } else if (owState.oneWireLevel == LEVEL_BREAK) {
+            } else if (owState.oneWireLevel == Level.BREAK) {
 
                 // restore power
                 serial.setDTR(true);
@@ -1854,7 +1287,7 @@ public class USerialAdapter extends DSPortAdapter {
                 sleep(300);
 
                 // set the level state
-                owState.oneWireLevel = LEVEL_NORMAL;
+                owState.oneWireLevel = Level.NORMAL;
 
                 // set the DS2480 to the correct mode and verify
                 adapterPresent = false;
@@ -1871,30 +1304,8 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    // --------
-    // -------- OneWire bus speed methods
-    // --------
-
-    /**
-     * This method takes an int representing the new speed of data transfer on
-     * the 1-Wire Network.
-     * <p>
-     *
-     * @param speed
-     * <ul>
-     * <li> 0 (SPEED_REGULAR) set to normal communciation speed
-     * <li> 1 (SPEED_FLEX) set to flexible communciation speed used for long
-     * lines
-     * <li> 2 (SPEED_OVERDRIVE) set to normal communciation speed to overdrive
-     * <li> 3 (SPEED_HYPERDRIVE) set to normal communciation speed to hyperdrive
-     * <li> >3 future speeds
-     * </ul>
-     * @throws OneWireIOException on a 1-Wire communication error
-     * @throws OneWireException on a setup error with the 1-Wire adapter or the
-     * adapter does not support this operation
-     */
-    @SuppressWarnings("static-access")
-    public void setSpeed(int speed) throws OneWireIOException, OneWireException {
+    @Override
+    public void setSpeed(Speed speed) throws OneWireException {
 
         try {
 
@@ -1902,14 +1313,14 @@ public class USerialAdapter extends DSPortAdapter {
             beginLocalExclusive();
 
             // check for valid speed
-            if ((speed == SPEED_REGULAR) || (speed == SPEED_OVERDRIVE) || (speed == SPEED_FLEX)) {
+            if ((speed == Speed.REGULAR) || (speed == Speed.OVERDRIVE) || (speed == Speed.FLEX)) {
 
                 // change 1-Wire speed
-                owState.oneWireSpeed = (char) speed;
+                owState.oneWireSpeed = speed;
 
                 // set adapter to communicate at this new speed (regular == flex
                 // for now)
-                if (speed == SPEED_OVERDRIVE)
+                if (speed == Speed.OVERDRIVE)
                     uState.uSpeedMode = uState.USPEED_OVERDRIVE;
                 else
                     uState.uSpeedMode = uState.USPEED_FLEX;
@@ -1922,29 +1333,10 @@ public class USerialAdapter extends DSPortAdapter {
         }
     }
 
-    /**
-     * This method returns the current data transfer speed through a port to a
-     * 1-Wire Network.
-     * <p>
-     *
-     * @return
-     * <ul>
-     * <li> 0 (SPEED_REGULAR) set to normal communication speed
-     * <li> 1 (SPEED_FLEX) set to flexible communication speed used for long
-     * lines
-     * <li> 2 (SPEED_OVERDRIVE) set to normal communication speed to overdrive
-     * <li> 3 (SPEED_HYPERDRIVE) set to normal communication speed to hyperdrive
-     * <li> >3 future speeds
-     * </ul>
-     */
-    public int getSpeed() {
-
+    @Override
+    public Speed getSpeed() {
         return owState.oneWireSpeed;
     }
-
-    // --------
-    // -------- Support methods
-    // --------
 
     /**
      * Peform a search using the oneWire state provided
@@ -1953,7 +1345,6 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    @SuppressWarnings("static-access")
     private boolean search(OneWireState mState) throws OneWireIOException, OneWireException {
 
         int reset_offset = 0;
@@ -1962,7 +1353,7 @@ public class USerialAdapter extends DSPortAdapter {
         if (uAdapterPresent()) {
 
             // check for pending power conditions
-            if (owState.oneWireLevel != LEVEL_NORMAL)
+            if (owState.oneWireLevel != Level.NORMAL)
                 setPowerNormal();
 
             // set the correct baud rate to stream this operation
@@ -2005,7 +1396,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @return true if device participated and was present in the strongAccess
      * search
      */
-    private boolean blockIsPresent(byte[] address, boolean alarmOnly) throws OneWireIOException, OneWireException {
+    private boolean blockIsPresent(byte[] address, boolean alarmOnly) throws OneWireException {
 
         // 24 bytes
         byte[] send_packet = {
@@ -2058,14 +1449,9 @@ public class USerialAdapter extends DSPortAdapter {
         return (goodbits >= 8);
     }
 
-    // --------
-    // -------- U Adapter Methods
-    // --------
-
     /**
      * set the correct baud rate to stream this operation
      */
-    @SuppressWarnings("static-access")
     private void setStreamingSpeed(int operation) throws OneWireIOException {
 
         ThreadContext.push("setStreamingSpeed(" + operation + ")");
@@ -2073,14 +1459,14 @@ public class USerialAdapter extends DSPortAdapter {
         try {
 
             // get the desired baud rate for this operation
-            int baud = uBuild.getDesiredBaud(operation, owState.oneWireSpeed, maxBaud);
+            int baud = UPacketBuilder.getDesiredBaud(operation, owState.oneWireSpeed, maxBaud);
 
             // check if already at the correct speed
             if (baud == serial.getBaudRate()) {
                 return;
             }
 
-            logger.debug("Changing baud rate from " + serial.getBaudRate() + " to " + baud);
+            logger.debug("Changing baud rate from {} to {}", serial.getBaudRate(), baud);
 
             // convert this baud to 'u' baud
             char ubaud;
@@ -2088,17 +1474,17 @@ public class USerialAdapter extends DSPortAdapter {
             switch (baud) {
 
             case 115200:
-                ubaud = uState.BAUD_115200;
+                ubaud = UAdapterState.BAUD_115200;
                 break;
             case 57600:
-                ubaud = uState.BAUD_57600;
+                ubaud = UAdapterState.BAUD_57600;
                 break;
             case 19200:
-                ubaud = uState.BAUD_19200;
+                ubaud = UAdapterState.BAUD_19200;
                 break;
             case 9600:
             default:
-                ubaud = uState.BAUD_9600;
+                ubaud = UAdapterState.BAUD_9600;
                 break;
             }
 
@@ -2119,7 +1505,7 @@ public class USerialAdapter extends DSPortAdapter {
                 // send command, no response at this baud rate
                 serial.flush();
 
-                RawSendPacket pkt = (RawSendPacket) uBuild.getPackets().nextElement();
+                RawSendPacket pkt = uBuild.getPackets().iterator().next();
                 char[] temp_buf = new char[pkt.buffer.length()];
 
                 pkt.buffer.getChars(0, pkt.buffer.length(), temp_buf, 0);
@@ -2171,10 +1557,8 @@ public class USerialAdapter extends DSPortAdapter {
                         return;
                     }
                 }
-            } catch (IOException ex) {
-                logger.error("USerialAdapter-setStreamingSpeed: " + ex);
-            } catch (OneWireIOException ex) {
-                logger.error("USerialAdapter-setStreamingSpeed: ", ex);
+            } catch (IOException|OneWireIOException ex) {
+                logger.error("USerialAdapter-setStreamingSpeed", ex);
             }
 
             logger.error("Failed to change baud of DS2480");
@@ -2188,9 +1572,8 @@ public class USerialAdapter extends DSPortAdapter {
      * Verify that the DS2480 based adapter is present on the open port.
      *
      * @return 'true' if adapter present
-     * @throws OneWireException - if port not selected
      */
-    private synchronized boolean uAdapterPresent() throws OneWireException {
+    private synchronized boolean uAdapterPresent() {
 
         boolean rt = true;
 
@@ -2219,7 +1602,7 @@ public class USerialAdapter extends DSPortAdapter {
 
         adapterPresent = rt;
 
-        logger.debug("AdapterPresent result: " + rt);
+        logger.debug("AdapterPresent result: {}", rt);
 
         return rt;
     }
@@ -2228,7 +1611,6 @@ public class USerialAdapter extends DSPortAdapter {
      * Do a master reset on the DS2480. This reduces the baud rate to 9600 and
      * performs a break. A single timing byte is then sent.
      */
-    @SuppressWarnings("static-access")
     private synchronized void uMasterReset() {
 
         ThreadContext.push("uMasterReset");
@@ -2243,12 +1625,10 @@ public class USerialAdapter extends DSPortAdapter {
                 // set the baud rate
                 serial.setBaudRate(9600);
 
-                uState.ubaud = uState.BAUD_9600;
-
                 // put back to standard speed
-                owState.oneWireSpeed = SPEED_REGULAR;
-                uState.uSpeedMode = uState.USPEED_FLEX;
-                uState.ubaud = uState.BAUD_9600;
+                owState.oneWireSpeed = Speed.REGULAR;
+                uState.uSpeedMode = UAdapterState.USPEED_FLEX;
+                uState.ubaud = UAdapterState.BAUD_9600;
 
                 // send a break to reset DS2480
                 serial.sendBreak(10);
@@ -2270,7 +1650,6 @@ public class USerialAdapter extends DSPortAdapter {
      * Do a power reset on the DS2480. This reduces the baud rate to 9600 and
      * powers down the DS2480. A single timing byte is then sent.
      */
-    @SuppressWarnings("static-access")
     private synchronized void uPowerReset() {
 
         ThreadContext.push("uPowerReset");
@@ -2285,12 +1664,10 @@ public class USerialAdapter extends DSPortAdapter {
                 // set the baud rate
                 serial.setBaudRate(9600);
 
-                uState.ubaud = uState.BAUD_9600;
-
                 // put back to standard speed
-                owState.oneWireSpeed = SPEED_REGULAR;
-                uState.uSpeedMode = uState.USPEED_FLEX;
-                uState.ubaud = uState.BAUD_9600;
+                owState.oneWireSpeed = Speed.REGULAR;
+                uState.uSpeedMode = UAdapterState.USPEED_FLEX;
+                uState.ubaud = UAdapterState.BAUD_9600;
 
                 // power down DS2480
                 serial.setDTR(false);
@@ -2327,15 +1704,16 @@ public class USerialAdapter extends DSPortAdapter {
             // build a message to read the baud rate from the U brick
             uBuild.restart();
 
+            // VT: FIXME: Consider making uParameters a map
             uBuild.setParameter(UParameterSettings.PARAMETER_SLEW,
-                    uState.uParameters[owState.oneWireSpeed].pullDownSlewRate);
+                    uState.uParameters[owState.oneWireSpeed.code].pullDownSlewRate);
             uBuild.setParameter(UParameterSettings.PARAMETER_WRITE1LOW,
-                    uState.uParameters[owState.oneWireSpeed].write1LowTime);
+                    uState.uParameters[owState.oneWireSpeed.code].write1LowTime);
             uBuild.setParameter(UParameterSettings.PARAMETER_SAMPLEOFFSET,
-                    uState.uParameters[owState.oneWireSpeed].sampleOffsetTime);
+                    uState.uParameters[owState.oneWireSpeed.code].sampleOffsetTime);
             uBuild.setParameter(UParameterSettings.PARAMETER_5VPULSE, UParameterSettings.TIME5V_infinite);
-            int baud_offset = uBuild.getParameter(UParameterSettings.PARAMETER_BAUDRATE);
-            int bit_offset = uBuild.dataBit(true, false);
+            var baud_offset = uBuild.getParameter(UParameterSettings.PARAMETER_BAUDRATE);
+            var bit_offset = uBuild.dataBit(true, false);
 
             // send and receive
             char[] result_array = uTransaction(uBuild);
@@ -2347,9 +1725,7 @@ public class USerialAdapter extends DSPortAdapter {
                         && ((result_array[bit_offset] & 0x0C) == uState.uSpeedMode))
                     return true;
             }
-        } catch (IOException ex) {
-            logger.error("USerialAdapter-uVerify: ", ex);
-        } catch (OneWireIOException ex) {
+        } catch (IOException | OneWireIOException ex) {
             logger.error("USerialAdapter-uVerify: ", ex);
         }
 
@@ -2365,19 +1741,15 @@ public class USerialAdapter extends DSPortAdapter {
      */
     private char[] uTransaction(UPacketBuilder tempBuild) throws OneWireIOException {
 
-        //int offset;
-
         try {
             // clear the buffers
             serial.flush();
             inBuffer.setLength(0);
 
-            // loop to send all of the packets
-            for (Enumeration<RawSendPacket> packet_enum = tempBuild.getPackets(); packet_enum.hasMoreElements();) {
+            // loop to send all the packets
+            for (RawSendPacket pkt : tempBuild.getPackets()) {
 
                 // get the next packet
-                RawSendPacket pkt = packet_enum.nextElement();
-
                 // bogus packet to indicate need to wait for long DS2480 alarm
                 // reset
                 if ((pkt.buffer.length() == 0) && (pkt.returnLength == 0)) {
@@ -2392,9 +1764,6 @@ public class USerialAdapter extends DSPortAdapter {
 
                 pkt.buffer.getChars(0, pkt.buffer.length(), temp_buf, 0);
 
-                // remember number of bytes in input
-                //offset = inBuffer.length();
-
                 // send the packet
                 serial.write(temp_buf);
 
@@ -2406,9 +1775,6 @@ public class USerialAdapter extends DSPortAdapter {
             char[] ret_buffer = new char[inBuffer.length()];
 
             inBuffer.getChars(0, inBuffer.length(), ret_buffer, 0);
-
-            // check for extra bytes in inBuffer
-            //extraBytesReceived = (inBuffer.length() > tempBuild.totalReturnLength);
 
             // clear the inbuffer
             inBuffer.setLength(0);
@@ -2430,58 +1796,13 @@ public class USerialAdapter extends DSPortAdapter {
     private void sleep(long msTime) {
 
         // provided debug on standard out
-        logger.debug("sleep(" + msTime + ")");
+        logger.debug("sleep({})", msTime);
 
         try {
             Thread.sleep(msTime);
         } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
             logger.debug("sleep interrupted");
         }
-    }
-
-    // --------
-    // -------- Static
-    // --------
-
-    /**
-     * Static method called before instance is created. Attempt to create a hash
-     * of SerialService's and get the max baud rate.
-     */
-    static {
-
-        /*
-         * // create a SerialServices instance for each port available and put
-         * in hash Enumeration com_enum =
-         * CommPortIdentifier.getPortIdentifiers(); CommPortIdentifier port_id;
-         * SerialService serial_instance; // loop throught all of the serial
-         * port elements while (com_enum.hasMoreElements()) { // get the next
-         * com port port_id = ( CommPortIdentifier ) com_enum.nextElement(); //
-         * only collect the names of the serial ports if (port_id.getPortType() ==
-         * CommPortIdentifier.PORT_SERIAL) { serial_instance = new
-         * SerialService(port_id.getName());
-         * serailServiceHash.put(port_id.getName(), serial_instance); if
-         * (DEBUG) System.out.println("DEBUG: Serial port: " +
-         * port_id.getName()); } }
-         */
-
-        // check properties to see if max baud set manualy
-        maxBaud = 115200;
-
-        String max_baud_str = OneWireAccessProvider.getProperty("onewire.serial.maxbaud");
-
-        if (max_baud_str != null) {
-            try {
-                maxBaud = Integer.parseInt(max_baud_str);
-            } catch (NumberFormatException ex) {
-                maxBaud = 0;
-            }
-        }
-
-        // provided debug on standard out
-        LogManager.getLogger(USerialAdapter.class).debug("getMaxBaud from properties: " + maxBaud);
-
-        // if not valid then use fastest
-        if ((maxBaud != 115200) && (maxBaud != 57600) && (maxBaud != 19200) && (maxBaud != 9600))
-            maxBaud = 115200;
     }
 }

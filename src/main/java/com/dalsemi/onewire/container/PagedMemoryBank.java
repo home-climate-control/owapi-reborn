@@ -120,33 +120,13 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  *
  * @see com.dalsemi.onewire.container.MemoryBank
  * @see com.dalsemi.onewire.container.OTPMemoryBank
- * @see com.dalsemi.onewire.container.OneWireContainer04
- * @see com.dalsemi.onewire.container.OneWireContainer06
- * @see com.dalsemi.onewire.container.OneWireContainer08
  * @see com.dalsemi.onewire.container.OneWireContainer09
- * @see com.dalsemi.onewire.container.OneWireContainer0A
- * @see com.dalsemi.onewire.container.OneWireContainer0B
- * @see com.dalsemi.onewire.container.OneWireContainer0C
- * @see com.dalsemi.onewire.container.OneWireContainer0F
  * @see com.dalsemi.onewire.container.OneWireContainer12
- * @see com.dalsemi.onewire.container.OneWireContainer13
- * @see com.dalsemi.onewire.container.OneWireContainer14
- * @see com.dalsemi.onewire.container.OneWireContainer18
- * @see com.dalsemi.onewire.container.OneWireContainer1A
- * @see com.dalsemi.onewire.container.OneWireContainer1D
- * @see com.dalsemi.onewire.container.OneWireContainer20
- * @see com.dalsemi.onewire.container.OneWireContainer21
- * @see com.dalsemi.onewire.container.OneWireContainer23
  *
- * @version    0.01, 11 Dec 2000
  * @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface PagedMemoryBank extends MemoryBank {
-
-    //--------
-    //-------- Paged Memory Bank Feature methods
-    //--------
 
     /**
      * Gets the number of pages in this memory bank.
@@ -258,10 +238,6 @@ public interface PagedMemoryBank extends MemoryBank {
      * @see #hasExtraInfo() hasExtraInfo
      */
     String getExtraInfoDescription();
-
-    //--------
-    //-------- I/O methods
-    //--------
 
     /**
      * Reads a page in this memory bank with no

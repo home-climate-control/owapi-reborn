@@ -27,58 +27,47 @@
 
 package com.dalsemi.onewire.container;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.utils.CRC16;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Memory bank class for the EEPROM section of iButtons and 1-Wire devices on
  * the DS2408.
  *
- * @version 0.00, 28 Aug 2000
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 class MemoryBankEEPROMstatus implements MemoryBank {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
-
-    // --------
-    // -------- Static Final Variables
-    // --------
+    protected final Logger logger = LogManager.getLogger();
 
     /**
-     * Read Memory Command
+     * Commands.
+     *
+     * Note that this set is different from the one in {@link Command}, hence inner enum.
      */
-    public static final byte READ_MEMORY_COMMAND = (byte) 0xF0;
+    enum MBCommand {
+
+        READ_MEMORY(0xF0),
+        WRITE_SCRATCHPAD(0x0F),
+        READ_SCRATCHPAD(0xAA),
+        COPY_SCRATCHPAD(0x55);
+
+        public final byte code;
+
+        MBCommand(int code) {
+            this.code = (byte) code;
+        }
+    }
 
     /**
-     * Write Scratchpad Command
-     */
-    public static final byte WRITE_SCRATCHPAD_COMMAND = (byte) 0x0F;
-
-    /**
-     * Read Scratchpad Command
-     */
-    public static final byte READ_SCRATCHPAD_COMMAND = (byte) 0xAA;
-
-    /**
-     * Copy Scratchpad Command
-     */
-    public static final byte COPY_SCRATCHPAD_COMMAND = (byte) 0x55;
-
-    /**
-     * Channel acces write to change the property of the channel
+     * Channel access write to change the property of the channel
      */
     public static final byte CHANNEL_ACCESS_WRITE = (byte) 0x5A;
-
-    // --------
-    // -------- Variables
-    // --------
 
     /**
      * Reference to the OneWireContainer this bank resides on.
@@ -94,10 +83,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
      * Flag to indicate that speed needs to be set
      */
     protected boolean doSetSpeed;
-
-    // --------
-    // -------- Protected Variables for MemoryBank implementation
-    // --------
 
     /**
      * Size of memory bank in bytes
@@ -157,10 +142,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
      */
     protected boolean writeVerification;
 
-    // --------
-    // -------- Protected Variables for PagedMemoryBank implementation
-    // --------
-
     /**
      * Number of pages in memory bank
      */
@@ -180,10 +161,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
      * Flag if memory bank has page auto-CRC generation
      */
     protected boolean pageAutoCRC;
-
-    // --------
-    // -------- Constructor
-    // --------
 
     /**
      * Memory bank contstuctor. Requires reference to the OneWireContainer this
@@ -219,123 +196,55 @@ class MemoryBankEEPROMstatus implements MemoryBank {
         }
     }
 
-    // --------
-    // -------- MemoryBank query methods
-    // --------
-
-    /**
-     * Query to see get a string description of the current memory bank.
-     *
-     * @return String containing the memory bank description
-     */
     @Override
     public String getBankDescription() {
         return bankDescription;
     }
 
-    /**
-     * Query to see if the current memory bank is general purpose user memory.
-     * If it is NOT then it is Memory-Mapped and writing values to this memory
-     * will affect the behavior of the 1-Wire device.
-     *
-     * @return 'true' if current memory bank is general purpose
-     */
     @Override
     public boolean isGeneralPurposeMemory() {
         return generalPurposeMemory;
     }
 
-    /**
-     * Query to see if current memory bank is read/write.
-     *
-     * @return 'true' if current memory bank is read/write
-     */
     @Override
     public boolean isReadWrite() {
         return readWrite;
     }
 
-    /**
-     * Query to see if current memory bank is write write once such as with
-     * EPROM technology.
-     *
-     * @return 'true' if current memory bank can only be written once
-     */
     @Override
     public boolean isWriteOnce() {
         return writeOnce;
     }
 
-    /**
-     * Query to see if current memory bank is read only.
-     *
-     * @return 'true' if current memory bank can only be read
-     */
     @Override
     public boolean isReadOnly() {
         return readOnly;
     }
 
-    /**
-     * Query to see if current memory bank non-volatile. Memory is non-volatile
-     * if it retains its contents even when removed from the 1-Wire network.
-     *
-     * @return 'true' if current memory bank non volatile.
-     */
     @Override
     public boolean isNonVolatile() {
         return nonVolatile;
     }
 
-    /**
-     * Query to see if current memory bank pages need the adapter to have a
-     * 'ProgramPulse' in order to write to the memory.
-     *
-     * @return 'true' if writing to the current memory bank pages requires a
-     *         'ProgramPulse'.
-     */
     @Override
     public boolean needsProgramPulse() {
         return programPulse;
     }
 
-    /**
-     * Query to see if current memory bank pages need the adapter to have a
-     * 'PowerDelivery' feature in order to write to the memory.
-     *
-     * @return 'true' if writing to the current memory bank pages requires
-     *         'PowerDelivery'.
-     */
     @Override
     public boolean needsPowerDelivery() {
         return powerDelivery;
     }
 
-    /**
-     * Query to get the starting physical address of this bank. Physical banks
-     * are sometimes sub-divided into logical banks due to changes in
-     * attributes.
-     *
-     * @return physical starting address of this logical bank.
-     */
     @Override
     public int getStartPhysicalAddress() {
         return startPhysicalAddress;
     }
 
-    /**
-     * Query to get the memory bank size in bytes.
-     *
-     * @return memory bank size in bytes.
-     */
     @Override
     public int getSize() {
         return size;
     }
-
-    // --------
-    // -------- PagedMemoryBank query methods
-    // --------
 
     /**
      * Query to get the number of pages in current memory bank.
@@ -422,46 +331,11 @@ class MemoryBankEEPROMstatus implements MemoryBank {
         return null;
     }
 
-    /**
-     * Set the write verification for the 'write()' method.
-     *
-     * @param doReadVerf
-     *            true (default) verify write in 'write' false, don't verify
-     *            write (used on Write-Once bit manipulation)
-     */
     @Override
     public void setWriteVerification(boolean doReadVerf) {
         writeVerification = doReadVerf;
     }
 
-    // --------
-    // -------- MemoryBank I/O methods
-    // --------
-
-    /**
-     * Read memory in the current bank with no CRC checking (device or data).
-     * The resulting data from this API may or may not be what is on the 1-Wire
-     * device. It is recommends that the data contain some kind of checking
-     * (CRC) like in the readPagePacket() method or have the 1-Wire device
-     * provide the CRC as in readPageCRC(). readPageCRC() however is not
-     * supported on all memory types, see 'hasPageAutoCRC()'. If neither is an
-     * option then this method could be called more then once to at least verify
-     * that the same thing is read consistantly.
-     *
-     * @param startAddr
-     *            starting physical address
-     * @param readContinue
-     *            if 'true' then device read is continued without re-selecting.
-     *            This can only be used if the new read() continious where the
-     *            last one led off and it is inside a
-     *            'beginExclusive/endExclusive' block.
-     * @param readBuf
-     *            byte array to place read data into
-     * @param offset
-     *            offset into readBuf to place data
-     * @param len
-     *            length in bytes to read
-     */
     @Override
     public void read(int startAddr, boolean readContinue, byte[] readBuf,
             int offset, int len) throws OneWireException {
@@ -481,7 +355,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
             // select the device
             if (ib.adapter.select(ib.address)) {
-                buff[0] = READ_MEMORY_COMMAND;
+                buff[0] = MBCommand.READ_MEMORY.code;
 
                 // address 1
                 buff[1] = (byte) (addr & 0xFF);
@@ -502,27 +376,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
         }
     }
 
-    /**
-     * Write memory in the current bank. It is recommended that when writing
-     * data that some structure in the data is created to provide error free
-     * reading back with read(). Or the method 'writePagePacket()' could be used
-     * which automatically wraps the data in a length and CRC.
-     *
-     * When using on Write-Once devices care must be taken to write into into
-     * empty space. If write() is used to write over an unlocked page on a
-     * Write-Once device it will fail. If write verification is turned off with
-     * the method 'setWriteVerification(false)' then the result will be an 'AND'
-     * of the existing data and the new data.
-     *
-     * @param startAddr
-     *            starting address
-     * @param writeBuf
-     *            byte array containing data to write
-     * @param offset
-     *            offset into writeBuf to get data
-     * @param len
-     *            length in bytes to write
-     */
     @Override
     public void write(int startAddr, byte[] writeBuf, int offset, int len)
             throws OneWireException {
@@ -554,6 +407,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             buffer[0] = CHANNEL_ACCESS_WRITE;
             buffer[1] = writeBuf[offset];
             buffer[2] = (byte) ~writeBuf[offset];
+
             System.arraycopy(ffBlock, 0, buffer, 3, 2);
 
             ib.adapter.dataBlock(buffer, 0, 5);
@@ -575,8 +429,10 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             System.arraycopy(writeBuf, offset, buffer, 3, len);
 
             ib.adapter.dataBlock(buffer, 0, len + 3);
+
         } else if (((startPhysicalAddress + startAddr) > 127)
                 && ((startPhysicalAddress + startAddr + len) < 130)) {
+
             byte[] buffer = new byte[8];
             int addr = 128;
             byte[] buff = new byte[11];
@@ -585,7 +441,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
             ib.adapter.select(ib.address);
 
-            buff[0] = READ_MEMORY_COMMAND;
+            buff[0] = MBCommand.READ_MEMORY.code;
 
             // address 1
             buff[1] = (byte) (addr & 0xFF);
@@ -624,10 +480,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
         } else
             throw new OneWireIOException("Trying to write read-only memory.");
     }
-
-    // --------
-    // -------- checkSpeed methods
-    // --------
 
     /**
      * Check the device speed if has not been done before or if an error was
@@ -686,7 +538,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             int cnt = 0;
             // set data block up
             // start by sending the write scratchpad command
-            send_block[cnt++] = WRITE_SCRATCHPAD_COMMAND;
+            send_block[cnt++] = MBCommand.WRITE_SCRATCHPAD.code;
             // followed by the target address
             send_block[cnt++] = (byte) (addr & 0x00FF);
             send_block[cnt++] = (byte) (((addr & 0x00FFFF) >>> 8) & 0x00FF);
@@ -715,11 +567,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
     /**
      * Copy all 8 bytes of the Sratch Pad to a certain address in memory.
-     *
-     * @param addr
-     *            the address to copy the data to
-     * @param auth
-     *            byte[] containing write authorization
      */
     public synchronized void copyScratchpad(byte[] es_data)
             throws OneWireException {
@@ -737,14 +584,14 @@ class MemoryBankEEPROMstatus implements MemoryBank {
             send_block[1] = es_data[0];// TA1;
 
             // Copy command
-            send_block[0] = COPY_SCRATCHPAD_COMMAND;
+            send_block[0] = MBCommand.COPY_SCRATCHPAD.code;
 
             // send copy scratchpad command
             ib.adapter.dataBlock(send_block, 0, 3);
 
             // provide strong pull-up for copy
-            ib.adapter.setPowerDuration(DSPortAdapter.DELIVERY_INFINITE);
-            ib.adapter.startPowerDelivery(DSPortAdapter.CONDITION_AFTER_BYTE);
+            ib.adapter.setPowerDuration(DSPortAdapter.PowerDeliveryDuration.INFINITE);
+            ib.adapter.startPowerDelivery(DSPortAdapter.PowerChangeCondition.AFTER_NEXT_BYTE);
             ib.adapter.putByte(send_block[3]);
 
             // pause before checking result
@@ -770,17 +617,6 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
     /**
      * Read from the Scratch Pad, which is a max of 8 bytes.
-     *
-     * @param readBuf
-     *            byte array to place read data into length of array is always
-     *            pageLength.
-     * @param offset
-     *            offset into readBuf to pug data
-     * @param len
-     *            length in bytes to read
-     * @param extraInfo
-     *            byte array to put extra info read into (TA1, TA2, e/s byte)
-     *            Can be 'null' if extra info is not needed.
      */
     public boolean readScratchpad(byte[] readBuf, int offset, int len,
             byte[] es_data) throws OneWireException {
@@ -792,7 +628,7 @@ class MemoryBankEEPROMstatus implements MemoryBank {
 
         // build first block
         byte[] raw_buf = new byte[14];
-        raw_buf[0] = READ_SCRATCHPAD_COMMAND;
+        raw_buf[0] = MBCommand.READ_SCRATCHPAD.code;
         System.arraycopy(ffBlock, 0, raw_buf, 1, 13);
 
         // do data block for TA1, TA2, and E/S

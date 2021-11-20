@@ -56,7 +56,7 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
  *
  * <DL>
  * <DD> See the usage example in
- * {@link com.dalsemi.onewire.container.TemperatureContainer TemperatureContainer}
+ * {@link TemperatureContainer}
  * for temperature specific operations.
  * </DL>
  *
@@ -65,17 +65,12 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
  * <DD><A HREF="http://pdfserv.maxim-ic.com/arpdf/DS1822.pdf"> http://pdfserv.maxim-ic.com/arpdf/DS1822.pdf</A>
  * </DL>
  *
- * @see com.dalsemi.onewire.container.TemperatureContainer
+ * @see TemperatureContainer
  *
- * @version    1.10, 26 September 2001
  * @author DalSemi
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireContainer22 extends OneWireContainer28 {
-
-    //-------------------------------------------------------------------------
-    //-------- Static Final Variables
-    //-------------------------------------------------------------------------
 
     /**
      * Creates an empty <code>OneWireContainer22</code>.  Must call
@@ -155,41 +150,16 @@ public class OneWireContainer22 extends OneWireContainer28 {
         super(sourceAdapter, newAddress);
     }
 
-    //--------
-    //-------- Information methods
-    //--------
-
-    /**
-     * Retrieves the Dallas Semiconductor part number of this
-     * <code>OneWireContainer22</code> as a <code>String</code>.
-     * For example 'DS1822'.
-     *
-     * @return this <code>OneWireContainer22</code> name
-     */
     @Override
     public String getName() {
         return "DS1822";
     }
 
-    /**
-     * Retrieves the alternate Dallas Semiconductor part numbers or names.
-     * A 'family' of 1-Wire Network devices may have more than one part number
-     * depending on packaging.  There can also be nicknames such as
-     * 'Crypto iButton'.
-     *
-     * @return this <code>OneWireContainer22</code> alternate names
-     */
     @Override
     public String getAlternateNames() {
         return "";
     }
 
-    /**
-     * Retrieves a short description of the function of this
-     * <code>OneWireContainer22</code> type.
-     *
-     * @return <code>OneWireContainer22</code> functional description
-     */
     @Override
     public String getDescription() {
         return "Digital thermometer measures temperatures from "
@@ -197,24 +167,4 @@ public class OneWireContainer22 extends OneWireContainer28 {
         + "accuracy between -10C and 85C. Thermometer "
         + "resolution is programmable at 9, 10, 11, and 12 bits. ";
     }
-
-    //--------
-    //-------- Temperature Feature methods
-    //--------
-
-    //--------
-    //-------- Temperature I/O Methods
-    //--------
-
-    //--------
-    //-------- Temperature 'get' Methods
-    //--------
-
-    //--------
-    //-------- Temperature 'set' Methods
-    //--------
-
-    //--------
-    //-------- Custom Methods for this iButton Type
-    //--------
 }

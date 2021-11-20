@@ -29,16 +29,19 @@
 package com.dalsemi.onewire.container;
 
 // imports
+
 import com.dalsemi.onewire.OneWireException;
-import com.dalsemi.onewire.adapter.*;
-import com.dalsemi.onewire.utils.*;
+import com.dalsemi.onewire.adapter.DSPortAdapter;
+import com.dalsemi.onewire.adapter.OneWireIOException;
+import com.dalsemi.onewire.utils.CRC16;
+import com.dalsemi.onewire.utils.CRC8;
 
 /**
  * Memory bank class for the EPROM section of iButtons and 1-Wire devices.
  *
  *  @version    0.00, 28 Aug 2000
  *  @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 class MemoryBankEPROM implements OTPMemoryBank {
 
@@ -700,8 +703,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
                 raw_buf [3] = ( byte ) 0xFF;
 
                 // check if get a 1 byte crc in a normal read.
-                int num_bytes = (normalReadCRC) ? 4
-                        : 3;
+                int num_bytes = normalReadCRC ? 4 : 3;
 
                 // do the first block for command, address
                 ib.adapter.dataBlock(raw_buf, 0, num_bytes);
@@ -768,7 +770,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
         }
 
         // set the program pulse duration
-        ib.adapter.setProgramPulseDuration(DSPortAdapter.DELIVERY_EPROM);
+        ib.adapter.setProgramPulseDuration(DSPortAdapter.PowerDeliveryDuration.EPROM);
 
         // attempt to put device at max desired speed
         checkSpeed();
@@ -1123,9 +1125,6 @@ class MemoryBankEPROM implements OTPMemoryBank {
      *
      * @param  page      number of page to redirect
      * @param  newPage   new page number to redirect to
-     *
-     * @throws OneWireIOException
-     * @throws OneWireException
      */
     @Override
     public void redirectPage(int page, int newPage) throws OneWireException {
@@ -1356,7 +1355,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
             lastcrc = CRC8.compute(raw_buf, 0, len, 0);
         }
 
-        if ((extraInfoLength > 0) || (crcAfterAddress)) {
+        if (extraInfoLength > 0 || crcAfterAddress) {
 
             // check CRC
             if (numCRCBytes == 2) {
@@ -1496,7 +1495,7 @@ class MemoryBankEPROM implements OTPMemoryBank {
         }
 
         // send the pulse
-        ib.adapter.startProgramPulse(DSPortAdapter.CONDITION_NOW);
+        ib.adapter.startProgramPulse(DSPortAdapter.PowerChangeCondition.NOW);
 
         // return the result
         return ( byte ) ib.adapter.getByte();

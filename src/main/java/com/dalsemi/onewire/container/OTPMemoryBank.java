@@ -106,20 +106,12 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  * @see com.dalsemi.onewire.container.MemoryBank
  * @see com.dalsemi.onewire.container.PagedMemoryBank
  * @see com.dalsemi.onewire.container.OneWireContainer09
- * @see com.dalsemi.onewire.container.OneWireContainer0B
- * @see com.dalsemi.onewire.container.OneWireContainer0F
  * @see com.dalsemi.onewire.container.OneWireContainer12
- * @see com.dalsemi.onewire.container.OneWireContainer13
  *
- * @version    0.01, 11 Dec 2000
  * @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface OTPMemoryBank extends PagedMemoryBank {
-
-    //--------
-    //-------- OTP Memory Bank feature methods
-    //--------
 
     /**
      * Checks to see if this memory bank has pages that can be redirected
@@ -158,10 +150,6 @@ public interface OTPMemoryBank extends PagedMemoryBank {
      * @see #isRedirectPageLocked(int) isRedirectPageLocked
      */
     boolean canLockRedirectPage();
-
-    //--------
-    //-------- I/O methods
-    //--------
 
     /**
      * Locks the specifed page in this memory bank.  Not supported
