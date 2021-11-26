@@ -6,6 +6,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'net.ltgt.errorprone'
+apply plugin: 'jacoco'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -31,6 +32,21 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.20.2'
 
     errorprone 'com.google.errorprone:error_prone_core:2.9.0'
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 sonarqube {
