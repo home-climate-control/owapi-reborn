@@ -303,4 +303,60 @@ public class OWPath implements Comparable<OWPath> {
         return toString().hashCode();
     }
 
+    /**
+     * Check if this path is a parent of the given path (or, if the given path is a child of this path).
+     *
+     * Path A is considered to be a parent of path B if path A must be open in order to open path B, but
+     * the opposite is not true.
+     *
+     * Identical paths are not parents of each other.
+     *
+     * @param target Path to check.
+     * @return {@code true} if the {@code maybeChild} is a child path of the {@code parent}.
+     */
+    public boolean isParentOf(OWPath target) {
+
+        var targetAsList = target.asList();
+
+        if (targetAsList.size() <= elements.size()) {
+            return false;
+        }
+
+        for (var depth = 0; depth < elements.size(); depth++) {
+            if (!elements.get(depth).equals(targetAsList.get(depth))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the common parent for this branch, and the given branch.
+     *
+     * @return The path that is the common parent.
+     *
+     * @throws IllegalArgumentException If the other branch is {@code null}, or if these branches don't have a common parent.
+     * The only case when this will happen is when they are based on different adapters.
+     */
+    public OWPath getCommonParent(OWPath other) {
+
+        if (other == null) {
+            throw new IllegalArgumentException("other path is null");
+        }
+
+        if (adapter != other.adapter) {
+            throw new IllegalArgumentException(other + "is on a different adapter");
+        }
+
+        OWPath result = new OWPath(adapter);
+
+        for (var depth = 0; depth < elements.size() && depth < other.elements.size(); depth++) {
+            if (elements.get(depth).equals(other.elements.get(depth))) {
+                result.elements.add(elements.get(depth));
+            }
+        }
+
+        return result;
+    }
 }
