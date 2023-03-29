@@ -37,11 +37,12 @@ dependencies {
 
 java {
     withSourcesJar()
-    withJavadocJar()
+    // Original Javadoc from DalSemi is too broken to fix
+    //withJavadocJar()
 }
 
 artifacts {
-    archives javadocJar, sourcesJar
+    archives /* javadocJar, */ sourcesJar
 }
 
 jacoco {
