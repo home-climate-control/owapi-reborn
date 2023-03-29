@@ -4,6 +4,7 @@ plugins {
 }
 
 apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
 apply plugin: 'net.ltgt.errorprone'
 apply plugin: 'jacoco'
@@ -21,17 +22,26 @@ repositories {
 
 dependencies {
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.1'
+    api group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
+    api group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
     implementation 'org.rxtx:rxtx:2.1.7'
-    implementation 'org.junit.jupiter:junit-jupiter:5.7.2'
 
     testImplementation 'org.mockito:mockito-core:3.12.4'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
-    testImplementation 'org.assertj:assertj-core:3.20.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    testImplementation('org.assertj:assertj-core:3.21.0')
 
     errorprone 'com.google.errorprone:error_prone_core:2.14.0'
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
 }
 
 jacoco {
