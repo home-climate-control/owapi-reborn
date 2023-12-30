@@ -2,8 +2,10 @@ plugins {
     java
     `java-library`
     jacoco
-    id("net.ltgt.errorprone")
-    id("org.sonarqube")
+    alias(libs.plugins.errorprone)
+    alias(libs.plugins.sonarqube)
+    alias(libs.plugins.git.properties)
+    alias(libs.plugins.gradle.versions)
 }
 
 group = "com.homeclimatecontrol"
@@ -21,7 +23,7 @@ tasks.compileJava {
 }
 
 jacoco {
-    toolVersion = "0.8.11"
+    toolVersion = libs.versions.jacoco.get()
 }
 
 tasks.jacocoTestReport {
@@ -41,17 +43,16 @@ repositories {
 
 dependencies {
 
-    api("org.apache.logging.log4j:log4j-api:2.20.0")
-    api("org.apache.logging.log4j:log4j-core:2.20.0")
-    implementation("org.rxtx:rxtx:2.1.7")
+    api(libs.log4j.api)
+    api(libs.log4j.core)
+    implementation(libs.rxtx)
 
-    testImplementation("org.mockito:mockito-core:3.12.4")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
-    testImplementation("org.assertj:assertj-core:3.21.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
+    testImplementation(libs.mockito)
+    testImplementation(libs.junit5.api)
+    testImplementation(libs.assertj.core)
+    testRuntimeOnly(libs.junit5.engine)
 
-    errorprone("com.google.errorprone:error_prone_core:2.14.0")
+    errorprone(libs.errorprone)
 }
 
 java {
