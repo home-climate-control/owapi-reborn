@@ -36,6 +36,35 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 
+import static com.dalsemi.onewire.adapter.DSPortAdapter.Level.BREAK;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.Level.NORMAL;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.Level.POWER_DELIVERY;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.PowerChangeCondition.AFTER_NEXT_BIT;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.PowerChangeCondition.AFTER_NEXT_BYTE;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.PowerChangeCondition.NOW;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.PowerDeliveryDuration.EPROM;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.PowerDeliveryDuration.INFINITE;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.Speed.FLEX;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.Speed.OVERDRIVE;
+import static com.dalsemi.onewire.adapter.DSPortAdapter.Speed.REGULAR;
+import static com.dalsemi.onewire.adapter.UAdapterState.BAUD_9600;
+import static com.dalsemi.onewire.adapter.UAdapterState.USPEED_FLEX;
+import static com.dalsemi.onewire.adapter.UAdapterState.USPEED_OVERDRIVE;
+import static com.dalsemi.onewire.adapter.UPacketBuilder.FUNCTION_12VPULSE_NOW;
+import static com.dalsemi.onewire.adapter.UPacketBuilder.FUNCTION_5VPULSE_NOW;
+import static com.dalsemi.onewire.adapter.UPacketBuilder.FUNCTION_RESET;
+import static com.dalsemi.onewire.adapter.UPacketBuilder.FUNCTION_STOP_PULSE;
+import static com.dalsemi.onewire.adapter.UPacketBuilder.OPERATION_BYTE;
+import static com.dalsemi.onewire.adapter.UPacketBuilder.OPERATION_SEARCH;
+import static com.dalsemi.onewire.adapter.UParameterSettings.PARAMETER_12VPULSE;
+import static com.dalsemi.onewire.adapter.UParameterSettings.PARAMETER_5VPULSE;
+import static com.dalsemi.onewire.adapter.UParameterSettings.PARAMETER_BAUDRATE;
+import static com.dalsemi.onewire.adapter.UParameterSettings.PARAMETER_SAMPLEOFFSET;
+import static com.dalsemi.onewire.adapter.UParameterSettings.PARAMETER_SLEW;
+import static com.dalsemi.onewire.adapter.UParameterSettings.PARAMETER_WRITE1LOW;
+import static com.dalsemi.onewire.adapter.UParameterSettings.TIME12V_512us;
+import static com.dalsemi.onewire.adapter.UParameterSettings.TIME5V_infinite;
+
 /**
  * The USerialAdapter class implements the DSPortAdapter interface for a DS2480
  * based serial adapter such as the DS9097U-009 or DS9097U-S09.
@@ -627,11 +656,11 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != Level.NORMAL)
+                if (owState.oneWireLevel != NORMAL)
                     setPowerNormal();
 
                 // if in overdrive, then use the block method in super
-                if (owState.oneWireSpeed == Speed.OVERDRIVE)
+                if (owState.oneWireSpeed == OVERDRIVE)
                     return blockIsPresent(address, false);
 
                 // create a private OneWireState
@@ -681,11 +710,11 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != Level.NORMAL)
+                if (owState.oneWireLevel != NORMAL)
                     setPowerNormal();
 
                 // if in overdrive, then use the block method in super
-                if (owState.oneWireSpeed == Speed.OVERDRIVE)
+                if (owState.oneWireSpeed == OVERDRIVE)
                     return blockIsPresent(address, true);
 
                 // create a private OneWireState
@@ -743,7 +772,7 @@ public class USerialAdapter extends DSPortAdapter {
     }
 
     @Override
-    public void targetAllFamilies() {
+    public synchronized void targetAllFamilies() {
 
         // clear the include and exclude family search lists
         owState.searchIncludeFamilies = new byte[0];
@@ -751,7 +780,7 @@ public class USerialAdapter extends DSPortAdapter {
     }
 
     @Override
-    public void targetFamily(int familyID) {
+    public synchronized void targetFamily(int familyID) {
 
         // replace include family array with 1 element array
         owState.searchIncludeFamilies = new byte[1];
@@ -759,7 +788,7 @@ public class USerialAdapter extends DSPortAdapter {
     }
 
     @Override
-    public void targetFamily(byte familyID[]) {
+    public synchronized void targetFamily(byte familyID[]) {
 
         // replace include family array with new array
         owState.searchIncludeFamilies = new byte[familyID.length];
@@ -768,7 +797,7 @@ public class USerialAdapter extends DSPortAdapter {
     }
 
     @Override
-    public void excludeFamily(int familyID) {
+    public synchronized void excludeFamily(int familyID) {
 
         // replace exclude family array with 1 element array
         owState.searchExcludeFamilies = new byte[1];
@@ -776,7 +805,7 @@ public class USerialAdapter extends DSPortAdapter {
     }
 
     @Override
-    public void excludeFamily(byte familyID[]) {
+    public synchronized void excludeFamily(byte familyID[]) {
 
         // replace exclude family array with new array
         owState.searchExcludeFamilies = new byte[familyID.length];
@@ -831,7 +860,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != Level.NORMAL)
+                if (owState.oneWireLevel != NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -849,7 +878,7 @@ public class USerialAdapter extends DSPortAdapter {
                     owState.levelChangeOnNextBit = false;
 
                     // set new level state
-                    owState.oneWireLevel = Level.POWER_DELIVERY;
+                    owState.oneWireLevel = POWER_DELIVERY;
                 }
 
                 // send and receive
@@ -881,7 +910,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != Level.NORMAL)
+                if (owState.oneWireLevel != NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -899,7 +928,7 @@ public class USerialAdapter extends DSPortAdapter {
                     owState.levelChangeOnNextBit = false;
 
                     // set new level state
-                    owState.oneWireLevel = Level.POWER_DELIVERY;
+                    owState.oneWireLevel = POWER_DELIVERY;
                 }
 
                 // send and receive
@@ -995,11 +1024,11 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != Level.NORMAL)
+                if (owState.oneWireLevel != NORMAL)
                     setPowerNormal();
 
                 // set the correct baud rate to stream this operation
-                setStreamingSpeed(uBuild.OPERATION_BYTE);
+                setStreamingSpeed(OPERATION_BYTE);
 
                 // flush out the com buffer
                 serial.flush();
@@ -1016,7 +1045,7 @@ public class USerialAdapter extends DSPortAdapter {
                     ret_data = uTransaction(uBuild);
 
                     // set new level state
-                    owState.oneWireLevel = Level.POWER_DELIVERY;
+                    owState.oneWireLevel = POWER_DELIVERY;
 
                     // extract the result byte
                     dataBlock[off] = uBuild.interpretPrimedByte(ret_data, data_offset);
@@ -1052,7 +1081,7 @@ public class USerialAdapter extends DSPortAdapter {
             if (uAdapterPresent()) {
 
                 // check for pending power conditions
-                if (owState.oneWireLevel != Level.NORMAL)
+                if (owState.oneWireLevel != NORMAL)
                     setPowerNormal();
 
                 // flush out the com buffer
@@ -1085,11 +1114,11 @@ public class USerialAdapter extends DSPortAdapter {
     @Override
     public void setPowerDuration(PowerDeliveryDuration timeFactor) throws OneWireException {
 
-        if (timeFactor != PowerDeliveryDuration.INFINITE)
+        if (timeFactor != INFINITE)
             // VT: FIXME: Replace with UnsupportedOperationException?
             throw new OneWireException("USerialAdapter-setPowerDuration, does not support this duration, infinite only");
         else
-            owState.levelTimeFactor = PowerDeliveryDuration.INFINITE;
+            owState.levelTimeFactor = INFINITE;
     }
 
     @Override
@@ -1100,19 +1129,19 @@ public class USerialAdapter extends DSPortAdapter {
             // acquire exclusive use of the port
             beginLocalExclusive();
 
-            if (changeCondition == PowerChangeCondition.AFTER_NEXT_BIT) {
+            if (changeCondition == AFTER_NEXT_BIT) {
                 owState.levelChangeOnNextBit = true;
-                owState.primedLevelValue = Level.POWER_DELIVERY;
-            } else if (changeCondition == PowerChangeCondition.AFTER_NEXT_BYTE) {
+                owState.primedLevelValue = POWER_DELIVERY;
+            } else if (changeCondition == AFTER_NEXT_BYTE) {
                 owState.levelChangeOnNextByte = true;
-                owState.primedLevelValue = Level.POWER_DELIVERY;
-            } else if (changeCondition == PowerChangeCondition.NOW) {
+                owState.primedLevelValue = POWER_DELIVERY;
+            } else if (changeCondition == NOW) {
 
                 // make sure adapter is present
                 if (uAdapterPresent()) {
 
                     // check for pending power conditions
-                    if (owState.oneWireLevel != Level.NORMAL)
+                    if (owState.oneWireLevel != NORMAL)
                         setPowerNormal();
 
                     // flush out the com buffer
@@ -1122,18 +1151,18 @@ public class USerialAdapter extends DSPortAdapter {
                     uBuild.restart();
 
                     // set the SPUD time value
-                    int set_SPUD_offset = uBuild.setParameter(UParameterSettings.PARAMETER_5VPULSE,
-                            UParameterSettings.TIME5V_infinite);
+                    int set_SPUD_offset = uBuild.setParameter(PARAMETER_5VPULSE,
+                            TIME5V_infinite);
 
                     // add the command to begin the pulse
-                    uBuild.sendCommand(UPacketBuilder.FUNCTION_5VPULSE_NOW, false);
+                    uBuild.sendCommand(FUNCTION_5VPULSE_NOW, false);
 
                     // send and receive
                     char[] result_array = uTransaction(uBuild);
 
                     // check the result
                     if (result_array.length == (set_SPUD_offset + 1)) {
-                        owState.oneWireLevel = Level.POWER_DELIVERY;
+                        owState.oneWireLevel = POWER_DELIVERY;
 
                         return true;
                     }
@@ -1155,7 +1184,7 @@ public class USerialAdapter extends DSPortAdapter {
     @Override
     public void setProgramPulseDuration(PowerDeliveryDuration timeFactor) throws OneWireException {
 
-        if (timeFactor != PowerDeliveryDuration.EPROM) {
+        if (timeFactor != EPROM) {
             // VT: FIXME: Replace with UnsupportedOperationException?
             throw new OneWireException("Only support EPROM length program pulse duration");
         }
@@ -1169,7 +1198,7 @@ public class USerialAdapter extends DSPortAdapter {
             throw new OneWireException("USerialAdapter: startProgramPulse, program voltage not available");
 
         // check if correct change condition
-        if (changeCondition != PowerChangeCondition.NOW)
+        if (changeCondition != NOW)
             throw new OneWireException("USerialAdapter: startProgramPulse, CONDITION_NOW only currently supported");
 
         try {
@@ -1181,11 +1210,11 @@ public class USerialAdapter extends DSPortAdapter {
             uBuild.restart();
 
             // int set_SPUD_offset =
-            uBuild.setParameter(UParameterSettings.PARAMETER_12VPULSE, UParameterSettings.TIME12V_512us);
+            uBuild.setParameter(PARAMETER_12VPULSE, TIME12V_512us);
 
             // add the command to begin the pulse
             // int pulse_offset =
-            uBuild.sendCommand(UPacketBuilder.FUNCTION_12VPULSE_NOW, true);
+            uBuild.sendCommand(FUNCTION_12VPULSE_NOW, true);
 
             // send the command
             // char[] result_array =
@@ -1216,7 +1245,7 @@ public class USerialAdapter extends DSPortAdapter {
             sleep(200);
 
             // set the level state
-            owState.oneWireLevel = Level.BREAK;
+            owState.oneWireLevel = BREAK;
         } finally {
 
             // release local exclusive use of port
@@ -1232,7 +1261,7 @@ public class USerialAdapter extends DSPortAdapter {
             // acquire exclusive use of the port
             beginLocalExclusive();
 
-            if (owState.oneWireLevel == Level.POWER_DELIVERY) {
+            if (owState.oneWireLevel == POWER_DELIVERY) {
 
                 // make sure adapter is present
                 if (uAdapterPresent()) {
@@ -1249,21 +1278,21 @@ public class USerialAdapter extends DSPortAdapter {
                     // is left in a bad state. Removed bad fix: extra getBit()
                     // SEE BELOW!
                     // stop pulse command
-                    uBuild.sendCommand(UPacketBuilder.FUNCTION_STOP_PULSE, true);
+                    uBuild.sendCommand(FUNCTION_STOP_PULSE, true);
 
                     // start pulse with no prime
-                    uBuild.sendCommand(UPacketBuilder.FUNCTION_5VPULSE_NOW, false);
+                    uBuild.sendCommand(FUNCTION_5VPULSE_NOW, false);
                     // \\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
 
                     // add the command to stop the pulse
-                    int pulse_response_offset = uBuild.sendCommand(UPacketBuilder.FUNCTION_STOP_PULSE, true);
+                    int pulse_response_offset = uBuild.sendCommand(FUNCTION_STOP_PULSE, true);
 
                     // send and receive
                     char[] result_array = uTransaction(uBuild);
 
                     // check the result
                     if (result_array.length == (pulse_response_offset + 1)) {
-                        owState.oneWireLevel = Level.NORMAL;
+                        owState.oneWireLevel = NORMAL;
 
                         // \\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//
                         // shughes - 8-28-2003
@@ -1277,7 +1306,7 @@ public class USerialAdapter extends DSPortAdapter {
                     } else
                         throw new OneWireIOException("Did not get a response back from stop power delivery");
                 }
-            } else if (owState.oneWireLevel == Level.BREAK) {
+            } else if (owState.oneWireLevel == BREAK) {
 
                 // restore power
                 serial.setDTR(true);
@@ -1287,7 +1316,7 @@ public class USerialAdapter extends DSPortAdapter {
                 sleep(300);
 
                 // set the level state
-                owState.oneWireLevel = Level.NORMAL;
+                owState.oneWireLevel = NORMAL;
 
                 // set the DS2480 to the correct mode and verify
                 adapterPresent = false;
@@ -1313,17 +1342,17 @@ public class USerialAdapter extends DSPortAdapter {
             beginLocalExclusive();
 
             // check for valid speed
-            if ((speed == Speed.REGULAR) || (speed == Speed.OVERDRIVE) || (speed == Speed.FLEX)) {
+            if ((speed == REGULAR) || (speed == OVERDRIVE) || (speed == FLEX)) {
 
                 // change 1-Wire speed
                 owState.oneWireSpeed = speed;
 
                 // set adapter to communicate at this new speed (regular == flex
                 // for now)
-                if (speed == Speed.OVERDRIVE)
-                    uState.uSpeedMode = uState.USPEED_OVERDRIVE;
+                if (speed == OVERDRIVE)
+                    uState.uSpeedMode = USPEED_OVERDRIVE;
                 else
-                    uState.uSpeedMode = uState.USPEED_FLEX;
+                    uState.uSpeedMode = USPEED_FLEX;
             } else
                 throw new OneWireException("Requested speed is not supported by this adapter");
         } finally {
@@ -1345,7 +1374,7 @@ public class USerialAdapter extends DSPortAdapter {
      * @throws OneWireIOException on a 1-Wire communication error
      * @throws OneWireException on a setup error with the 1-Wire adapter
      */
-    private boolean search(OneWireState mState) throws OneWireIOException, OneWireException {
+    private boolean search(OneWireState mState) throws OneWireException {
 
         int reset_offset = 0;
 
@@ -1353,11 +1382,11 @@ public class USerialAdapter extends DSPortAdapter {
         if (uAdapterPresent()) {
 
             // check for pending power conditions
-            if (owState.oneWireLevel != Level.NORMAL)
+            if (owState.oneWireLevel != NORMAL)
                 setPowerNormal();
 
             // set the correct baud rate to stream this operation
-            setStreamingSpeed(uBuild.OPERATION_SEARCH);
+            setStreamingSpeed(OPERATION_SEARCH);
 
             // reset the packet
             uBuild.restart();
@@ -1484,7 +1513,7 @@ public class USerialAdapter extends DSPortAdapter {
                 break;
             case 9600:
             default:
-                ubaud = UAdapterState.BAUD_9600;
+                ubaud = BAUD_9600;
                 break;
             }
 
@@ -1499,7 +1528,7 @@ public class USerialAdapter extends DSPortAdapter {
             // build a message to read the baud rate from the U brick
             uBuild.restart();
 
-            int baud_offset = uBuild.setParameter(UParameterSettings.PARAMETER_BAUDRATE, ubaud);
+            int baud_offset = uBuild.setParameter(PARAMETER_BAUDRATE, ubaud);
 
             try {
                 // send command, no response at this baud rate
@@ -1530,7 +1559,7 @@ public class USerialAdapter extends DSPortAdapter {
             // verify adapter is at new baud rate
             uBuild.restart();
 
-            baud_offset = uBuild.getParameter(UParameterSettings.PARAMETER_BAUDRATE);
+            baud_offset = uBuild.getParameter(PARAMETER_BAUDRATE);
 
             // set the DS2480 communication speed for subsequent blocks
             uBuild.setSpeed();
@@ -1626,9 +1655,9 @@ public class USerialAdapter extends DSPortAdapter {
                 serial.setBaudRate(9600);
 
                 // put back to standard speed
-                owState.oneWireSpeed = Speed.REGULAR;
-                uState.uSpeedMode = UAdapterState.USPEED_FLEX;
-                uState.ubaud = UAdapterState.BAUD_9600;
+                owState.oneWireSpeed = REGULAR;
+                uState.uSpeedMode = USPEED_FLEX;
+                uState.ubaud = BAUD_9600;
 
                 // send a break to reset DS2480
                 serial.sendBreak(10);
@@ -1636,7 +1665,7 @@ public class USerialAdapter extends DSPortAdapter {
 
                 // send the timing byte
                 serial.flush();
-                serial.write(UPacketBuilder.FUNCTION_RESET);
+                serial.write(FUNCTION_RESET);
                 serial.flush();
             } catch (IOException ex) {
                 logger.error("Reset failed", ex);
@@ -1665,9 +1694,9 @@ public class USerialAdapter extends DSPortAdapter {
                 serial.setBaudRate(9600);
 
                 // put back to standard speed
-                owState.oneWireSpeed = Speed.REGULAR;
-                uState.uSpeedMode = UAdapterState.USPEED_FLEX;
-                uState.ubaud = UAdapterState.BAUD_9600;
+                owState.oneWireSpeed = REGULAR;
+                uState.uSpeedMode = USPEED_FLEX;
+                uState.ubaud = BAUD_9600;
 
                 // power down DS2480
                 serial.setDTR(false);
@@ -1679,7 +1708,7 @@ public class USerialAdapter extends DSPortAdapter {
 
                 // send the timing byte
                 serial.flush();
-                serial.write(UPacketBuilder.FUNCTION_RESET);
+                serial.write(FUNCTION_RESET);
                 serial.flush();
             } catch (IOException ex) {
                 logger.error("Reset failed", ex);
@@ -1705,14 +1734,14 @@ public class USerialAdapter extends DSPortAdapter {
             uBuild.restart();
 
             // VT: FIXME: Consider making uParameters a map
-            uBuild.setParameter(UParameterSettings.PARAMETER_SLEW,
+            uBuild.setParameter(PARAMETER_SLEW,
                     uState.uParameters[owState.oneWireSpeed.code].pullDownSlewRate);
-            uBuild.setParameter(UParameterSettings.PARAMETER_WRITE1LOW,
+            uBuild.setParameter(PARAMETER_WRITE1LOW,
                     uState.uParameters[owState.oneWireSpeed.code].write1LowTime);
-            uBuild.setParameter(UParameterSettings.PARAMETER_SAMPLEOFFSET,
+            uBuild.setParameter(PARAMETER_SAMPLEOFFSET,
                     uState.uParameters[owState.oneWireSpeed.code].sampleOffsetTime);
-            uBuild.setParameter(UParameterSettings.PARAMETER_5VPULSE, UParameterSettings.TIME5V_infinite);
-            var baud_offset = uBuild.getParameter(UParameterSettings.PARAMETER_BAUDRATE);
+            uBuild.setParameter(PARAMETER_5VPULSE, TIME5V_infinite);
+            var baud_offset = uBuild.getParameter(PARAMETER_BAUDRATE);
             var bit_offset = uBuild.dataBit(true, false);
 
             // send and receive
@@ -1795,14 +1824,13 @@ public class USerialAdapter extends DSPortAdapter {
      */
     private void sleep(long msTime) {
 
-        // provided debug on standard out
         logger.debug("sleep({})", msTime);
 
         try {
             Thread.sleep(msTime);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            logger.debug("sleep interrupted");
+            logger.debug("sleep interrupted", ex);
         }
     }
 }
