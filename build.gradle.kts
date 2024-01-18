@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.homeclimatecontrol"
-version = "2.0.1-SNAPSHOT"
+version = "2.0.1"
 
 apply(plugin = "java")
 apply(plugin = "java-library")
