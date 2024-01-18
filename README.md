@@ -2,7 +2,7 @@ owapi-reborn
 ==
 
 [![Gradle](https://github.com/home-climate-control/owapi-reborn/actions/workflows/gradle.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/gradle.yml)
-[![CodeQL](https://github.com/home-climate-control/owapi-reborn/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/home-climate-control/owapi-reborn/actions/workflows/codeql.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/codeql.yml)
 [![SonarCloud](https://github.com/home-climate-control/owapi-reborn/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/home-climate-control/owapi-reborn/actions/workflows/sonarcloud.yml)  
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=home-climate-control_owapi-reborn&metric=alert_status)](https://sonarcloud.io/dashboard?id=home-climate-control_owapi-reborn)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=home-climate-control_owapi-reborn&metric=bugs)](https://sonarcloud.io/dashboard?id=home-climate-control_owapi-reborn)
