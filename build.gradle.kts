@@ -4,7 +4,7 @@ plugins {
     jacoco
     alias(libs.plugins.errorprone)
     alias(libs.plugins.sonarqube)
-    alias(libs.plugins.git.properties)
+    alias(libs.plugins.git.properties) apply false
     alias(libs.plugins.gradle.versions)
 }
 
@@ -17,6 +17,12 @@ apply(plugin = "maven-publish")
 apply(plugin = "jacoco")
 apply(plugin = "net.ltgt.errorprone")
 
+if (project.parent == null) {
+    // If this project is included as a submodule, this plugin chokes on non-existing ./.git
+    // and produces very annoying unsuppressable output
+    // See https://github.com/n0mer/gradle-git-properties/issues/175
+    apply(plugin = libs.plugins.git.properties.get().pluginId)
+}
 
 tasks.compileJava {
     options.release = 11
