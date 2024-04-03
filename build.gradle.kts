@@ -18,10 +18,11 @@ apply(plugin = "jacoco")
 apply(plugin = "net.ltgt.errorprone")
 
 if (project.parent == null) {
-    // If this project is included as a submodule, this plugin chokes on non-existing ./.git
-    // and produces very annoying unsuppressable output
-    // See https://github.com/n0mer/gradle-git-properties/issues/175
-    apply(plugin = libs.plugins.git.properties.get().pluginId)
+    // If this project is included as a submodule or is in a Git worktree, this plugin chokes on non-existing ./.git
+    // and produces very long and annoying unsuppressable output.
+
+    // See https://github.com/n0mer/gradle-git-properties/issues/175 - will re-enable when fixed. Not worth it now.
+    // apply(plugin = libs.plugins.git.properties.get().pluginId)
 }
 
 tasks.compileJava {
