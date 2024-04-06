@@ -13,7 +13,7 @@ owapi-reborn
 
 ### Dallas Semiconductor 1-Wire API, on its own again
 
-This code is based on the original Dallas Semicondictor `owapi` library version - when it was released (about 20 years ago).
+This code is based on the original Dallas Semiconductor `owapi` library version - when it was released (about 20 years ago).
 At that point, Java dependency management mechanism was in its infancy, and the most sensible way to retain a potentially disappearing artifact
 was to integrate it in its entirety.
 
