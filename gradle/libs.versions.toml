@@ -1,11 +1,11 @@
 [versions]
 
 assertj = "3.24.2"
-errorprone = "2.24.0"
-jacoco = "0.8.11"
+errorprone = "2.38.0"
+jacoco = "0.8.13"
 junit5 = "5.10.1"
 log4j = "2.20.0"
-mockito = "5.8.0"
+mockito = "5.18.0"
 rxtx = "2.1.7"
 sonarqube = "4.4.1.3373"
 
