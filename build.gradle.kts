@@ -8,15 +8,6 @@ plugins {
     alias(libs.plugins.gradle.versions)
 }
 
-group = "com.homeclimatecontrol"
-version = "2.0.2-SNAPSHOT"
-
-apply(plugin = "java")
-apply(plugin = "java-library")
-apply(plugin = "maven-publish")
-apply(plugin = "jacoco")
-apply(plugin = "net.ltgt.errorprone")
-
 if (project.parent == null) {
     // If this project is included as a submodule, this plugin chokes on non-existing ./.git
     // and produces very annoying unsuppressable output
@@ -24,13 +15,17 @@ if (project.parent == null) {
     apply(plugin = libs.plugins.git.properties.get().pluginId)
 }
 
-tasks.compileJava {
-    options.release = 17
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("--should-stop=ifError=FLOW")
 }
 
-tasks.compileTestJava {
-    options.release = 17
+tasks.named<JavaCompile>("compileTestJava") {
     options.compilerArgs.add("--should-stop=ifError=FLOW")
 }
 
@@ -38,7 +33,7 @@ jacoco {
     toolVersion = libs.versions.jacoco.get()
 }
 
-tasks.jacocoTestReport {
+tasks.named<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.test) // tests are required to run before generating the report
     reports {
         xml.required = true
@@ -48,10 +43,6 @@ tasks.jacocoTestReport {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-repositories {
-    mavenCentral()
 }
 
 dependencies {

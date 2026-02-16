@@ -1,8 +1,10 @@
 [versions]
 
 assertj = "3.24.2"
-errorprone = "2.38.0"
+errorprone-lib = "2.42.0"
+errorprone-plugin = "5.0.0"
 gradle-git-properties = "2.5.7"
+gradle-versions = "0.52.0"
 jacoco = "0.8.13"
 junit5 = "6.0.0"
 log4j = "2.20.0"
@@ -13,7 +15,7 @@ sonarqube = "6.3.1.5724"
 [libraries]
 
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
-errorprone = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+errorprone = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone-lib" }
 junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
 junit5-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
 junit5-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
@@ -25,7 +27,7 @@ rxtx = { module = "org.rxtx:rxtx", version.ref = "rxtx" }
 
 [plugins]
 
-errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-plugin" }
 git-properties = { id = "com.gorylenko.gradle-git-properties", version.ref = "gradle-git-properties" }
-gradle-versions = { id = "com.github.ben-manes.versions", version = "0.50.0"}
+gradle-versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions"}
 sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
