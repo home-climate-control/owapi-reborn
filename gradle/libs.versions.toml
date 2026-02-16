@@ -2,6 +2,7 @@
 
 assertj = "3.24.2"
 errorprone = "2.38.0"
+gradle-git-properties = "2.5.7"
 jacoco = "0.8.13"
 junit5 = "6.0.0"
 log4j = "2.20.0"
@@ -25,6 +26,6 @@ rxtx = { module = "org.rxtx:rxtx", version.ref = "rxtx" }
 [plugins]
 
 errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
-git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
+git-properties = { id = "com.gorylenko.gradle-git-properties", version.ref = "gradle-git-properties" }
 gradle-versions = { id = "com.github.ben-manes.versions", version = "0.50.0"}
 sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
