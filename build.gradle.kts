@@ -8,6 +8,12 @@ plugins {
     alias(libs.plugins.gradle.versions)
 }
 
+// VT: NOTE: Contrary to Gradle best practices, these two need to be here (and not in gradle.properties)
+// Otherwise, build breaks if this project is included as a submodule
+// Possibly related: https://github.com/gradle/gradle/issues/24680 - keep rechecking
+group = "com.homeclimatecontrol"
+version = "2.0.2-SNAPSHOT"
+
 if (project.parent == null) {
     // If this project is included as a submodule, this plugin chokes on non-existing ./.git
     // and produces very annoying unsuppressable output
